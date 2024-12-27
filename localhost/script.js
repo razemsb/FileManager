@@ -19,14 +19,14 @@ function searchFolders() {
                         var li = document.createElement('li');
                         li.classList.add('list-group-item');
                         
-                        // Добавляем имя папки
+                        // добавляем имя папки
                         li.innerHTML = folder;
 
                         // создаем контейнер для кнопок
                         var buttonContainer = document.createElement('div');
                         buttonContainer.classList.add('d-flex', 'justify-content-end', 'mt-2');
 
-                        // кнопка "Перейти в папку"
+                        // кнопка 1
                         var goButton = document.createElement('button');
                         goButton.classList.add('btn', 'btn-outline-info', 'btn-sm');
                         goButton.innerHTML = 'Перейти';
@@ -34,7 +34,7 @@ function searchFolders() {
                             window.location.href = folder;
                         };
 
-                        // кнопка "Закрепить"
+                        // кнопка 2
                         var pinButton = document.createElement('button');
                         pinButton.classList.add('btn', 'btn-outline-success', 'btn-sm', 'ms-2');
                         pinButton.innerHTML = 'Закрепить';
