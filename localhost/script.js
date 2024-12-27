@@ -22,7 +22,7 @@ function searchFolders() {
                         // Добавляем имя папки
                         li.innerHTML = folder;
 
-                        // создаем контейнер для кнопок, чтобы выровнять их справа
+                        // создаем контейнер для кнопок
                         var buttonContainer = document.createElement('div');
                         buttonContainer.classList.add('d-flex', 'justify-content-end', 'mt-2');
 
