@@ -1,0 +1,58 @@
+body {
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+.container {
+    max-width: 1200px;
+}
+
+h1, h3 {
+    color: #007BFF;
+}
+
+.card {
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.card-body {
+    text-align: center;
+}
+
+.card-title {
+    font-size: 1.2rem;
+    color: #333;
+}
+
+button {
+    border-radius: 5px;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.folder-item {
+    display: none;
+}
+
+.folder-item.show {
+    display: block;
+}
+
+.pin-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.pin-btn:hover {
+    background-color: #218838;
+}
+
+.card-body form {
+    margin-top: 10px;
+}
+html {
+    scroll-behavior: smooth;
+}
