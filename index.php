@@ -22,6 +22,46 @@ function getFolders($dir) {
     return $folders;
 }
 
+function getFileLanguages($folderPath) {
+    $languages = [
+        'PHP' => ['.php'],
+        'JavaScript' => ['.js'],
+        'HTML' => ['.html'],
+        'CSS' => ['.css'],
+        'Python' => ['.py'],
+        'SQL' => ['.sql'],
+        'JSON' => ['.json'],
+        'XML' => ['.xml'],
+    ];
+
+    $languageCount = [];
+    $files = scandir($folderPath);
+
+    foreach ($files as $file) {
+        $filePath = $folderPath . DIRECTORY_SEPARATOR . $file;
+        if (is_file($filePath)) {
+            $fileExtension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+            foreach ($languages as $language => $extensions) {
+                if (in_array('.' . $fileExtension, $extensions)) {
+                    if (!isset($languageCount[$language])) {
+                        $languageCount[$language] = 0;
+                    }
+                    $languageCount[$language]++;
+                }
+            }
+        }
+    }
+
+    return $languageCount;
+}
+
+if (isset($_GET['folder'])) {
+    $folderPath = $_GET['folder'];
+    $languageCount = getFileLanguages($folderPath);
+    echo json_encode($languageCount);
+    exit;
+}
+
 // функция чтения данных из файла
 function readFromFile($file) {
     return file_exists($file) ? array_filter(explode(PHP_EOL, file_get_contents($file))) : [];
@@ -90,6 +130,9 @@ $folders = getFolders(__DIR__);
 <body>
 <div class="container mt-5">
 <button id="theme-toggle" class="btn btn-light rounded-circle position-fixed top-0 end-0 m-3 shadow-sm">🌙</button>
+<a href="http://localhost/phpMyAdmin/index.php?route=/&route=%2F" id="db" class="btn btn-light rounded-circle position-fixed end-0 m-3 shadow-sm text-decoration-none" target="_blank" rel="noopener noreferrer">
+    БД
+</a>
 <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="offcanvasExampleLabel">Меню</h5>
@@ -104,7 +147,7 @@ $folders = getFolders(__DIR__);
                         <?php echo $folder; ?>
                         <form method="POST" action="" class="d-inline">
                             <input type="hidden" name="open" value="<?php echo $folder; ?>">
-                            <button type="submit" class="btn btn-sm btn-outline-success">Перейти</button>
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Открыть</button>
                         </form>
                     </li>
                 <?php endforeach; ?>
@@ -141,22 +184,11 @@ $folders = getFolders(__DIR__);
    <div class="row mb-4">
     <div class="col-12 d-flex justify-content-between align-items-center">
         <h3>Закрепленные Папки (<?= count($pinnedFolders); ?>)</h3>
-        <div class="d-flex">
-            <?php if (count($pinnedFolders) > 3): ?>
-                <button id="showAllPinnedFolders" class="btn btn-outline w-10 mb-3">
-                    <img src="localhost/down.svg" style="width: 30px; height: 30px; object-fit: cover;">
-                </button>
-                <button id="hidePinnedFolders" class="btn btn-outlinew-10 mb-3" style="display: none;">
-                    <img src="localhost/up.svg" style="width: 30px; height: 30px; object-fit: cover;">
-                </button>
-            <?php endif; ?>
-        </div>
     </div>
     <div class="col-12">
         <div class="row" id="pinnedFoldersContainer" data-pinned-folders='<?php echo json_encode($pinnedFolders); ?>'>
             <?php 
-            $pinnedFoldersToShow = array_slice($pinnedFolders, 0, 3);
-            foreach ($pinnedFoldersToShow as $folder): ?>
+            foreach ($pinnedFolders as $folder): ?>
                 <div class="col-md-4 mb-3">
                     <div class="card shadow-sm">
                         <div class="card-body">
@@ -204,10 +236,10 @@ $folders = getFolders(__DIR__);
         <h3>Все Папки (<?= count($folders); ?>)</h3>
         <div class="d-flex">
             <?php if (count($folders) > 6): ?>
-                <button id="showAllFolders" class="btn btn-outline w-10 mb-3">
+                <button id="showAllFolders" class="btn btn-outline w-10 mb-3 border-0" style="z-index: 1000;">
                     <img src="localhost/down.svg" style="width: 30px; height: 30px; object-fit: cover;">
                 </button>
-                <button id="hideFolders" class="btn btn-outline w-10 mb-3" style="display: none;">
+                <button id="hideFolders" class="btn btn-outline w-10 mb-3 border-0" style="z-index:1000;display: none;">
                     <img src="localhost/up.svg" style="width: 30px; height: 30px; object-fit: cover;">
                 </button>
             <?php endif; ?>
@@ -215,32 +247,35 @@ $folders = getFolders(__DIR__);
     </div>
     <div class="col-12">
         <div class="row" id="foldersContainer" data-folders='<?php echo json_encode($folders); ?>'>
-            <?php 
-            $foldersToShow = array_slice($folders, 0, 6);
-            foreach ($foldersToShow as $folder): ?>
-                <div class="col-md-4 mb-3 folder-item">
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title"><?php echo $folder; ?><img src="localhost/folder.svg" style="width: 30px; height: 30px; object-fit: cover; float: right"></h5>
-                            <form method="POST" action="">
-                                <input type="hidden" name="open" value="<?php echo $folder; ?>">
-                                <button type="submit" class="btn btn-outline-primary w-100">Перейти в папку</button>
-                            </form>
-                            <form method="POST" action="">
-                                <input type="hidden" name="pin_folder" value="<?php echo $folder; ?>">
-                                <button class="btn btn-outline-success w-100 mt-2">Закрепить</button>
-                            </form>
-                        </div>
+    <?php 
+    $foldersToShow = array_slice($folders, 0, 6);
+    foreach ($foldersToShow as $folder): ?>
+        <div class="col-md-4 mb-3 folder-item" data-folder="<?= $folder ?>" onmouseenter="showLanguagesModal('<?php echo $folder; ?>')" onmouseleave="hideLanguagesModal('<?php echo $folder; ?>')">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <?php echo $folder; ?>
+                        <img src="localhost/folder.svg" style="width: 30px; height: 30px; object-fit: cover; float: right">
+                    </h5>
+                    <form method="POST" action="">
+                        <input type="hidden" name="open" value="<?php echo $folder; ?>">
+                        <button type="submit" class="btn btn-outline-primary w-100">Перейти в папку</button>
+                    </form>
+                    <form method="POST" action="">
+                        <input type="hidden" name="pin_folder" value="<?php echo $folder; ?>">
+                        <button class="btn btn-outline-success w-100 mt-2">Закрепить</button>
+                    </form>
+                    <div class="languages-modal" id="languagesModal<?php echo $folder; ?>" style="display: none;">
+                        <ul id="languagesList<?php echo $folder; ?>" class="list-group"></ul>
                     </div>
                 </div>
-            <?php endforeach; ?>
+            </div>
         </div>
+    <?php endforeach; ?>
     </div>
 </div>
-
-</div>
-    <script src="localhost/script.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+<script src="localhost/script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
 </body>
 </html>
