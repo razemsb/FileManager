@@ -205,9 +205,34 @@ $folders = getFolders(__DIR__);
     <title>Enigma | Файловый Менеджер</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="temp/style.css">
+    <style>
+    html {
+        transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out, background-image 0.3s ease-in-out;
+    }
+    body {
+     background-image: url('temp/background_light.jpg'); 
+        background-repeat: repeat;
+        background-size: auto; 
+    }
+    body #content {
+        background-color: #f8f9fa;
+        border: 1px solid #e0e0e0;
+    }
+    body.dark-theme #content {
+        background-color: #212529;
+        border: 1px solid #343a40;
+    }
+    body.dark-theme {
+        background-image: url('temp/background_dark.jpg'); 
+        background-repeat: repeat;
+        background-size: auto; 
+        color: #f8f9fa;
+    }
+    </style>
 </head>
 <body>
-<div class="container mt-5">
+<main>
+<div class="container mt-3 pt-4 pb-1 mb-3" id="content" style="border-radius: 20px;">
 <button id="theme-toggle" class="btn btn-light rounded-circle position-fixed top-0 end-0 m-3 shadow-sm">🌙</button>
 <a href="http://localhost/phpMyAdmin/index.php?route=/&route=%2F" id="db" class="btn btn-light rounded-circle position-fixed end-0 m-3 shadow-sm text-decoration-none" target="_blank" rel="noopener noreferrer">БД</a>
 <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
@@ -216,6 +241,9 @@ $folders = getFolders(__DIR__);
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
+    <img src="temp/mita.jpeg" class="mx-auto d-block rounded-circle" style="margin-left: auto; margin-right: auto; width: 90%;">
+    <p class="mt-2 text-center">by razemsb</p>
+        <hr>
         <h6>Закрепленные папки</h6>
         <ul class="list-group list-group-flush mb-4">
             <?php if (count($pinnedFolders) > 0): ?>
@@ -232,7 +260,7 @@ $folders = getFolders(__DIR__);
                 <li class="list-group-item">Нет закрепленных папок</li>
             <?php endif; ?>
         </ul>
-
+        <hr>
         <h6>Недавно посещенные папки</h6>
         <ul class="list-group list-group-flush">
             <?php if (count($recentFolders) > 0): ?>
@@ -249,6 +277,14 @@ $folders = getFolders(__DIR__);
                 <li class="list-group-item">Нет недавно посещенных папок</li>
             <?php endif; ?>
         </ul>
+        <hr>
+        <h2 class="text-center mt-2">Лента кринжа...</h2>
+        <hr>
+        <div class="align-items-center">
+            <img src="temp/zhaba_cringe.jpg" class="mx-auto d-block" style="margin-left: auto; margin-right: auto; width: 90%;">
+        </div>
+        <hr>
+        <video src="temp/vid.mp4" class="mx-auto d-block" style="margin-left: auto; margin-right: auto; width: 90%;" controls loop></video>
         <hr>
         <p class="text-center mt-2">жаба мудак</p>
     </div>
@@ -323,32 +359,11 @@ $folders = getFolders(__DIR__);
     <div class="row">
     <div class="col-12">
         <div class="row" id="foldersContainer" data-folders='<?php echo json_encode($folders); ?>'>
-            <?php 
-            $foldersToShow = array_slice($folders, 0, 8);
-            foreach ($foldersToShow as $all_folder): ?>
-                <div class="col-md-3 mb-3 folder-item" data-folder="<?= htmlspecialchars($all_folder['name']); ?>">
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <?= $all_folder['name']; ?>
-                                <img src="temp/folder.svg" style="width: 30px; height: 30px; object-fit: cover; float: right">
-                            </h5>
-                            <form method="POST" action="">
-                                <input type="hidden" name="open" value="<?= htmlspecialchars($all_folder['path']); ?>">
-                                <button type="submit" class="btn btn-outline-primary w-100">Перейти в папку</button>
-                            </form>
-                            <form method="POST" action="">
-                                <input type="hidden" name="pin_folder" value="<?= htmlspecialchars($all_folder['path']); ?>">
-                                <button class="btn btn-outline-success w-100 mt-2">Закрепить</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
         </div>
     </div>
 </div>
 </div>
+</main>
 <script src="temp/script.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>

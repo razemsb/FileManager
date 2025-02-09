@@ -1,0 +1,8 @@
+enigma2.1
+magazine_1c
+enigma2.0
+ skelet
+sample
+ forest
+ Zoo2.0
+ zoo

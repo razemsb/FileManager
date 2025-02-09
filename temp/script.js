@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="card shadow-sm">
                         <div class="card-body">
                             <h5 class="card-title">
-                                <p class="float-start">${all_folder.name}</p>
+                                <p class="float-start">${all_folder.name.length > 15 ? all_folder.name.slice(0, 10) + "..." : all_folder.name}</p>
                                 <img src="temp/folder.svg" style="width: 30px; height: 30px; object-fit: cover; float: right">
                             </h5>
                             <form method="POST" action="">
