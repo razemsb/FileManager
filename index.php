@@ -7,11 +7,31 @@ $folders = array_filter(scandir($directory), function($folder) use ($directory) 
 $pinnedFile = __DIR__ . '/temp/pinned_folders.txt';
 $recentFile = __DIR__ . '/temp/recent_folders.txt';
 
+// Проверяем и создаем директорию temp если она не существует
+if (!file_exists(__DIR__ . '/temp')) {
+    mkdir(__DIR__ . '/temp', 0777, true);
+}
+
+// Проверяем права доступа к файлам
+foreach ([$pinnedFile, $recentFile] as $file) {
+    if (!file_exists($file)) {
+        touch($file);
+        chmod($file, 0666);
+    }
+}
+
 function readFromFile($file){
-    return file_exists($file) ? array_filter(explode(PHP_EOL, file_get_contents($file))) : [];
+    if (!file_exists($file)) {
+        touch($file);
+        return [];
+    }
+    $content = file_get_contents($file);
+    return $content ? array_filter(explode(PHP_EOL, $content)) : [];
 }
 
 function writeToFile($file, $data){
+    $data = array_filter($data);
+    $data = array_unique($data);
     file_put_contents($file, implode(PHP_EOL, $data));
 }
 
@@ -25,7 +45,9 @@ if (isset($_POST['pinned'])) {
         if (count($pinnedFolders) > 30) {
             array_pop($pinnedFolders);
         }
-        writeToFile($pinnedFile, $pinnedFolders);
+        writeToFile($pinnedFile, array_unique($pinnedFolders));
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit;
     }
 }
 
@@ -34,6 +56,8 @@ if (isset($_POST['unpin_folder'])) {
     if (in_array($folderToUnpin, $pinnedFolders)) {
         $pinnedFolders = array_values(array_diff($pinnedFolders, [$folderToUnpin]));
         writeToFile($pinnedFile, $pinnedFolders);
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit;
     }
 }
 
@@ -264,22 +288,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_download_folder'
                         <div class='folder-header'>
                             <span class='folder-title' title="<?= $folder ?>"><?= $folderName ?></span>
                             <div class='folder-actions d-flex'>
-                            <form method="POST" onclick="submit()">
-                                <i class='bi bi-pin-angle<?= $isPinned ? '-fill' : '' ?>'></i>
-                                <?php if ($isPinned): ?>
-                                    <input type="hidden" name="unpin_folder" value="<?= $folder ?>">
-                                <?php else: ?>
-                                    <input type="hidden" name="pinned" value="<?= $folder ?>">
-                                <?php endif; ?>
-                            </form>
-                            <form method="POST" onclick="submit()">
-                                <i class="bi bi-eye"></i>
-                                <input type="hidden" name="open" value="<?= $folder ?>">
-                            </form>
-                            <form method="POST" id="downloadForm-<?= $folder ?>">
-                                <i class='bi bi-download' onclick="showDownloadSpinner('<?= $folder ?>')"></i>
-                                <input type="hidden" name="download_folder" value="<?= $folder ?>">
-                            </form>
+                                <form method="POST" style="margin: 0; padding: 0;">
+                                    <i class='bi bi-pin-angle<?= $isPinned ? '-fill' : '' ?>' onclick="this.parentElement.submit();" style="cursor: pointer;"></i>
+                                    <?php if ($isPinned): ?>
+                                        <input type="hidden" name="unpin_folder" value="<?= htmlspecialchars($folder) ?>">
+                                    <?php else: ?>
+                                        <input type="hidden" name="pinned" value="<?= htmlspecialchars($folder) ?>">
+                                    <?php endif; ?>
+                                </form>
+                                <form method="POST" style="margin: 0; padding: 0;">
+                                    <i class="bi bi-eye" onclick="this.parentElement.submit();" style="cursor: pointer;"></i>
+                                    <input type="hidden" name="open" value="<?= htmlspecialchars($folder) ?>">
+                                </form>
+                                <form method="POST" id="downloadForm-<?= htmlspecialchars($folder) ?>" style="margin: 0; padding: 0;">
+                                    <i class='bi bi-download' onclick="showDownloadSpinner('<?= htmlspecialchars($folder) ?>')" style="cursor: pointer;"></i>
+                                    <input type="hidden" name="download_folder" value="<?= htmlspecialchars($folder) ?>">
+                                </form>
                             </div>
                         </div>
                         <div class='folder-footer'>Изменено: <?= $lastModified ?></div>
