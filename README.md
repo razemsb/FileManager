@@ -35,7 +35,7 @@
 3. Откройте страницу в браузере
 
 ```bash
-git clone https://github.com/razemsb/file_manager.git
+git clone https://github.com/razemsb/FileManager.git
 cd file-manager
 ```
 
