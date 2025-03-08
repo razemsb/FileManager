@@ -7,8 +7,8 @@
     --text-light: #6c757d;
     --white: #fff;
     --white-transparent: rgba(255, 255, 255, 0.95);
-    --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.05);
-    --shadow-medium: 0 8px 25px rgba(0, 123, 255, 0.15);
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow-medium: 0 4px 12px rgba(0, 123, 255, 0.15);
     --transition-fast: 0.3s ease;
     --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -43,7 +43,6 @@ body::-webkit-scrollbar-thumb:hover {
     background-color: var(--primary-color);
 }
 
-/* Общие стили */
 .flex-center {
     display: flex;
     align-items: center;
@@ -56,7 +55,6 @@ body::-webkit-scrollbar-thumb:hover {
     justify-content: space-between;
 }
 
-/* Анимации */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -79,7 +77,6 @@ body::-webkit-scrollbar-thumb:hover {
     }
 }
 
-/* Навигация */
 .nav-bar {
     background: linear-gradient(135deg, #1e1e2d 0%, #2d2d3d 100%);
     padding: 5px 20px;
@@ -101,7 +98,8 @@ body::-webkit-scrollbar-thumb:hover {
     position: absolute;
     top: 0;
     left: 0;
-    height: 4px;
+    height: 2px;
+    width: 100%;
     background: linear-gradient(90deg, 
         var(--primary-color) 0%,
         #00ff88 25%,
@@ -131,7 +129,6 @@ body::-webkit-scrollbar-thumb:hover {
     }
 }
 
-/* Поиск */
 .search-container {
     position: relative;
     width: 300px;
@@ -185,7 +182,6 @@ body::-webkit-scrollbar-thumb:hover {
     transform: translateY(-50%) scale(1.1);
 }
 
-/* Название компании */
 .company-name {
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
     position: relative;
@@ -216,9 +212,8 @@ body::-webkit-scrollbar-thumb:hover {
     width: 100%;
 }
 
-/* Боковая панель */
 .sidebar {
-    width: 250px;
+    width: 16%;
     height: 100vh;
     background: #1e1e2d;
     color: var(--white);
@@ -243,12 +238,12 @@ body::-webkit-scrollbar-thumb:hover {
     color: var(--white);
 }
 
-/* Основной контент */
 .content {
     margin-left: 270px;
     padding: 20px;
     transition: var(--transition-fast);
     margin-top: 60px;
+    height: 100%;
 }
 
 .grid-container {
@@ -257,6 +252,9 @@ body::-webkit-scrollbar-thumb:hover {
     gap: 15px;
     padding: 20px;
     width: 100%;
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 .pagination {
@@ -311,39 +309,27 @@ body::-webkit-scrollbar-thumb:hover {
     border-radius: 16px;
     padding: 20px;
     box-shadow: var(--shadow-light);
-    transition: var(--transition-smooth);
+    transition: transform 0.2s ease;
     cursor: pointer;
     border: 1px solid var(--primary-light);
-    opacity: 1;
-    transform: translateY(0) scale(1);
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(10px);
+    backdrop-filter: none;
     height: 100%;
     display: flex;
     flex-direction: column;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .folder-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, transparent, var(--primary-light), transparent);
-    transform: translateX(-100%);
-    transition: var(--transition-smooth);
+    display: none;
 }
 
 .folder-card:hover {
-    transform: translateY(-5px) scale(1.02);
+    transform: translateY(-5px);
     border-color: var(--primary-dark);
     box-shadow: var(--shadow-medium);
-}
-
-.folder-card:hover::before {
-    transform: translateX(100%);
 }
 
 .folder-card.hidden {
@@ -536,7 +522,6 @@ body::-webkit-scrollbar-thumb:hover {
     color: var(--text-dark) !important;
 }
 
-/* Медиа-запросы */
 @media (max-width: 768px) {
     .nav-bar {
         padding: 10px 15px;
@@ -576,4 +561,8 @@ body::-webkit-scrollbar-thumb:hover {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-5px); }
     75% { transform: translateX(5px); }
+}
+
+.is-scrolling .folder-card {
+    transition: none;
 }
