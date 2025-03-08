@@ -47,7 +47,7 @@ function hideLoadingBar() {
 }
 
 function updateLoadingProgress(loaded, total) {
-    const progress = (loaded / total) * 50;
+    const progress = (loaded / total) * 100;
     document.querySelector('.nav-bar').style.setProperty('--loading-progress', `${progress}%`);
 }
 
@@ -67,6 +67,14 @@ document.addEventListener('DOMContentLoaded', function() {
     let totalPages = Math.ceil(folderCards.length / cardsPerPage);
     
     function updatePagination() {
+        const visibleCards = Array.from(folderCards).filter(card => !card.classList.contains('hidden'));
+        
+        if (visibleCards.length === 0) {
+            pagination.style.display = 'none';
+            return;
+        }
+        
+        pagination.style.display = 'flex';
         pagination.innerHTML = `
             <button class="pagination-button" id="prevPage" ${currentPage === 1 ? 'disabled' : ''}>
                 <i class="bi bi-chevron-left"></i> Назад
@@ -131,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     shouldShow = true;
             }
             
-            if (searchTerm && !folderName.includes(searchTerm)) {
+            if (searchTerm && !folderName.includes(searchTerm.toLowerCase())) {
                 shouldShow = false;
             }
             
@@ -152,34 +160,13 @@ document.addEventListener('DOMContentLoaded', function() {
         updatePagination();
         
         if (visibleCount === 0) {
-            setTimeout(() => {
-                noResultsMessage.style.display = 'flex';
-                const noResultsContent = noResultsMessage.querySelector('.no-results-content');
-                if (type === 'pinned') {
-                    noResultsContent.innerHTML = `
-                        <i class="bi bi-pin-angle" style="font-size: 3rem; margin-bottom: 15px;"></i>
-                        <h3>Нет закрепленных папок</h3>
-                        <p>Закрепите папки, чтобы они отображались здесь</p>
-                    `;
-                } else if (type === 'recent') {
-                    noResultsContent.innerHTML = `
-                        <i class="bi bi-clock-history" style="font-size: 3rem; margin-bottom: 15px;"></i>
-                        <h3>Нет недавних папок</h3>
-                        <p>Откройте папки, чтобы они появились здесь</p>
-                    `;
-                } else if (searchTerm !== '') {
-                    noResultsContent.innerHTML = `
-                        <i class="bi bi-search" style="font-size: 3rem; margin-bottom: 15px;"></i>
-                        <h3>Ничего не найдено</h3>
-                        <p>Попробуйте изменить параметры поиска</p>
-                    `;
-                }
-                setTimeout(hideLoadingBar, 500);
-            }, 350);
+            noResultsMessage.style.display = 'flex';
+            pagination.style.display = 'none';
         } else {
             noResultsMessage.style.display = 'none';
-            setTimeout(hideLoadingBar, 500);
         }
+        
+        setTimeout(hideLoadingBar, 500);
     }
     
     updatePagination();
@@ -245,4 +232,30 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.width = '300px';
         }
     });
+
+    let scrollTimeout;
+    const content = document.querySelector('.content');
+    
+    content.addEventListener('scroll', function() {
+        if (!content.classList.contains('is-scrolling')) {
+            content.classList.add('is-scrolling');
+        }
+        
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            content.classList.remove('is-scrolling');
+        }, 150);
+    });
+
+    content.addEventListener('scroll', function() {
+        if (scrollTimeout) {
+            clearTimeout(scrollTimeout);
+        }
+        
+        content.classList.add('is-scrolling');
+        
+        scrollTimeout = setTimeout(() => {
+            content.classList.remove('is-scrolling');
+        }, 150);
+    }, { passive: true }); 
 });
