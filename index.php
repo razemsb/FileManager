@@ -295,7 +295,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_download_folder'
                                     <?php endif; ?>
                                 </form>
                                 <form method="POST" style="margin: 0; padding: 0;">
-                                    <i class="bi bi-eye" onclick="this.parentElement.submit();" style="cursor: pointer;"></i>
+                                    <i class="bi bi-eye" style="cursor: pointer;"></i>
                                     <input type="hidden" name="open" value="<?= htmlspecialchars($folder) ?>">
                                 </form>
                                 <form method="POST" id="downloadForm-<?= htmlspecialchars($folder) ?>" style="margin: 0; padding: 0;">
