@@ -7,12 +7,10 @@ $folders = array_filter(scandir($directory), function($folder) use ($directory) 
 $pinnedFile = __DIR__ . '/temp/pinned_folders.txt';
 $recentFile = __DIR__ . '/temp/recent_folders.txt';
 
-// Проверяем и создаем директорию temp если она не существует
 if (!file_exists(__DIR__ . '/temp')) {
     mkdir(__DIR__ . '/temp', 0777, true);
 }
 
-// Проверяем права доступа к файлам
 foreach ([$pinnedFile, $recentFile] as $file) {
     if (!file_exists($file)) {
         touch($file);
