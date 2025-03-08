@@ -1,3 +1,33 @@
+function updateRecentFolder(folder) {
+    fetch(window.location.href, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `open=${encodeURIComponent(folder)}`
+    })
+    .then(() => {
+        const cards = document.querySelectorAll('.folder-card');
+        cards.forEach(card => {
+            const folderTitle = card.querySelector('.folder-title');
+            if (folderTitle.getAttribute('title') === folder) {
+                card.dataset.recent = 'true';
+            }
+        });
+        
+        const recentButton = document.querySelector('.folder-filter[data-type="recent"]');
+        const badge = recentButton.querySelector('.badge');
+        let currentCount = parseInt(badge.textContent);
+        badge.textContent = currentCount + 1;
+
+        if (recentButton.classList.contains('active')) {
+            filterCards('recent', document.getElementById('folderSearch').value.toLowerCase().trim());
+        }
+        
+        window.location.href = folder;
+    });
+}
+
 function showDownloadSpinner(folder) {
     document.getElementById('downloadOverlay').classList.add('active');
     $.ajax({
@@ -102,19 +132,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    function updateVisibleCards() {
-        const startIndex = (currentPage - 1) * cardsPerPage;
-        const endIndex = startIndex + cardsPerPage;
-        
-        folderCards.forEach((card, index) => {
-            if (index >= startIndex && index < endIndex) {
-                card.style.display = '';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-    }
-    
     function filterCards(type, searchTerm = '') {
         showLoadingBar();
         let visibleCount = 0;
@@ -157,7 +174,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         currentPage = 1;
         totalPages = Math.ceil(visibleCount / cardsPerPage);
+        
         updatePagination();
+        updateVisibleCards();
         
         if (visibleCount === 0) {
             noResultsMessage.style.display = 'flex';
@@ -167,6 +186,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         setTimeout(hideLoadingBar, 500);
+    }
+    
+    function updateVisibleCards() {
+        const startIndex = (currentPage - 1) * cardsPerPage;
+        const endIndex = startIndex + cardsPerPage;
+        let visibleIndex = 0;
+        
+        folderCards.forEach(card => {
+            if (!card.classList.contains('hidden')) {
+                if (visibleIndex >= startIndex && visibleIndex < endIndex) {
+                    card.classList.remove('page-hidden');
+                } else {
+                    card.classList.add('page-hidden');
+                }
+                visibleIndex++;
+            }
+        });
     }
     
     updatePagination();
@@ -258,4 +294,24 @@ document.addEventListener('DOMContentLoaded', function() {
             content.classList.remove('is-scrolling');
         }, 150);
     }, { passive: true }); 
+
+    const folderActions = document.querySelectorAll('.folder-actions');
+    folderActions.forEach(actions => {
+        const openForm = actions.querySelector('form:nth-child(2)');
+        if (openForm) {
+            const folder = openForm.querySelector('input[name="open"]').value;
+            openForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                updateRecentFolder(folder);
+            });
+            
+            const eyeIcon = openForm.querySelector('.bi-eye');
+            if (eyeIcon) {
+                eyeIcon.onclick = function(e) {
+                    e.preventDefault();
+                    updateRecentFolder(folder);
+                };
+            }
+        }
+    });
 });
