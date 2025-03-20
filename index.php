@@ -1,4 +1,5 @@
 <?php 
+setlocale(LC_TIME, 'ru_RU.UTF-8');
 $directory = ".";
 $folders = array_filter(scandir($directory), function($folder) use ($directory) {
     return $folder !== "." && $folder !== ".." && is_dir($folder);
@@ -275,7 +276,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_download_folder'
             <?php else: ?>
                 <?php foreach ($folders as $folder) : ?>
                     <?php 
-                        $lastModified = date("d.m.Y H:i", filemtime($folder));
+                        $lastModifiedTimestamp = filemtime($folder);
+                        $dateFormatter = new IntlDateFormatter('ru_RU', IntlDateFormatter::LONG, IntlDateFormatter::NONE);
+                        $lastModified = $dateFormatter->format($lastModifiedTimestamp);
                         $folderName = htmlspecialchars(strlen($folder) > 10 ? substr($folder, 0, 10) . "..." : $folder);
                         $isPinned = in_array($folder, $pinnedFolders);
                         $isRecent = in_array($folder, $recentFolders);
