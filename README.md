@@ -26,7 +26,7 @@
 1. Клонируйте репозиторий:
 ```bash
 git clone https://github.com/yourusername/enigmadevix-filemanager.git
-
+```
     Убедитесь, что у вас установлен PHP (версия 7.4 или выше)
 
     Разместите файлы на вашем веб-сервере
