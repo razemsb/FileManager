@@ -65,13 +65,15 @@ git clone https://github.com/yourusername/enigmadevix-filemanager.git
 📄 Структура проекта
 ```
 enigmadevix-filemanager/
-├── temp/                 # Временные файлы и данные
-│   ├── api.php           # PHP API для работы с файлами
-│   ├── app.js            # Основная логика приложения
-│   ├── style.css         # Стили приложения
-│   └── logo.svg          # Логотип проекта
-├── index.html            # Главная страница
-└── README.md             # Этот файл
+├── temp/
+│   ├── recent_folders.txt    # Временные файлы и данные
+│   ├── pinned_folders.txt    # Временные файлы и данные
+│   ├── api.php               # PHP API для работы с файлами
+│   ├── app.js                # Основная логика приложения
+│   ├── style.css             # Стили приложения
+│   └── logo.svg              # Логотип проекта
+├── index.html                # Главная страница
+└── README.md                 # Этот файл
 ```
 
 🤝 Участие в разработке
