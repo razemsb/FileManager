@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoFile Manager</title>
+    <link rel="shorcut icon" href="temp/logo.svg">
+    <link rel="stylesheet" href="temp/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="temp/app.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" @click="toggleSidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+                <h1 class="app-title">
+                    <!-- <img src="temp/logo.svg" width="50px" height="50px"> -->
+                    <span>EnigmaDevix FileManager</span>
+                </h1>
+            </div>
+            <div class="search-bar">
+                <i class="bi bi-search"></i>
+                <input type="text" v-model="searchQuery" @input="filterFolders" placeholder="Поиск папок...">
+            </div>
+        </header>
+        <div class="app-container">
+            <aside class="app-sidebar" :class="{ 'collapsed': sidebarCollapsed }">
+                <nav class="sidebar-nav">
+                    <div class="sidebar-section">
+                        <h3 class="sidebar-title">МЕНЮ</h3>
+                        <button class="sidebar-btn" :class="{ active: activeFilter === 'all' }"
+                            @click="setFilter('all')">
+                            <i class="bi bi-collection"></i>
+                            <span class="btn-text">Все папки</span>
+                            <span class="badge">{{ totalCount }}</span>
+                        </button>
+                        <button class="sidebar-btn" :class="{ active: activeFilter === 'pinned' }"
+                            @click="setFilter('pinned')">
+                            <i class="bi bi-pin"></i>
+                            <span class="btn-text">Закрепленные</span>
+                            <span class="badge">{{ pinnedCount }}</span>
+                        </button>
+                        <button class="sidebar-btn" :class="{ active: activeFilter === 'recent' }"
+                            @click="setFilter('recent')">
+                            <i class="bi bi-clock"></i>
+                            <span class="btn-text">Недавние</span>
+                            <span class="badge">{{ recentCount }}</span>
+                        </button>
+                    </div>
+                </nav>
+            </aside>
+            <main class="app-main">
+                <div class="folder-grid">
+                    <div v-for="folder in paginatedFolders" class="folder-card" :class="{ 'pinned': folder.isPinned, 'recent': folder.isRecent }">
+                        <div class="folder-header">
+                            <i class="bi bi-folder"></i>
+                            <h3 class="folder-name" data-bs-toggle="tooltip" :title="folder.name"
+                                :data-bs-original-title="folder.name">
+                                {{ formatFolderName(folder.name) }}
+                            </h3>
+                            <div class="folder-actions">
+                                <button class="action-btn" @click="togglePin(folder)" data-bs-toggle="tooltip"
+                                    :title="folder.isPinned ? 'Открепить' : 'Закрепить'">
+                                    <i :class="folder.isPinned ? 'bi-pin-fill' : 'bi-pin'"></i>
+                                </button>
+                                <button class="action-btn" @click="openFolder(folder)" data-bs-toggle="tooltip"
+                                    title="Открыть">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </button>
+                                <button class="action-btn" @click="downloadFolder(folder)" data-bs-toggle="tooltip"
+                                    title="Скачать">
+                                    <i class="bi bi-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="folder-footer">
+                            <span class="modified-date" data-bs-toggle="tooltip"
+                                :title="'Последнее изменение: ' + formatDate(folder.modified)">
+                                <i class="bi bi-calendar"></i>
+                                {{ formatDate(folder.modified) }}
+                            </span>
+                        </div>
+                    </div>
+                    <div v-if="filteredFolders.length === 0" class="empty-state">
+                        <i class="bi bi-folder-x"></i>
+                        <h3>Папки не найдены</h3>
+                        <p>Попробуйте изменить параметры поиска</p>
+                    </div>
+                </div>
+                <div class="pagination" v-if="totalPages > 1">
+                    <button class="pagination-btn" @click="prevPage" :disabled="currentPage === 1">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <div class="page-numbers">
+                        <button v-for="page in visiblePages" :key="page" class="page-btn"
+                            :class="{ active: page === currentPage }" @click="goToPage(page)">
+                            {{ page }}
+                        </button>
+                    </div>
+                    <button class="pagination-btn" @click="nextPage" :disabled="currentPage === totalPages">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </main>
+        </div>
+        <div class="overlay" :class="{ active: isLoading }">
+            <div class="spinner-container">
+                <div class="spinner"></div>
+                <p>Архивирование папки...</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
