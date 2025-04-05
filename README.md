@@ -66,7 +66,7 @@ git clone https://github.com/razemsb/FileManager.git
 
 📄 Структура проекта
 ```
-enigmadevix-filemanager/
+FileManager/
 ├── temp/
 │   ├── recent_folders.txt    # Временные файлы и данные
 │   ├── pinned_folders.txt    # Временные файлы и данные
