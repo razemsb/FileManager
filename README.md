@@ -84,6 +84,7 @@ FileManager/
 │   ├── bootstrap             # Зависимости
 │   ├── axios                 # Зависимости
 │   ├── vue                   # Зависимости
+│   ├── popperjs              # Зависимости
 │   ├── img/                
 │   └── logo.svg              # Логотип проекта
 ├── index.html                # Главная страница
