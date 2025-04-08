@@ -33,14 +33,14 @@ function saveRecentFolders($folders) {
 }
 
 function downloadFolder($folderName) {
-    $folderPath = BASE_DIR . '/' . $folderName;
+    $folderPath = realpath(BASE_DIR . DIRECTORY_SEPARATOR . $folderName);
     
     if (!is_dir($folderPath)) {
         throw new Exception("Папка не существует");
     }
 
     $zip = new ZipArchive();
-    $zipFilename = DATA_DIR . '/' . $folderName . '.zip';
+    $zipFilename = DATA_DIR . DIRECTORY_SEPARATOR . $folderName . '.zip';
     
     if ($zip->open($zipFilename, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== TRUE) {
         throw new Exception("Не удалось создать архив");
@@ -50,12 +50,15 @@ function downloadFolder($folderName) {
         new RecursiveDirectoryIterator($folderPath),
         RecursiveIteratorIterator::LEAVES_ONLY
     );
-
     foreach ($files as $name => $file) {
         if (!$file->isDir()) {
             $filePath = $file->getRealPath();
-            $relativePath = substr($filePath, strlen($folderPath) + 1);
-            $zip->addFile($filePath, $relativePath);
+            $relativePath = ltrim(
+                str_replace($folderPath, '', $filePath),
+                DIRECTORY_SEPARATOR
+            );
+            $relativePath = str_replace(DIRECTORY_SEPARATOR, '/', $relativePath);
+            $zip->addFile($filePath, $folderName . '/' . $relativePath);
         }
     }
 
@@ -68,12 +71,15 @@ function downloadFolder($folderName) {
     header('Content-Type: application/zip');
     header('Content-Disposition: attachment; filename="' . basename($zipFilename) . '"');
     header('Content-Length: ' . filesize($zipFilename));
+    
+    if (ob_get_level()) {
+        ob_end_clean();
+    }
     readfile($zipFilename);
     
     unlink($zipFilename);
     exit;
 }
-
 try {
     $method = $_SERVER['REQUEST_METHOD'];
     $action = $_GET['action'] ?? '';

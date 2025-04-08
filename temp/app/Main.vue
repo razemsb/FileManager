@@ -19,15 +19,19 @@ createApp({
         const tooltipInstances = ref([]);
 
         const initTooltips = () => {
-            destroyTooltips();
-            const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-            tooltipInstances.value = Array.from(tooltipElements).map(el => {
-                return new bootstrap.Tooltip(el, {
-                    placement: 'bottom',
-                    trigger: 'hover'
+            try {
+                destroyTooltips();
+                const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                tooltipInstances.value = Array.from(tooltipElements).map(el => {
+                    return new bootstrap.Tooltip(el, {
+                        placement: 'bottom',
+                        trigger: 'hover'
+                    });
                 });
-            });
-        }; 
+            } catch (err) {
+                console.error('Tooltip initialization error:', err);
+            }
+        };
 
         const loadFolders = async () => {
             try {
@@ -35,7 +39,7 @@ createApp({
                 const response = await axios.get('temp/api/api.php?action=getFolders');
                 if (response.data?.success) {
                     folders.value = response.data.data;
-                    initTooltips();
+                    nextTick(initTooltips);
                 } else {
                     throw new Error(response.data?.error || 'Ошибка загрузки данных');
                 }
@@ -62,7 +66,8 @@ createApp({
 
         const updateTooltips = () => {
             nextTick(() => {
-                setTimeout(initTooltips, 100);
+                destroyTooltips();
+                initTooltips();
             });
         };
 
@@ -103,10 +108,29 @@ createApp({
             }
         };
 
-        const downloadFolder = (folder) => {
-            isLoading.value = true;
-            window.open(`temp/api/api.php?action=download&folder=${encodeURIComponent(folder.name)}`, '_blank');
-            isLoading.value = false;
+        const downloadFolder = async (folder) => {
+            try {
+                isLoading.value = true;
+                error.value = false;
+                const response = await fetch(`temp/api/api.php?action=download&folder=${encodeURIComponent(folder.name)}`);
+                if (!response.ok) {
+                    throw new Error('Ошибка при загрузке папки');
+                }
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${folder.name}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } catch (err) {
+                console.error('Ошибка при скачивании:', err);
+                error.value = true;
+            } finally {
+                isLoading.value = false;
+            }
         };
 
         const nextPage = () => {
@@ -185,8 +209,9 @@ createApp({
             return pages;
         });
 
-        onMounted(() => {
-            loadFolders();
+        onMounted(async () => {
+            await loadFolders();
+            initTooltips();
             const checkScreenSize = () => {
                 sidebarCollapsed.value = window.innerWidth < 992;
             };

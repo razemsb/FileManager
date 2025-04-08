@@ -11,6 +11,7 @@
     <script src="temp/app/Main.vue" defer></script>
     <script src="temp/js/dark-theme.js" defer></script>
     <script src="temp/vendors/bootstrap/js/bootstrap.js" defer></script>
+    <script src="temp/vendors/popperjs/popper.js"></script>
     <script src="temp/vendors/vue/vue.global.js"></script>
     <script src="temp/vendors/axios/axios.js"></script>
 </head>
@@ -121,6 +122,12 @@
                 <p>Подождите, идет загрузка...</p>
             </div>
         </div>
+        <!-- <div class="overlay" :class="{ active: error = true }">
+            <div class="spinner-container">
+                <p>Ошибка при скачивании</p>
+                <button class="btn btn-close" @click="errorRemove(true)"></button>
+            </div>
+        </div> -->
     </div>
 </body>
 </html>

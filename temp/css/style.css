@@ -93,5 +93,5 @@ body{background-color:#f5f7fa;color:var(--dark);line-height:1.6}
 .dark .theme-toggle{background-color:var(--primary-dark)}
 .dark .theme-toggle .bi-sun{display:block}
 .dark .theme-toggle .bi-moon{display:none}
-.dark div.spinner-container{background:var(--dark)!important; color: var(--light-gray)!important; padding:2rem;border-radius:var(--border-radius);text-align:center;max-width:400px;width:90%}
+.dark .spinner-container{background:var(--dark)!important; color: var(--light-gray)!important; padding:2rem;border-radius:var(--border-radius);text-align:center;max-width:400px;width:90%}
 img {padding: 5px; width: 50px; height: 50px;}
