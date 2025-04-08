@@ -5,7 +5,6 @@ const {
     onMounted, 
     nextTick 
 } = Vue;
-
 createApp({
     setup() {
         const folders = ref([]);
