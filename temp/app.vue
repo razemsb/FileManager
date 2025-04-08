@@ -1,4 +1,10 @@
-const { createApp, ref, computed, onMounted, nextTick } = Vue;
+const { 
+    createApp, 
+    ref, 
+    computed, 
+    onMounted, 
+    nextTick 
+} = Vue;
 
 createApp({
     setup() {
@@ -11,6 +17,17 @@ createApp({
         const sidebarCollapsed = ref(false);
         const error = ref(null);
         const tooltipInstances = ref([]);
+
+        const initTooltips = () => {
+            destroyTooltips();
+            const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            tooltipInstances.value = Array.from(tooltipElements).map(el => {
+                return new bootstrap.Tooltip(el, {
+                    placement: 'bottom',
+                    trigger: 'hover'
+                });
+            });
+        }; 
 
         const loadFolders = async () => {
             try {
@@ -28,17 +45,6 @@ createApp({
             } finally {
                 isLoading.value = false;
             }
-        };
-
-        const initTooltips = () => {
-            destroyTooltips();
-            const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-            tooltipInstances.value = Array.from(tooltipElements).map(el => {
-                return new bootstrap.Tooltip(el, {
-                    placement: 'bottom',
-                    trigger: 'hover'
-                });
-            });
         };
 
         const destroyTooltips = () => {
