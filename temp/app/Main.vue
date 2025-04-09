@@ -5,17 +5,66 @@ const {
     onMounted, 
     nextTick 
 } = Vue;
-createApp({
+createApp ({
     setup() {
         const folders = ref([]);
         const searchQuery = ref('');
         const isLoading = ref(false);
         const activeFilter = ref('all');
         const currentPage = ref(1);
-        const itemsPerPage = ref(16);
+        const itemsPerPage = ref(calculateOptimalItemsPerPage);
         const sidebarCollapsed = ref(false);
         const error = ref(null);
         const tooltipInstances = ref([]);
+
+        function calculateOptimalItemsPerPage() {
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            const aspectRatio = screenWidth / screenHeight;
+            const diagonal = Math.sqrt(Math.pow(screenWidth, 2) + Math.pow(screenHeight, 2)) / 96; 
+            
+            if (aspectRatio >= 1.7 && aspectRatio <= 1.8) {
+                if (screenWidth >= 3840) return 40;      
+                if (screenWidth >= 2560) return 30;       
+                if (screenWidth >= 1920) return 24;       
+                if (screenWidth >= 1600) return 20;      
+                return 16;                               
+            }
+            
+            if (aspectRatio > 2.0) {
+                if (screenWidth >= 5120) return 50;       
+                if (screenWidth >= 3440) return 40;      
+                return 32;                               
+            }
+            
+            if (aspectRatio > 1.8) {
+                return 28;
+            }
+            
+            return 12;
+        }
+        
+        function handleResize() {
+            itemsPerPage.value = calculateOptimalItemsPerPage();
+            currentPage.value = 1;
+            updateTooltips();
+        }
+        
+        onMounted(() => {
+            handleResize();
+            window.addEventListener('resize', debounce(handleResize, 200));
+        });
+        
+        function debounce(func, wait) {
+            let timeout;
+            return function() {
+                const context = this, args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    func.apply(context, args);
+                }, wait);
+            };
+        }
 
         const initTooltips = () => {
             try {
