@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 define('BASE_DIR', __DIR__ . '/../..');
-define('DATA_DIR', BASE_DIR . '/temp/files');
+define('DATA_DIR', BASE_DIR . '/data/files');
 
 function getFoldersList() {
     $folders = array_filter(scandir(BASE_DIR), function($item) {

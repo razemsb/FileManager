@@ -84,7 +84,7 @@ createApp ({
         const loadFolders = async () => {
             try {
                 isLoading.value = true;
-                const response = await axios.get('temp/api/api.php?action=getFolders');
+                const response = await axios.get('data/api/api.php?action=getFolders');
                 if (response.data?.success) {
                     folders.value = response.data.data;
                     nextTick(initTooltips);
@@ -126,7 +126,7 @@ createApp ({
         const togglePin = async (folder) => {
             try {
                 isLoading.value = true;
-                const response = await axios.post('temp/api/api.php', {
+                const response = await axios.post('data/api/api.php', {
                     action: 'togglePin',
                     folder: folder.name,
                     pinned: folder.isPinned
@@ -145,7 +145,7 @@ createApp ({
 
         const openFolder = async (folder) => {
             try {
-                await axios.post('temp/api/api.php', {
+                await axios.post('data/api/api.php', {
                     action: 'addRecent',
                     folder: folder.name
                 });
@@ -160,7 +160,7 @@ createApp ({
             try {
                 isLoading.value = true;
                 error.value = false;
-                const response = await fetch(`temp/api/api.php?action=download&folder=${encodeURIComponent(folder.name)}`);
+                const response = await fetch(`data/api/api.php?action=download&folder=${encodeURIComponent(folder.name)}`);
                 if (!response.ok) {
                     throw new Error('Ошибка при загрузке папки');
                 }
