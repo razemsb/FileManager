@@ -73,8 +73,6 @@ FileManager/
 │   ├── pinned_folders.txt    # Временные файлы и данные
 │   ├── api/   
 │   ├── api.php               # PHP API для работы с файлами
-│   ├── test_api.go           # Пока что не рабочий API
-│   ├── download.go           # Пока что не рабочий API     
 │   ├── app/
 │   ├── Main.vue              # Основная логика приложения
 │   ├── css/
