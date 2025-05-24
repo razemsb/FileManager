@@ -2,6 +2,9 @@
 
 ![Logo](./data/img/favicon.ico)
 
+![screen-1](./data/img/screenshot-1.png)
+![screen-2](./data/img/screenshot-2.png)
+
 Современный файловый менеджер для управления папками с интуитивно понятным интерфейсом и мощными возможностями.
 
 ## ✨ Особенности
