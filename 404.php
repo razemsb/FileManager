@@ -33,17 +33,16 @@ $path = $_SERVER['REQUEST_URI'];
             background: #f0f2f5;
             color: var(--text-dark);
             min-height: 100vh;
+            margin: 0;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
         }
 
-        .nav-bar {
+        .app-header {
             background: linear-gradient(135deg, #1e1e2d 0%, #2d2d3d 100%);
-            padding: 5px 20px;
+            padding: 15px 20px;
             display: flex;
             align-items: center;
-            justify-content: center;
             box-shadow: var(--shadow-medium);
             position: fixed;
             width: 100%;
@@ -54,123 +53,185 @@ $path = $_SERVER['REQUEST_URI'];
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .nav-bar::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 2px;
-            width: 100%;
-            background: linear-gradient(90deg,
-                    var(--primary-color) 0%,
-                    #00ff88 25%,
-                    #00ffff 50%,
-                    #00ff88 75%,
-                    var(--primary-color) 100%);
-            background-size: 200% 100%;
-            animation: loading 1s linear infinite;
-            opacity: 0;
-            transition: all 0.3s ease;
-            z-index: 1001;
-            width: 0;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
-        .nav-bar.loading::before {
-            opacity: 1;
-            width: var(--loading-progress, 0%);
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
         }
 
-        .company-name {
-            text-align: center;
-            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        .error-page-container {
+            display: flex;
+            flex: 1;
+            padding-top: 80px;
+            align-items: center;
+            justify-content: center;
             position: relative;
             overflow: hidden;
-            font-size: 1.8rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-            background: linear-gradient(45deg, var(--white), #e0e0e0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            padding: 5px 0;
         }
 
-        .dark .error-container {
-            background-color: #1e293b;
-            color: #e0e0e0 !important;
-            box-shadow: none !important;
-            border: none !important;
-        }
-
-        .dark .error-message {
-            font-size: 1.2rem;
-            color: var(---white);
-            margin-bottom: 30px;
-        }
-
-        .error-container {
-            background: var(--white-transparent);
-            border-radius: 16px;
+        .error-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             padding: 40px;
-            width: 90%;
-            max-width: 600px;
-            text-align: center;
+        }
+
+        .error-text {
+            width: 45%;
+            padding: 40px;
+            background: var(--white-transparent);
+            border-radius: 20px;
             box-shadow: var(--shadow-medium);
-            border: 1px solid var(--primary-light);
             backdrop-filter: blur(10px);
-            animation: fadeIn 0.5s ease-out;
-            margin-top: 80px;
+            border: 1px solid var(--primary-light);
+            animation: slideInLeft 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .error-image {
+            width: 50%;
+            position: relative;
+            animation: floatIn 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s both;
+        }
+
+        .error-image img {
+            width: 100%;
+            height: 100%;
+            max-width: 600px;
+            border-radius: 20px;
+            transform: perspective(1000px) rotateY(-10deg);
+            transition: transform 0.5s ease;
+        }
+
+        .error-image:hover img {
+            transform: perspective(1000px) rotateY(0deg);
         }
 
         .error-code {
-            font-size: 4rem;
-            font-weight: 600;
+            font-size: 5rem;
+            font-weight: 700;
             color: var(--primary-color);
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, var(--primary-color), #00c6ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .error-message {
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             color: var(--text-dark);
             margin-bottom: 30px;
+            line-height: 1.5;
         }
 
         .folder-name {
             font-weight: 600;
             color: var(--primary-color);
             word-break: break-all;
+            background: var(--primary-light);
+            padding: 2px 8px;
+            border-radius: 6px;
         }
 
         .back-button {
-            background: var(--white-transparent);
-            border: 1px solid var(--primary-light);
-            border-radius: 8px;
-            padding: 12px 24px;
-            font-size: 16px;
-            color: var(--text-dark);
+            background: var(--primary-color);
+            border: none;
+            border-radius: 50px;
+            padding: 15px 30px;
+            font-size: 1rem;
+            color: white;
             cursor: pointer;
-            transition: var(--transition-fast);
+            transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
         }
 
         .back-button:hover {
-            background: var(--primary-light);
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-            transform: translateY(-2px);
+            background: #0069d9;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
         }
 
-        @keyframes fadeIn {
+        .back-button:active {
+            transform: translateY(1px);
+        }
+
+        @keyframes slideInLeft {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateX(-50px);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes floatIn {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .dark body {
+            background: #1a1a2e;
+        }
+
+        .dark .error-text {
+            background-color: rgba(30, 41, 59, 0.9);
+            color: #e0e0e0;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .dark .error-message {
+            color: #e0e0e0;
+        }
+
+        .dark .folder-name {
+            color: #a3d4ff;
+            background: rgba(0, 123, 255, 0.2);
+        }
+
+        @media (max-width: 992px) {
+            .error-content {
+                flex-direction: column;
+                padding: 20px;
+            }
+
+            .error-text,
+            .error-image {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .error-text {
+                margin-bottom: 40px;
+            }
+
+            .error-image img {
+                max-width: 100%;
             }
         }
     </style>
@@ -179,7 +240,7 @@ $path = $_SERVER['REQUEST_URI'];
 <body>
     <header class="app-header">
         <div class="header-left">
-            <button class="sidebar-toggle" @click="toggleSidebar">
+            <button class="sidebar-toggle">
                 <i class="bi bi-list"></i>
             </button>
             <h1 class="app-title">
@@ -211,23 +272,39 @@ $path = $_SERVER['REQUEST_URI'];
                         d="M755 90C755 214.264 855.736 315 980 315C995.058 315 1009.77 313.521 1024 310.7V0H773.722C761.68 27.5608 755 58.0003 755 90Z"
                         fill="#5D96FF" class="svg-elem-10"></path>
                 </svg>
-                <span style="margin-top: 3px;">FileManager</span>
+                <span>FileManager</span>
             </h1>
-            <button class="theme-toggle">
-                <i class="bi bi-moon"></i>
-                <i class="bi bi-sun"></i>
-            </button>
         </div>
     </header>
-    <div class="error-container">
-        <h1 class="error-code">404</h1>
-        <p class="error-message">
-            Страница <span class="folder-name"><?= htmlspecialchars($path) ?></span> не найдена
-        </p>
-        <button onclick="window.history.back();" class="back-button">
-            <i class="bi bi-arrow-left"></i> Вернуться назад
-        </button>
+
+    <div class="error-page-container">
+        <div class="error-content">
+            <div class="error-text">
+                <h1 class="error-code">404</h1>
+                <p class="error-message">
+                    Упс! Страница <span class="folder-name"><?= htmlspecialchars($path) ?></span> не найдена
+                </p>
+                <button onclick="window.history.back();" class="back-button">
+                    <i class="bi bi-arrow-left"></i> Вернуться назад
+                </button>
+            </div>
+
+            <div class="error-image">
+                <img src="data/img/404.png" alt="404 Мем" class="meme-image">
+            </div>
+        </div>
     </div>
+
+    <script>
+        // Добавляем небольшую задержку для плавного появления
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.style.opacity = 0;
+            setTimeout(() => {
+                document.body.style.transition = 'opacity 0.5s ease';
+                document.body.style.opacity = 1;
+            }, 100);
+        });
+    </script>
 </body>
 
 </html>
