@@ -3,45 +3,54 @@ header('Content-Type: application/json');
 define('BASE_DIR', __DIR__ . '/../..');
 define('DATA_DIR', BASE_DIR . '/data/files');
 
-function getFoldersList() {
-    $folders = array_filter(scandir(BASE_DIR), function($item) {
-        return $item !== '.' && $item !== '..' && is_dir(BASE_DIR . '/' . $item);
+function getFoldersList()
+{
+    $excludedFolders = ['data', '.git'];
+
+    $folders = array_filter(scandir(BASE_DIR), function ($item) use ($excludedFolders) {
+        return $item !== '.' && $item !== '..' && !in_array($item, $excludedFolders) && $item && is_dir(BASE_DIR . '/' . $item);
     });
     return array_values($folders);
 }
 
-function getPinnedFolders() {
+function getPinnedFolders()
+{
     $file = DATA_DIR . '/pinned_folders.txt';
-    if (!file_exists($file)) return [];
+    if (!file_exists($file))
+        return [];
     return array_filter(explode("\n", file_get_contents($file)));
 }
 
-function getRecentFolders() {
+function getRecentFolders()
+{
     $file = DATA_DIR . '/recent_folders.txt';
-    if (!file_exists($file)) return [];
+    if (!file_exists($file))
+        return [];
     return array_filter(explode("\n", file_get_contents($file)));
 }
 
-function savePinnedFolders($folders) {
+function savePinnedFolders($folders)
+{
     $file = DATA_DIR . '/pinned_folders.txt';
     file_put_contents($file, implode("\n", $folders));
 }
 
-function saveRecentFolders($folders) {
+function saveRecentFolders($folders)
+{
     $file = DATA_DIR . '/recent_folders.txt';
     file_put_contents($file, implode("\n", $folders));
 }
 
-function downloadFolder($folderName) {
-    // Проверка на пустое имя
+function downloadFolder($folderName)
+{
+
     if (empty($folderName)) {
         throw new Exception("Имя папки не указано");
     }
 
-    // Проверка безопасности пути
     $basePath = realpath(BASE_DIR);
     $folderPath = realpath($basePath . DIRECTORY_SEPARATOR . $folderName);
-    
+
     if ($folderPath === false || strpos($folderPath, $basePath) !== 0) {
         throw new Exception("Недопустимый путь к папке");
     }
@@ -50,20 +59,17 @@ function downloadFolder($folderName) {
         throw new Exception("Папка '$folderName' не существует или недоступна");
     }
 
-    // Создаем временный файл
     $tempZip = tempnam(sys_get_temp_dir(), 'zip_');
     if ($tempZip === false) {
         throw new Exception("Ошибка создания временного файла");
     }
 
-    // Создаем архив
     $zip = new ZipArchive();
     if ($zip->open($tempZip, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
         unlink($tempZip);
         throw new Exception("Не удалось создать ZIP-архив");
     }
 
-    // Добавляем файлы с правильной структурой
     $files = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($folderPath, RecursiveDirectoryIterator::SKIP_DOTS),
         RecursiveIteratorIterator::SELF_FIRST
@@ -72,12 +78,10 @@ function downloadFolder($folderName) {
     foreach ($files as $file) {
         $filePath = $file->getRealPath();
         $relativePath = substr($filePath, strlen($folderPath) + 1);
-        
+
         if ($file->isDir()) {
-            // Добавляем директорию
             $zip->addEmptyDir($folderName . '/' . $relativePath);
         } else {
-            // Добавляем файл
             $zip->addFile($filePath, $folderName . '/' . $relativePath);
         }
     }
@@ -87,13 +91,11 @@ function downloadFolder($folderName) {
         throw new Exception("Ошибка при закрытии архива");
     }
 
-    // Проверяем архив
     if (!file_exists($tempZip) || filesize($tempZip) === 0) {
         unlink($tempZip);
         throw new Exception("Создан пустой архив");
     }
 
-    // Отправляем архив
     header('Content-Type: application/zip');
     header('Content-Disposition: attachment; filename="' . $folderName . '.zip"');
     header('Content-Length: ' . filesize($tempZip));
@@ -102,7 +104,6 @@ function downloadFolder($folderName) {
     header('Pragma: no-cache');
     header('Expires: 0');
 
-    // Очищаем буферы
     while (ob_get_level()) {
         ob_end_clean();
     }
@@ -121,7 +122,7 @@ try {
             $pinned = getPinnedFolders();
             $recent = getRecentFolders();
 
-            $result = array_map(function($folder) use ($pinned, $recent) {
+            $result = array_map(function ($folder) use ($pinned, $recent) {
                 return [
                     'name' => $folder,
                     'modified' => filemtime(BASE_DIR . '/' . $folder),
@@ -133,7 +134,7 @@ try {
             echo json_encode(['success' => true, 'data' => $result]);
             exit;
         }
-        
+
         if ($action === 'download') {
             $folder = $_GET['folder'] ?? '';
             downloadFolder($folder);
@@ -179,7 +180,7 @@ try {
     }
 
     throw new Exception('Неизвестный запрос');
-    
+
 } catch (Exception $e) {
     http_response_code(400);
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
