@@ -17,6 +17,13 @@ createApp ({
         const error = ref(null);
         const tooltipInstances = ref([]);
 
+        const scrollToTop = () => {
+            window.scrollTo({
+                top: 0,
+                behavoir: 'smooth'
+            });
+        }
+
         function calculateOptimalItemsPerPage() {
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
@@ -24,21 +31,21 @@ createApp ({
             const diagonal = Math.sqrt(Math.pow(screenWidth, 2) + Math.pow(screenHeight, 2)) / 96; 
             
             if (aspectRatio >= 1.7 && aspectRatio <= 1.8) {
-                if (screenWidth >= 3840) return 40;      
-                if (screenWidth >= 2560) return 30;       
-                if (screenWidth >= 1920) return 24;       
+                if (screenWidth >= 3840) return 32;      
+                if (screenWidth >= 2560) return 35;      
+                if (screenWidth >= 1920) return 16;       
                 if (screenWidth >= 1600) return 20;      
                 return 16;                               
             }
             
             if (aspectRatio > 2.0) {
-                if (screenWidth >= 5120) return 50;       
-                if (screenWidth >= 3440) return 40;      
-                return 32;                               
+                if (screenWidth >= 5120) return 40;       
+                if (screenWidth >= 3440) return 36;      
+                return 30;                               
             }
             
             if (aspectRatio > 1.8) {
-                return 28;
+                return 16;
             }
             
             return 12;
@@ -184,13 +191,15 @@ createApp ({
         const nextPage = () => {
             if (currentPage.value < totalPages.value) {
                 currentPage.value++;
+                scrollToTop();
                 updateTooltips();
-            }
+            }   
         };
 
         const prevPage = () => {
             if (currentPage.value > 1) {
                 currentPage.value--;
+                scrollToTop();
                 updateTooltips();
             }
         };
@@ -198,6 +207,7 @@ createApp ({
         const goToPage = (page) => {
             if (page !== '...') {
                 currentPage.value = page;
+                scrollToTop();
                 updateTooltips();
             }
         };
@@ -283,6 +293,7 @@ createApp ({
             paginatedFolders,
             visiblePages,
             loadFolders,
+            scrollToTop,
             setFilter,
             toggleSidebar,
             togglePin,

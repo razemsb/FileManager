@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EnigmaFile Manager</title>
-    <link rel="shorcut icon" href="data/img/logo.svg">
-    <link rel="stylesheet" href="data/css/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="icon" type="image/png" href="data/img/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="data/img/favicon.svg" />
+    <link rel="shortcut icon" href="data/img/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="data/img/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="MyWebSite" />
+    <link rel="manifest" href="data/img/site.webmanifest" />
+    <link rel="stylesheet" href="data/css/style.min.css">
+    <link rel="stylesheet" href="data/vendors/bootstrap/icons/bootstrap-icons.min.css">
     <link href="data/vendors/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <script src="data/app/Main.vue" defer></script>
     <script src="data/js/dark-theme.js" defer></script>
@@ -23,8 +28,35 @@
                     <i class="bi bi-list"></i>
                 </button>
                 <h1 class="app-title">
-                    <img src="data/img/logo.svg"> 
-                    <span>EnigmaDevix FileManager</span>
+                    <svg width="40px" height="40px" viewBox="0 0 1024 1024" style="border-radius: 10px; margin-top: 5px;" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1024 0H0V1024H1024V0Z" fill="#5D56C3" class="svg-elem-1"></path>
+                        <rect x="96" y="97" width="832" height="825" rx="140" fill="#7D97FF" class="svg-elem-2"></rect>
+                        <path
+                            d="M606.244 862.089C676.465 840.886 710.277 821.623 771.5 783.952C707.948 807.494 673.5 817.952 598 810.152C550.5 805.244 521 787.452 480 767.802C434.164 743.295 424 741.175 397 725.952C367.616 703.521 349 692.452 333.6 681.752C333.6 681.752 253 635.39 187 628.252C121 621.114 98.5 628 96 628L94.5 769.728C96 813.728 103 846.5 139 883C170.141 914.574 208.5 924.5 260.5 921.728L446 922C504.599 894.862 540.271 879.928 606.244 862.089Z"
+                            fill="#5866C3" class="svg-elem-3"></path>
+                        <path opacity="0.6"
+                            d="M336 941C336 816.736 235.264 716 111 716C70.6354 716 32.7533 726.629 0 745.241V1024H320.196C330.394 998.318 336 970.314 336 941Z"
+                            fill="#1C5298" class="svg-elem-4"></path>
+                        <path opacity="0.99"
+                            d="M797.992 221.637C846.69 279.534 876.497 292.35 928 309C934.263 210.782 924.055 170.369 882 133C839.794 97.8894 810.334 93.6344 755 96.9998C757.337 145.671 767.492 173.597 797.992 221.637Z"
+                            fill="#9066C4" class="svg-elem-5"></path>
+                        <path opacity="0.3"
+                            d="M101 350C250.669 350 372 230.012 372 82C372 53.3991 367.47 25.8446 359.08 0H0V330.768C29.7528 342.593 62.1171 349.349 96 349.955C97.663 349.985 99.3298 350 101 350Z"
+                            fill="#1C2F60" class="svg-elem-6"></path>
+                        <path
+                            d="M688.35 696C774.836 656.561 827.645 606.471 928 474V602C877.654 683.836 850.5 729 775.5 783C705 809.5 647.5 821.5 567 804.5C504.5 786.5 397.5 726 397.5 726L688.5 725L688.35 696Z"
+                            fill="#7D86F2" class="svg-elem-7"></path>
+                        <path
+                            d="M214 542C160 519 134.627 514.663 96 509V628C130.791 623.498 154.311 625.509 197 629.35C239.855 639.702 263.343 643.649 336 682V628C294.037 592.925 269.5 573 214 542Z"
+                            fill="#7D86F2" class="svg-elem-8"></path>
+                        <path
+                            d="M336.5 267L335.5 726H686.5L686 626.5L447.5 626V542H649.5V447H447.5V366H684.5V267H336.5Z"
+                            fill="#D9D9D9" class="svg-elem-9"></path>
+                        <path opacity="0.3"
+                            d="M755 90C755 214.264 855.736 315 980 315C995.058 315 1009.77 313.521 1024 310.7V0H773.722C761.68 27.5608 755 58.0003 755 90Z"
+                            fill="#5D96FF" class="svg-elem-10"></path>
+                    </svg>
+                    <span style="margin-top: 3px;">FileManager</span>
                 </h1>
                 <button class="theme-toggle">
                     <i class="bi bi-moon"></i>
@@ -64,7 +96,8 @@
             </aside>
             <main class="app-main">
                 <div class="folder-grid">
-                    <div v-for="folder in paginatedFolders" class="folder-card" :class="{ 'pinned': folder.isPinned, 'recent': folder.isRecent }">
+                    <div v-for="folder in paginatedFolders" class="folder-card"
+                        :class="{ 'pinned': folder.isPinned, 'recent': folder.isRecent }">
                         <div class="folder-header">
                             <i class="bi bi-folder"></i>
                             <h3 class="folder-name" data-bs-toggle="tooltip" :title="folder.name"
@@ -80,10 +113,10 @@
                                     title="Открыть">
                                     <i class="bi bi-box-arrow-up-right"></i>
                                 </button>
-                                <button class="action-btn" @click="downloadFolder(folder)" data-bs-toggle="tooltip"
+                                <!-- <button class="action-btn" @click="downloadFolder(folder)" data-bs-toggle="tooltip"
                                     title="Скачать">
                                     <i class="bi bi-download"></i>
-                                </button>
+                                </button> -->
                             </div>
                         </div>
                         <div class="folder-footer">
@@ -130,4 +163,5 @@
         </div> -->
     </div>
 </body>
+
 </html>

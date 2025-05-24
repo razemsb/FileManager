@@ -33,51 +33,82 @@ function saveRecentFolders($folders) {
 }
 
 function downloadFolder($folderName) {
-    $folderPath = realpath(BASE_DIR . DIRECTORY_SEPARATOR . $folderName);
+    // Проверка на пустое имя
+    if (empty($folderName)) {
+        throw new Exception("Имя папки не указано");
+    }
+
+    // Проверка безопасности пути
+    $basePath = realpath(BASE_DIR);
+    $folderPath = realpath($basePath . DIRECTORY_SEPARATOR . $folderName);
     
+    if ($folderPath === false || strpos($folderPath, $basePath) !== 0) {
+        throw new Exception("Недопустимый путь к папке");
+    }
+
     if (!is_dir($folderPath)) {
-        throw new Exception("Папка не существует");
+        throw new Exception("Папка '$folderName' не существует или недоступна");
     }
 
+    // Создаем временный файл
+    $tempZip = tempnam(sys_get_temp_dir(), 'zip_');
+    if ($tempZip === false) {
+        throw new Exception("Ошибка создания временного файла");
+    }
+
+    // Создаем архив
     $zip = new ZipArchive();
-    $zipFilename = DATA_DIR . DIRECTORY_SEPARATOR . $folderName . '.zip';
-    
-    if ($zip->open($zipFilename, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== TRUE) {
-        throw new Exception("Не удалось создать архив");
+    if ($zip->open($tempZip, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+        unlink($tempZip);
+        throw new Exception("Не удалось создать ZIP-архив");
     }
 
+    // Добавляем файлы с правильной структурой
     $files = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($folderPath),
-        RecursiveIteratorIterator::LEAVES_ONLY
+        new RecursiveDirectoryIterator($folderPath, RecursiveDirectoryIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::SELF_FIRST
     );
-    foreach ($files as $name => $file) {
-        if (!$file->isDir()) {
-            $filePath = $file->getRealPath();
-            $relativePath = ltrim(
-                str_replace($folderPath, '', $filePath),
-                DIRECTORY_SEPARATOR
-            );
-            $relativePath = str_replace(DIRECTORY_SEPARATOR, '/', $relativePath);
+
+    foreach ($files as $file) {
+        $filePath = $file->getRealPath();
+        $relativePath = substr($filePath, strlen($folderPath) + 1);
+        
+        if ($file->isDir()) {
+            // Добавляем директорию
+            $zip->addEmptyDir($folderName . '/' . $relativePath);
+        } else {
+            // Добавляем файл
             $zip->addFile($filePath, $folderName . '/' . $relativePath);
         }
     }
 
-    $zip->close();
-
-    if (!file_exists($zipFilename)) {
-        throw new Exception("Ошибка создания архива");
+    if (!$zip->close()) {
+        unlink($tempZip);
+        throw new Exception("Ошибка при закрытии архива");
     }
 
+    // Проверяем архив
+    if (!file_exists($tempZip) || filesize($tempZip) === 0) {
+        unlink($tempZip);
+        throw new Exception("Создан пустой архив");
+    }
+
+    // Отправляем архив
     header('Content-Type: application/zip');
-    header('Content-Disposition: attachment; filename="' . basename($zipFilename) . '"');
-    header('Content-Length: ' . filesize($zipFilename));
-    
-    if (ob_get_level()) {
+    header('Content-Disposition: attachment; filename="' . $folderName . '.zip"');
+    header('Content-Length: ' . filesize($tempZip));
+    header('Content-Transfer-Encoding: binary');
+    header('Cache-Control: no-cache, must-revalidate');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+
+    // Очищаем буферы
+    while (ob_get_level()) {
         ob_end_clean();
     }
-    readfile($zipFilename);
-    
-    unlink($zipFilename);
+
+    readfile($tempZip);
+    unlink($tempZip);
     exit;
 }
 try {

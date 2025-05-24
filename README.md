@@ -1,6 +1,6 @@
 # 📁 EnigmaDevix FileManager
 
-![Logo](./temp/img/logo.svg)
+![Logo](./data/img/favicon.ico)
 
 Современный файловый менеджер для управления папками с интуитивно понятным интерфейсом и мощными возможностями.
 
@@ -52,8 +52,6 @@ git clone https://github.com/razemsb/FileManager.git
 
     Автоматическое сохранение истории недавних папок
 
-    Скачивание целых папок в ZIP-архиве
-
     Пользовательский интерфейс
 
     Адаптивный дизайн для всех устройств
@@ -72,11 +70,11 @@ FileManager/
 │   ├── recent_folders.txt    # Временные файлы и данные
 │   ├── pinned_folders.txt    # Временные файлы и данные
 │   ├── api/   
-│   ├── api.php               # PHP API для работы с файлами
+│   ├── api.php               # PHP API для работы с файлами    
 │   ├── app/
 │   ├── Main.vue              # Основная логика приложения
 │   ├── css/
-│   ├── style.css             # Стили приложения
+│   ├── style.min.css         # Стили приложения
 │   ├── js/                   
 │   ├── dark-theme.js         # Для переключения темной/светлой темы
 │   ├── vendors/
@@ -84,8 +82,7 @@ FileManager/
 │   ├── axios                 # Зависимости
 │   ├── vue                   # Зависимости
 │   ├── popperjs              # Зависимости
-│   ├── img/                
-│   └── logo.svg              # Логотип проекта
+│   ├── img/                  # Favicon
 ├── index.html                # Главная страница
 └── README.md                 # Этот файл
 ```
