@@ -1,0 +1,328 @@
+/* theme-midnight.css — Midnight Blue (lightened + slightly bluer accents) */
+/* Версия: чуть светлее фон, немного больше синего, но без неона — премиально и спокойно */
+
+:root {
+    /* primary/accents (названия совместимы с base.css) */
+    --red: #4A86A8;        /* чуть светлее и более синий (primary accent) */
+    --red-600: #3F7698;
+    --red-700: #305E7A;
+
+    --gold: #86DFF0;       /* холодный циан — вторичный акцент, мягкий */
+    --gold-600: #62CFE6;
+
+    --jade: #3FC99D;       /* success-ish, холоднее */
+
+    /* text / neutral */
+    --ink: #EAF8FF;
+    --ink-2: #D6F0FB;
+    --ink-3: #9AB6C9;
+    --stone: #7C98AB;
+
+    /* surfaces */
+    --cloud: #071328;
+    --paper: #041426;
+    --paper-2: #03121e;
+    --line: #0C2A44;
+
+    /* background / cards — чуть светлее, но всё ещё глубокий */
+    --bg: radial-gradient(1200px 800px at 18% 10%, rgba(8,14,26,0.96) 0%, rgba(3,8,16,0.96) 45%, rgba(1,6,10,1) 100%);
+    --bg-fallback: #041025;
+    --card: linear-gradient(180deg, rgba(8,14,26,0.96), rgba(4,10,18,0.98));
+    --folder-card: rgba(10, 18, 32, 0.86);
+
+    --muted: #94B0C3;
+    --border: rgba(96,140,170,0.09);
+
+    --recent-color: #5FD6A0;
+
+    /* semantic aliases used by base */
+    --primary: var(--red);
+    --accent: var(--gold);
+}
+
+/* backdrop: чуть светлее, мягче */
+body {
+    background: var(--bg-fallback);
+    color: var(--ink);
+    transition: background 320ms var(--easing), color 240ms var(--easing);
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+
+    /* фон — при желании замени путь на своё изображение */
+    background-image:
+        url('../../img/midnight-background.jpg');
+    background-repeat: no-repeat;
+    background-position: center var(--bg-vertical, center);
+    background-size: cover;
+
+    transform: translateZ(0);
+    will-change: background-position;
+    opacity: 0.94;
+}
+
+/* overlay: мягкая текстура + спокойная аврора */
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+
+    background-image:
+        radial-gradient(circle at 12% 18%, rgba(134,223,240,0.02), transparent 6%),
+        radial-gradient(circle at 82% 78%, rgba(74,134,168,0.01), transparent 5%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.0075) 0 1px, transparent 1px 5px),
+        linear-gradient(180deg, rgba(8,12,20,0.03), transparent 38%);
+    mix-blend-mode: overlay;
+}
+
+/* Search input: контраст и мягкий cyan glow */
+.search-input {
+    background-color: rgba(6,12,22,0.94) !important;
+    border: 1px solid rgba(74,134,168,0.06);
+    color: var(--ink);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(134,223,240,0.09);
+}
+
+/* SETTINGS MODAL — слегка светлее, тоньше обводки */
+.settings-overlay {
+    background: rgba(2, 6, 12, 0.66);
+    backdrop-filter: blur(8px) saturate(108%);
+    -webkit-backdrop-filter: blur(8px) saturate(108%);
+    transition: opacity .22s var(--easing), visibility .22s var(--easing);
+}
+
+.settings-modal {
+    width: min(760px, 96vw);
+    max-width: 900px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(8,14,26,0.97), rgba(4,10,18,0.985));
+    border: 1px solid rgba(134,223,240,0.055);
+    box-shadow:
+        0 12px 34px rgba(0, 0, 0, 0.58),
+        0 2px 8px rgba(4, 8, 14, 0.42);
+    transform-origin: center;
+    transition: transform .22s var(--easing), opacity .22s var(--easing);
+    color: var(--ink);
+}
+
+.settings-modal i {
+    color: var(--ink-3) !important;
+}
+
+.settings-header {
+    padding: 14px 18px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, rgba(8,14,26,0.94), rgba(4,9,16,0.9));
+    border-bottom: 1px solid rgba(134,223,240,0.03);
+}
+
+.settings-header h3 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    color: var(--ink);
+}
+
+/* Tabs — сдержанный ховер */
+.settings-tabs {
+    background: transparent;
+    border-bottom: 1px solid rgba(96,140,170,0.04);
+}
+
+.settings-tabs .tab {
+    padding: 10px 12px;
+    color: var(--ink-2);
+    font-weight: 700;
+    border-radius: 10px;
+    margin: 8px;
+    transition: all .18s var(--easing);
+}
+
+.settings-tabs .tab:hover {
+    background: rgba(74,134,168,0.04);
+    color: var(--ink);
+}
+
+.settings-tabs .tab.active {
+    color: var(--ink);
+    background: linear-gradient(180deg, rgba(134,223,240,0.045), rgba(12,22,34,0.02));
+    box-shadow: inset 0 -2px 0 rgba(134,223,240,0.10);
+}
+
+/* Content blocks */
+.settings-body {
+    padding: 18px;
+    display: grid;
+    gap: 14px;
+}
+
+.set {
+    padding: 14px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(8,14,26,0.95), rgba(6,12,20,0.92));
+    border: 1px dashed rgba(96,140,170,0.04);
+}
+
+/* footer / buttons — более мягкий primary */
+.settings-footer {
+    padding: 12px 14px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid rgba(96,140,170,0.03);
+    background: linear-gradient(180deg, rgba(6,10,16,0.02), transparent);
+}
+
+.btn {
+    padding: 9px 14px;
+    border-radius: 12px;
+    font-weight: 800;
+    letter-spacing: .2px;
+    border: 1px solid rgba(134,223,240,0.05);
+    background: linear-gradient(180deg, rgba(6,12,22,0.93), rgba(4,9,16,0.96));
+    color: var(--ink);
+    transition: transform .12s var(--easing), box-shadow .12s var(--easing);
+}
+
+.btn:hover {
+    transform: translateY(-1.4px);
+    box-shadow: 0 8px 20px rgba(4, 9, 16, 0.55);
+}
+
+.btn.primary {
+    border: none;
+    background: linear-gradient(135deg, rgba(74,134,168,0.96), rgba(134,223,240,0.92));
+    color: #031026;
+    box-shadow: 0 8px 28px rgba(74,134,168,0.07), 0 2px 6px rgba(3,8,14,0.46);
+}
+
+.btn.ghost {
+    background: transparent;
+    border: 1px solid rgba(96,140,170,0.035);
+    color: var(--ink);
+}
+
+/* theme chips — чуть ярче при активном состоянии */
+.theme-chip {
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(6,12,22,0.93), rgba(4,9,16,0.96));
+    border: 1px solid rgba(96,140,170,0.04);
+    color: var(--ink-2);
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform .12s var(--easing), box-shadow .12s var(--easing);
+}
+
+.theme-chip:hover {
+    transform: translateY(-1.4px);
+    box-shadow: 0 8px 18px rgba(4,9,16,0.56);
+    color: var(--ink);
+}
+
+.theme-chip.active {
+    border-color: rgba(134,223,240,0.12);
+    box-shadow: 0 14px 36px rgba(134,223,240,0.055);
+    color: var(--ink);
+}
+
+/* sidebar badges — мягче, но читабельно */
+.app-sidebar .badge {
+    background: linear-gradient(90deg, rgba(74,134,168,0.12), rgba(134,223,240,0.06));
+    color: #EAF8FF;
+    font-weight: 800;
+    padding: 4px 10px;
+    box-shadow: inset 0 -1px 0 rgba(255,255,255,0.01);
+}
+
+.app-sidebar .sidebar-btn .badge,
+.app-sidebar .sidebar-btn .badge * {
+    color: #EAF8FF !important;
+}
+
+/* focus styles — менее агрессивно */
+.settings-modal :focus,
+.theme-chip:focus,
+.btn:focus {
+    outline: 3px solid rgba(134,223,240,0.14);
+    outline-offset: 3px;
+    border-radius: 10px;
+}
+
+/* responsive parity */
+@media (max-width: 560px) {
+    .settings-modal {
+        width: calc(100vw - 26px);
+        margin: 10px;
+    }
+
+    .settings-header h3 {
+        font-size: 15px;
+    }
+
+    .theme-chip {
+        padding: 7px 9px;
+        font-size: 13px;
+    }
+
+    .settings-footer {
+        padding: 10px;
+        gap: 8px;
+    }
+}
+
+/* accessibility */
+:focus-visible {
+    outline: 2px solid rgba(134,223,240,0.36);
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+/* number inputs */
+input[type="number"] {
+    background: rgba(10,18,30,0.7) !important;
+}
+
+/* folder card accent — мягкий полосной градиент, чуть светлее */
+.folder-card::after {
+    background: linear-gradient(90deg, rgba(74,134,168,0.78), rgba(134,223,240,0.78));
+    height: 3px;
+}
+
+/* hover — деликатнее чтобы не резало глаз */
+.folder-card:hover {
+    transform: translateY(-0.9px);
+    box-shadow: 0 10px 26px rgba(2,8,16,0.56);
+    border-color: color-mix(in srgb, var(--red) 10%, var(--border));
+}
+
+.pagination-btn:hover:not(:disabled),
+.page-btn:hover {
+    transform: translateY(-0.9px);
+}
+
+/* spinner — согласован с новой палитрой */
+.spinner {
+    border-top-color: rgba(74,134,168,0.92);
+}

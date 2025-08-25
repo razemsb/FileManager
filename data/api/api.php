@@ -2,6 +2,7 @@
 header('Content-Type: application/json');
 define('BASE_DIR', __DIR__ . '/../..');
 define('DATA_DIR', BASE_DIR . '/data/files');
+define('CATEGORIES_FILE', DATA_DIR . '/categories.txt');
 
 function getFoldersList()
 {
@@ -41,8 +42,24 @@ function saveRecentFolders($folders)
     file_put_contents($file, implode("\n", $folders));
 }
 
+function getCategories() {
+    if (!file_exists(CATEGORIES_FILE)) return [];
+    $json = file_get_contents(CATEGORIES_FILE);
+    $data = json_decode($json, true);
+    return is_array($data) ? $data : [];
+}
+
+function saveCategories($categories) {
+    file_put_contents(CATEGORIES_FILE, json_encode($categories, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+}
+
+
 function downloadFolder($folderName)
 {
+
+    if (!extension_loaded('zip')) {
+        throw new Exception("ZipArchive error");
+    }
 
     if (empty($folderName)) {
         throw new Exception("Имя папки не указано");
@@ -140,6 +157,12 @@ try {
             downloadFolder($folder);
             exit;
         }
+
+        if ($action === 'getCategories') {
+            echo json_encode(['success' => true, 'data' => getCategories()]);
+            exit;
+        }
+        
     }
 
     if ($method === 'POST') {
@@ -177,6 +200,17 @@ try {
             echo json_encode(['success' => true]);
             exit;
         }
+
+        if ($action === 'saveCategories') {
+            $categories = $input['categories'] ?? [];
+            if (!is_array($categories)) {
+                throw new Exception("Некорректный формат категорий");
+            }
+            saveCategories($categories);
+            echo json_encode(['success' => true]);
+            exit;
+        }
+        
     }
 
     throw new Exception('Неизвестный запрос');
