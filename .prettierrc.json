@@ -1,13 +1,31 @@
 {
+  "plugins": ["@prettier/plugin-php"],
+  "printWidth": 120,
+  "tabWidth": 4,
+  "useTabs": false,
   "semi": true,
   "singleQuote": true,
-  "trailingComma": "es5",
-  "printWidth": 100,
+  "trailingComma": "all",
+  "bracketSpacing": true,
+  "bracketSameLine": false,
+  "arrowParens": "avoid",
+  "proseWrap": "preserve",
+  "htmlWhitespaceSensitivity": "css",
+  "endOfLine": "lf",
+  "embeddedLanguageFormatting": "auto",
+  "singleAttributePerLine": false,
+  "phpVersion": "8.2",
   "overrides": [
     {
       "files": "*.vue",
       "options": {
-        "parser": "babel"
+        "parser": "vue"
+      }
+    },
+    {
+      "files": "*.php",
+      "options": {
+        "parser": "php"
       }
     }
   ]

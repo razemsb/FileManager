@@ -1168,7 +1168,7 @@ html:focus-within {
 }
 
 .theme-chip.active {
-  color: #fff;
+  color: aliceblue;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
@@ -1230,7 +1230,7 @@ html:focus-within {
 }
 
 .context-menu .ctx-item.ctx-delete {
-  color: #ff6b6b;
+  color: #ff0000 !important;
 }
 
 .context-menu .ctx-item.ctx-delete:hover {
@@ -1272,6 +1272,11 @@ html:focus-within {
   background: rgba(255, 107, 107, 0.15);
   color: var(--ctx-danger);
   border-left-color: var(--ctx-danger);
+}
+ 
+.ctx-item i {
+  margin-right: 1rem;
+  font-size: 2rem;
 }
 
 .modal-overlay {

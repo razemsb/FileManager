@@ -2,11 +2,10 @@
 header('Content-Type: application/json');
 define('BASE_DIR', __DIR__ . '/../..');
 define('DATA_DIR', BASE_DIR . '/data/files');
-define('CATEGORIES_FILE', DATA_DIR . '/categories.txt');
 
 function getFoldersList()
 {
-    $excludedFolders = ['data', '.git'];
+    $excludedFolders = ['data', '.git', '.vscode'];
 
     $folders = array_filter(scandir(BASE_DIR), function ($item) use ($excludedFolders) {
         return $item !== '.' && $item !== '..' && !in_array($item, $excludedFolders) && $item && is_dir(BASE_DIR . '/' . $item);
@@ -41,18 +40,6 @@ function saveRecentFolders($folders)
     $file = DATA_DIR . '/recent_folders.txt';
     file_put_contents($file, implode("\n", $folders));
 }
-
-function getCategories() {
-    if (!file_exists(CATEGORIES_FILE)) return [];
-    $json = file_get_contents(CATEGORIES_FILE);
-    $data = json_decode($json, true);
-    return is_array($data) ? $data : [];
-}
-
-function saveCategories($categories) {
-    file_put_contents(CATEGORIES_FILE, json_encode($categories, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-}
-
 
 function downloadFolder($folderName)
 {
@@ -158,11 +145,6 @@ try {
             exit;
         }
 
-        if ($action === 'getCategories') {
-            echo json_encode(['success' => true, 'data' => getCategories()]);
-            exit;
-        }
-        
     }
 
     if ($method === 'POST') {
@@ -201,16 +183,61 @@ try {
             exit;
         }
 
-        if ($action === 'saveCategories') {
-            $categories = $input['categories'] ?? [];
-            if (!is_array($categories)) {
-                throw new Exception("Некорректный формат категорий");
+        if ($action === 'deleteFolder') {
+            $folder = $input['folder'] ?? '';
+
+            if (empty($folder)) {
+                throw new Exception("Имя папки не указано");
             }
-            saveCategories($categories);
-            echo json_encode(['success' => true]);
+
+            $basePath = realpath(BASE_DIR);
+            $folderPath = realpath($basePath . DIRECTORY_SEPARATOR . $folder);
+
+            // Проверка безопасности
+            if ($folderPath === false || strpos($folderPath, $basePath) !== 0) {
+                throw new Exception("Недопустимый путь к папке");
+            }
+
+            if (!is_dir($folderPath)) {
+                throw new Exception("Папка '$folder' не существует");
+            }
+
+            function deleteDirectory($dir)
+            {
+                if (!file_exists($dir))
+                    return true;
+
+                if (!is_dir($dir)) {
+                    return unlink($dir);
+                }
+
+                foreach (scandir($dir) as $item) {
+                    if ($item == '.' || $item == '..')
+                        continue;
+
+                    if (!deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
+                        return false;
+                    }
+                }
+
+                return rmdir($dir);
+            }
+
+            if (deleteDirectory($folderPath)) {
+                $pinnedFolders = getPinnedFolders();
+                $pinnedFolders = array_diff($pinnedFolders, [$folder]);
+                savePinnedFolders($pinnedFolders);
+                $recentFolders = getRecentFolders();
+                $recentFolders = array_diff($recentFolders, [$folder]);
+                saveRecentFolders($recentFolders);
+                echo json_encode(['success' => true]);
+            } else {
+                throw new Exception("Не удалось удалить папку");
+            }
             exit;
         }
-        
+
+        throw new Exception('Неизвестный запрос');
     }
 
     throw new Exception('Неизвестный запрос');

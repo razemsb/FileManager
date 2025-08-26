@@ -1,0 +1,123 @@
+:root {
+  --easing: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --transition: all 0.25s var(--easing);
+
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+
+  --shadow-1: 0 6px 16px rgba(97, 18, 52, 0.06);
+  --shadow-2: 0 10px 26px rgba(97, 18, 52, 0.08);
+  --shadow-3: 0 14px 40px rgba(97, 18, 52, 0.1);
+
+  --primary: #f783ac;
+  --primary-dark: #e35d8f;
+  --secondary: #e63946;
+  --accent: #a8dadc;
+  --red: #e63946;
+  --gold: #ffd1e9;
+
+  --ink: #5e2750;
+  --ink-2: #8c5a7a;
+  --ink-3: #b08aa3;
+  --muted: #a67b94;
+  --stone: #caa8bb;
+
+  --paper: #fffafc;
+  --paper-2: #fff0f3;
+  --bg: radial-gradient(5000px 420px at 12% 6%, rgba(247, 131, 172, 0.06), transparent 7%),
+    radial-gradient(5000px 340px at 92% 92%, rgba(168, 218, 220, 0.03), transparent 8%),
+    linear-gradient(180deg, #fff0f3 0%, #fff8fb 100%);
+  --card: #ffffff;
+  --folder-card: linear-gradient(180deg, #fff, #fff8fb);
+  --border: #fbc4d1;
+  --line: #fcdfe8;
+
+  --recent-color: #37d67a;
+
+  --bg-vertical: 18vh;
+  --bg-primary: #fff0f3;
+  --border-color: #fbc4d1;
+}
+
+html {
+  height: 100%;
+  background: var(--bg, #fff0f3);
+}
+
+body {
+  min-height: 100%;
+  position: relative;
+  z-index: 0;
+  background: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  background-image: url('../../img/themes/hello-kitty-back.jpg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
+  opacity: 0.16;
+  transform: translateZ(0);
+  will-change: background-position, opacity;
+  filter: saturate(1.02) contrast(0.98) blur(0.8px);
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.02) 0 1px,
+      transparent 1px 6px
+    ),
+    radial-gradient(circle at 12% 10%, rgba(247, 131, 172, 0.06), transparent 8%),
+    radial-gradient(circle at 88% 92%, rgba(168, 218, 220, 0.03), transparent 10%);
+  background-repeat: no-repeat;
+  background-size: cover;
+  mix-blend-mode: overlay;
+  opacity: 1;
+  transform: translateZ(0);
+  will-change: opacity, transform;
+}
+
+@media (max-width: 900px), (hover: none) {
+  body::before {
+    background-attachment: scroll;
+    filter: none;
+    opacity: 0.12;
+  }
+  body::after {
+    background-image: radial-gradient(circle at 12% 10%, rgba(247, 131, 172, 0.05), transparent 10%),
+      radial-gradient(circle at 88% 92%, rgba(168, 218, 220, 0.02), transparent 12%);
+    mix-blend-mode: normal;
+  }
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, var(--primary), var(--gold));
+  color: #111;
+  border-color: transparent;
+  box-shadow: 0 10px 30px rgba(247, 131, 172, 0.12);
+}
+
+.sidebar-btn .badge {
+  color: aliceblue !important;
+}
+
+.theme-chip.active {
+    color: black !important;
+}

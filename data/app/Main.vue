@@ -31,13 +31,18 @@ createApp({
     const categories = ref({});
 
     const themes = ref({
-      light: [{ id: 'japan', label: 'Japan' }],
+      light: [
+        { id: 'japan', label: 'Japan' }
+      ],
       dark: [
         { id: 'china', label: 'China' },
         { id: 'MidNightBlue', label: 'Midnight Blue' },
         { id: 'OldDark', label: 'Old Dark' },
       ],
-      custom: [{ id: 'NeoTokyo', label: 'Neo Tokyo' }],
+      custom: [
+        { id: 'NeoTokyo', label: 'Neo Tokyo' },
+        { id: 'HelloKitty', label: 'Hello Kitty'}
+      ],
     });
 
     const flatThemes = computed(() => [
@@ -437,23 +442,17 @@ createApp({
       // build inner HTML
       menuEl.innerHTML = `
         <button type="button" class="ctx-item ctx-open" data-action="open" style="width:100%;text-align:left;padding:8px;border:none;background:transparent;cursor:pointer;">
-          <i class="bi bi-box-arrow-up-right" style="margin-right:8px"></i><span>Открыть</span>
+          <i class="bi bi-box-arrow-up-right"></i><span>Открыть</span>
         </button>
         <button type="button" class="ctx-item ctx-pin" data-action="pin" style="width:100%;text-align:left;padding:8px;border:none;background:transparent;cursor:pointer;">
-          <i class="bi bi-pin" style="margin-right:8px"></i><span>Закрепить</span>
-        </button>
-        <button type="button" class="ctx-item ctx-rename" data-action="rename" style="width:100%;text-align:left;padding:8px;border:none;background:transparent;cursor:pointer;">
-          <i class="fa-regular fa-pen-to-square" style="margin-right:8px"></i><span>Переименовать</span>
-        </button>
-        <button type="button" class="ctx-item ctx-copy" data-action="copy" style="width:100%;text-align:left;padding:8px;border:none;background:transparent;cursor:pointer;">
-          <i class="fa-regular fa-link" style="margin-right:8px"></i><span>Копировать ссылку</span>
+          <i class="bi bi-pin"></i><span>Закрепить</span>
         </button>
         <button type="button" class="ctx-item ctx-download" data-action="download" style="width:100%;text-align:left;padding:8px;border:none;background:transparent;cursor:pointer;">
-          <i class="fa-regular fa-download" style="margin-right:8px"></i><span>Скачать</span>
+          <i class="bi bi-cloud-arrow-down"></i><span>Скачать</span>
         </button>
         <hr style="margin:6px 0;border:none;border-top:1px solid rgba(0,0,0,0.06)">
-        <button type="button" class="ctx-item ctx-delete" data-action="delete" style="width:100%;text-align:left;padding:8px;border:none;background:transparent;cursor:pointer;color:var(--danger,#c72);">
-          <i class="fa-regular fa-trash" style="margin-right:8px"></i><span>Удалить</span>
+        <button type="button" class="ctx-item ctx-delete" data-action="delete" style="width:100%;text-align:left;padding:8px;border:none;background:transparent;cursor:pointer;">
+          <i class="bi bi-trash"></i><span>Удалить</span>
         </button>
       `;
 
