@@ -16,6 +16,7 @@ createApp({
     const tooltipInstances = ref([]);
     const isSettingsOpen = ref(false);
     const activeTab = ref('general');
+    const showDbButton = ref(false);
 
     const settings = ref({
       perPageMode: 'auto',
@@ -884,6 +885,7 @@ createApp({
       applySettings,
       onRightClickFolder,
       filterFolders,
+      showDbButton
     };
   },
 }).mount('#app');

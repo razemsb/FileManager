@@ -10,7 +10,7 @@
     <link rel="shortcut icon" href="data/img/favicon/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="data/img/favicon/apple-touch-icon.png" />
     <link rel="manifest" href="data/img/favicon/site.webmanifest" />
-    <link rel="stylesheet" href="data/css/style.min.css" />
+    <link rel="stylesheet" href="data/css/style.css" />
     <link rel="stylesheet" href="data/vendors/fontawesome/css/all.min.css" />
     <link rel="stylesheet" href="data/vendors/bootstrap/icons/bootstrap-icons.min.css" />
     <link href="data/vendors/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
@@ -100,7 +100,7 @@
           </h1>
         </div>
         <div class="top-bar">
-          <button class="theme-toggle" @click="openSettings" :title="'Настройки, Тема: ' + theme">
+          <button class="theme-toggle" @click="openSettings" data-bs-toggle="tooltip" :title="'Настройки, Тема: ' + theme">
             <svg
               width="192"
               height="230"
@@ -354,6 +354,9 @@
               </defs>
             </svg>
           </button>
+          <a v-if="showDbButton === true" class="db-toggle" id="db-toggle" href="http://localhost/phpmyadmin/" target="_blank" data-bs-toggle="tooltip" title="Перейти к phpMyAdmin" data-bs-original-title="Перейти к phpMyAdmin">
+            <img src="data/img/other/favicon.ico">
+          </a>
           <div class="search-bar">
             <i class="bi bi-search"></i>
             <input
@@ -501,11 +504,11 @@
             </button>
             <button
               class="tab"
-              :class="{active: activeTab==='nav'}"
-              @click="activeTab='nav'"
+              :class="{active: activeTab==='settings'}"
+              @click="activeTab='settings'"
               role="tab"
             >
-              <i class="fa-solid fa-compass"></i> Навигация
+              <i class="fa-solid fa-gear"></i> Настройки
             </button>
             <button
               class="tab"
@@ -640,14 +643,18 @@
               </fieldset>
             </section>
 
-            <section v-show="activeTab==='nav'">
+            <section v-show="activeTab==='settings'">
               <fieldset class="set">
-                <legend><i class="fa-solid fa-keyboard"></i> Навигация (заглушка)</legend>
-                <ul class="list">
-                  <li><i class="fa-regular fa-circle-check"></i> Горячие клавиши — скоро</li>
-                  <li><i class="fa-regular fa-circle-check"></i> Быстрый поиск по Enter — скоро</li>
-                  <li><i class="fa-regular fa-circle-check"></i> Папки-избранное — скоро</li>
-                </ul>
+                <legend><i class="fa-solid fa-keyboard"></i> Допольнительные настройки</legend>
+                
+                <button v-if="!showDbButton" @click="showDbButton = true" class="btn btn-primary">
+                  <i class="fa-solid fa-eye"></i> Показать кнопку БД
+                </button>
+                
+                <button v-else @click="showDbButton = false" class="btn btn-secondary">
+                  <i class="fa-solid fa-eye-slash"></i> Скрыть кнопку БД
+                </button>
+                
               </fieldset>
             </section>
 

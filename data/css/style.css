@@ -1409,3 +1409,22 @@ html:focus-within {
     width: 100%;
   }
 }
+
+.db-toggle {
+  order: 3;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--accent, var(--gold));
+  cursor: pointer;
+  background: radial-gradient(circle at center, rgba(212, 175, 55, 0.2), transparent 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+  transition: all 0.3s ease-in-out;
+}
+
+.db-icon {
+  font-size: 1.5rem;
+}
