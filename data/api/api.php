@@ -116,6 +116,32 @@ function downloadFolder($folderName)
     unlink($tempZip);
     exit;
 }
+
+function createTestFolders($count = 5, $prefix = 'test_folder')
+{
+    $basePath = realpath(BASE_DIR);
+    $createdFolders = [];
+
+    for ($i = 1; $i <= $count; $i++) {
+        $folderName = $prefix . '_' . uniqid() . '_' . $i;
+        $folderPath = $basePath . '/' . $folderName;
+
+        if (!file_exists($folderPath)) {
+            if (mkdir($folderPath, 0755, true)) {
+                $createdFolders[] = $folderName;
+
+                $fileCount = rand(1, 3);
+                for ($j = 1; $j <= $fileCount; $j++) {
+                    $fileName = $folderPath . '/test_file_' . $j . '.txt';
+                    file_put_contents($fileName, "Тестовое содержимое файла " . $j . "\nСоздано: " . date('Y-m-d H:i:s'));
+                }
+            }
+        }
+    }
+
+    return $createdFolders;
+}
+
 try {
     $method = $_SERVER['REQUEST_METHOD'];
     $action = $_GET['action'] ?? '';
@@ -150,6 +176,22 @@ try {
     if ($method === 'POST') {
         $input = json_decode(file_get_contents('php://input'), true);
         $action = $input['action'] ?? '';
+
+        if ($action === 'createFolders') {
+            $count = $input['count'] ?? 5;
+            $prefix = $input['prefix'] ?? 'test_folder';
+            
+            $count = min(max(1, (int)$count), 50);
+            
+            $createdFolders = createTestFolders($count, $prefix);
+            
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Создано папок: ' . count($createdFolders),
+                'folders' => $createdFolders
+            ]);
+            exit;
+        }
 
         if ($action === 'togglePin') {
             $folder = $input['folder'] ?? '';

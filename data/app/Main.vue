@@ -1,3 +1,175 @@
+class PopupNotifier {
+  constructor(options = {}) {
+      this.settings = {
+          theme: 'light',
+          colors: {
+              success: '#22c55e',
+              error: '#ef4444',
+              info: '#3b82f6',
+              warning: '#facc15'
+          },
+          position: 'bottom-right',
+          duration: 3000,
+          maxNotifications: 5,
+          showTime: true,
+          showClose: true,
+          autoClose: true,
+          ...options
+      };
+
+      this.icons = {
+          success: '<i class="fa-solid fa-circle-check"></i>',
+          error: '<i class="fa-solid fa-circle-xmark"></i>',
+          info: '<i class="fa-solid fa-circle-info"></i>',
+          warning: '<i class="fa-solid fa-triangle-exclamation"></i>'
+      };
+
+      this.initTheme();
+      this.initContainers();
+  }
+
+  initTheme() {
+      document.body.classList.add(`popupx-theme-${this.settings.theme}`);
+      
+      const root = document.documentElement;
+      root.style.setProperty('--popup-success', this.settings.colors.success);
+      root.style.setProperty('--popup-error', this.settings.colors.error);
+      root.style.setProperty('--popup-info', this.settings.colors.info);
+      root.style.setProperty('--popup-warning', this.settings.colors.warning);
+  }
+
+  initContainers() {
+      const positions = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+      positions.forEach(pos => {
+          const container = document.createElement('div');
+          container.id = `popup-container-${pos}`;
+          container.className = `popup-container ${pos}`;
+          document.body.appendChild(container);
+      });
+  }
+
+  setTheme(theme) {
+      this.settings.theme = theme;
+      document.body.classList.remove('popupx-theme-light', 'popupx-theme-dark');
+      document.body.classList.add(`popupx-theme-${theme}`);
+  }
+
+  setColors(colors) {
+      this.settings.colors = {...this.settings.colors, ...colors};
+      this.initTheme();
+  }
+
+  show({
+      type = 'info',
+      message = '',
+      title = '',
+      duration = this.settings.duration,
+      position = this.settings.position,
+      showTime = this.settings.showTime,
+      showClose = this.settings.showClose,
+      autoClose = this.settings.autoClose,
+      color = null
+  } = {}) {
+      const container = document.getElementById(`popup-container-${position}`);
+      if (!container) return;
+
+      if (container.children.length >= this.settings.maxNotifications) {
+          container.removeChild(container.children[0]);
+      }
+
+      const currentTime = this.getCurrentTime();
+      const popupId = `popup-${Date.now()}`;
+      const customColor = color || this.settings.colors[type];
+
+      const popup = document.createElement('div');
+      popup.id = popupId;
+      popup.className = `popup popup-${type}`;
+      popup.style.setProperty('--popup-color', customColor);
+      popup.setAttribute('role', 'alert');
+      popup.setAttribute('aria-live', 'assertive');
+
+      popup.innerHTML = `
+          <div class="popup-icon">${this.icons[type] || this.icons.info}</div>
+          <div class="popup-content">
+              ${title ? `<div class="popup-title">${title}</div>` : ''}
+              <div class="popup-message">${message}</div>
+              ${showTime ? `<div class="popup-time">${currentTime}</div>` : ''}
+          </div>
+          ${showClose ? `
+              <button class="popup-close" aria-label="Закрыть уведомление">
+                  <i class="fa-solid fa-xmark"></i>
+              </button>
+          ` : ''}
+      `;
+
+      container.appendChild(popup);
+      setTimeout(() => popup.classList.add('show'), 10);
+
+      const closePopup = () => {
+          popup.classList.remove('show');
+          popup.classList.add('hide');
+          popup.addEventListener('transitionend', () => popup.remove());
+      };
+
+      let timeoutId;
+
+      if (autoClose) {
+          timeoutId = setTimeout(closePopup, duration);
+      }
+
+      const closeBtn = popup.querySelector('.popup-close');
+      if (closeBtn) {
+          closeBtn.addEventListener('click', () => {
+              if (timeoutId) clearTimeout(timeoutId);
+              closePopup();
+          });
+      }
+
+      popup.addEventListener('mouseenter', () => {
+          if (timeoutId) clearTimeout(timeoutId);
+      });
+
+      popup.addEventListener('mouseleave', () => {
+          if (autoClose) {
+              timeoutId = setTimeout(closePopup, duration);
+          }
+      });
+
+      return {
+          close: () => {
+              if (timeoutId) clearTimeout(timeoutId);
+              closePopup();
+          },
+          update: (newOptions) => {
+
+          }
+      };
+  }
+
+  getCurrentTime() {
+      const now = new Date();
+      return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  success(options) {
+      return this.show({ ...options, type: 'success' });
+  }
+
+  error(options) {
+      return this.show({ ...options, type: 'error' });
+  }
+
+  info(options) {
+      return this.show({ ...options, type: 'info' });
+  }
+
+  warning(options) {
+      return this.show({ ...options, type: 'warning' });
+  }
+}
+
+const notifier = new PopupNotifier();
+
 const { createApp, ref, computed, onMounted, nextTick, watch, onBeforeUnmount } = Vue;
 
 createApp({
@@ -16,7 +188,11 @@ createApp({
     const tooltipInstances = ref([]);
     const isSettingsOpen = ref(false);
     const activeTab = ref('general');
-    const showDbButton = ref(false);
+    const showDbButton = ref(true);
+    const showFolderCreator = ref(false);
+    const testFolderCount = ref(50);
+    const testFolderPrefix = ref('test_folder');
+    const ProjectStatus = ref('Productionn');
 
     const settings = ref({
       perPageMode: 'auto',
@@ -42,9 +218,15 @@ createApp({
       ],
       custom: [
         { id: 'NeoTokyo', label: 'Neo Tokyo' },
-        { id: 'HelloKitty', label: 'Hello Kitty'}
+        { id: 'HelloKitty', label: 'Hello Kitty'},
+        { id: 'Aurora', label: 'Aurora'},
+        { id: 'GithubDark', label: 'Github Dark'}
       ],
     });
+
+    function toggleSidebar() { 
+      sidebarCollapsed.value = !sidebarCollapsed.value; 
+    }
 
     const flatThemes = computed(() => [
       ...themes.value.light,
@@ -195,13 +377,11 @@ createApp({
           `data/api/api.php?action=download&folder=${encodeURIComponent(folder.name)}`
         );
 
-        // Сначала проверяем Content-Type
         const contentType = response.headers.get('content-type') || '';
 
         if (!response.ok) {
           let errorMessage = `Ошибка сервера: ${response.status}`;
 
-          // Пытаемся прочитать ответ как JSON или текст
           try {
             if (contentType.includes('application/json')) {
               const errorData = await response.json();
@@ -211,7 +391,6 @@ createApp({
               errorMessage = errorText;
             }
 
-            // Проверяем на наличие ошибок ZipArchive
             if (
               errorMessage.toLowerCase().includes('ziparchive') ||
               errorMessage.toLowerCase().includes('zip extension') ||
@@ -220,14 +399,12 @@ createApp({
               throw new Error('ZIP_ARCHIVE_ERROR');
             }
           } catch (e) {
-            // Не удалось прочитать ошибку
             console.error('Не удалось прочитать ошибку:', e);
           }
 
           throw new Error(errorMessage);
         }
 
-        // Если ответ успешный, но Content-Type JSON - это может быть ошибка
         if (contentType.includes('application/json')) {
           const responseData = await response.json();
 
@@ -241,7 +418,6 @@ createApp({
             throw new Error('ZIP_ARCHIVE_ERROR');
           }
 
-          // Если это JSON но не ошибка, продолжаем нормальную обработку
           const blob = new Blob([JSON.stringify(responseData)], { type: 'application/json' });
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -254,10 +430,8 @@ createApp({
           return;
         }
 
-        // Обычная обработка бинарных данных
         const blob = await response.blob();
 
-        // Дополнительная проверка: если blob очень маленький, это может быть ошибка
         if (blob.size < 100) {
           const text = await blob.text();
           if (
@@ -420,161 +594,196 @@ createApp({
     // -----------------------
     // CONTEXT MENU: create DOM menu (robust)
     // -----------------------
-    function createContextMenuDom() {
-      // If already exists, return
-      if (menuEl) return menuEl;
+    // replace existing createContextMenuDom / showContextMenuAt / hideContextMenu with this
 
-      menuEl = document.createElement('div');
-      menuEl.className = 'context-menu';
-      // minimal inline styles to ensure visibility; real CSS should style it
-      menuEl.style.position = 'fixed';
-      menuEl.style.zIndex = '99999';
-      menuEl.style.minWidth = '200px';
-      menuEl.style.display = 'none';
-      menuEl.style.background = 'var(--menu-bg, #fff)';
-      menuEl.style.boxShadow = '0 6px 20px rgba(0,0,0,0.12)';
-      menuEl.style.borderRadius = '8px';
-      menuEl.style.padding = '6px';
-      menuEl.style.fontSize = '14px';
-      menuEl.style.color = 'var(--menu-color, #111)';
-      menuEl.style.userSelect = 'none';
-      menuEl.style.outline = 'none';
+function createContextMenuDom() {
+  if (menuEl) return menuEl;
 
-      // build inner HTML
-      menuEl.innerHTML = `
-        <button type="button" class="ctx-item ctx-open" data-action="open" style="width:100%;text-align:left;padding:8px;border:none;background:transparent;cursor:pointer;">
-          <i class="bi bi-box-arrow-up-right"></i><span>Открыть</span>
-        </button>
-        <button type="button" class="ctx-item ctx-pin" data-action="pin" style="width:100%;text-align:left;padding:8px;border:none;background:transparent;cursor:pointer;">
-          <i class="bi bi-pin"></i><span>Закрепить</span>
-        </button>
-        <button type="button" class="ctx-item ctx-download" data-action="download" style="width:100%;text-align:left;padding:8px;border:none;background:transparent;cursor:pointer;">
-          <i class="bi bi-cloud-arrow-down"></i><span>Скачать</span>
-        </button>
-        <hr style="margin:6px 0;border:none;border-top:1px solid rgba(0,0,0,0.06)">
-        <button type="button" class="ctx-item ctx-delete" data-action="delete" style="width:100%;text-align:left;padding:8px;border:none;background:transparent;cursor:pointer;">
-          <i class="bi bi-trash"></i><span>Удалить</span>
-        </button>
-      `;
+  // create menu container
+  menuEl = document.createElement('div');
+  menuEl.className = 'efm-context-menu';
+  menuEl.setAttribute('role', 'menu');
+  menuEl.setAttribute('aria-hidden', 'true');
+  menuEl.tabIndex = -1; 
 
-      // attach item listeners (use event delegation)
-      menuEl.addEventListener('click', (ev) => {
-        const btn = ev.target.closest('.ctx-item');
-        if (!btn) return;
-        ev.stopPropagation();
-        ev.preventDefault();
-        const action = btn.getAttribute('data-action');
-        const folder = ctxFolder.value;
-        if (!folder) {
-          hideContextMenu();
-          return;
-        }
+  // inner markup — no inline styles here
+  menuEl.innerHTML = `
+    <button type="button" class="ctx-item" data-action="open" role="menuitem" tabindex="-1">
+      <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i><span class="ctx-label">Открыть</span>
+    </button>
+    <button type="button" class="ctx-item" data-action="pin" role="menuitem" tabindex="-1">
+      <i class="bi bi-pin" aria-hidden="true"></i><span class="ctx-label">Закрепить</span>
+    </button>
+    <button type="button" class="ctx-item" data-action="download" role="menuitem" tabindex="-1">
+      <i class="bi bi-cloud-arrow-down" aria-hidden="true"></i><span class="ctx-label">Скачать</span>
+    </button>
+    <div class="ctx-sep" role="separator"></div>
+    <button type="button" class="ctx-item danger" data-action="delete" role="menuitem" tabindex="-1">
+      <i class="bi bi-trash" aria-hidden="true"></i><span class="ctx-label">Удалить</span>
+    </button>
+  `;
 
-        // route actions
-        switch (action) {
-          case 'open':
-            ctxOpen(folder);
-            break;
-          case 'pin':
-            ctxTogglePin(folder);
-            break;
-          case 'rename':
-            ctxRename(folder);
-            break;
-          case 'copy':
-            ctxCopyLink(folder);
-            break;
-          case 'download':
-            ctxDownload(folder);
-            break;
-          case 'delete':
-            ctxDelete(folder);
-            break;
-          default:
-            break;
-        }
-      });
-
-      document.body.appendChild(menuEl);
-      return menuEl;
+  // handle clicks (event delegation)
+  menuEl.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-action]');
+    if (!btn) return;
+    ev.stopPropagation();
+    ev.preventDefault();
+    const action = btn.getAttribute('data-action');
+    const folder = ctxFolder.value;
+    if (!folder) {
+      hideContextMenu();
+      return;
     }
 
-    function showContextMenuAt(x, y, folder) {
-      // create if missing
-      const el = createContextMenuDom();
-      ctxFolder.value = folder;
-      // update pin label/icon depending on folder.isPinned
-      const pinBtn = el.querySelector('.ctx-pin');
-      if (folder && folder.isPinned) {
-        pinBtn.innerHTML = `<i class="bi bi-pin-fill" style="margin-right:8px"></i><span>Открепить</span>`;
-      } else {
-        pinBtn.innerHTML = `<i class="bi bi-pin" style="margin-right:8px"></i><span>Закрепить</span>`;
-      }
+    switch (action) {
+      case 'open': ctxOpen(folder); break;
+      case 'pin': ctxTogglePin(folder); break;
+      case 'download': ctxDownload(folder); break;
+      case 'delete': ctxDelete(folder); break;
+      case 'rename': ctxRename(folder); break;
+      case 'copy': ctxCopyLink(folder); break;
+      default: break;
+    }
+  });
 
-      el.style.display = 'block';
-      el.style.left = x + 'px';
-      el.style.top = y + 'px';
+  // keyboard nav inside menu
+  menuEl.addEventListener('keydown', (ev) => {
+    const items = Array.from(menuEl.querySelectorAll('.ctx-item'));
+    const idx = items.indexOf(document.activeElement);
+    if (ev.key === 'ArrowDown') {
+      ev.preventDefault();
+      const next = items[(idx + 1) % items.length];
+      next.focus();
+    } else if (ev.key === 'ArrowUp') {
+      ev.preventDefault();
+      const prev = items[(idx - 1 + items.length) % items.length];
+      prev.focus();
+    } else if (ev.key === 'Home') {
+      ev.preventDefault();
+      items[0].focus();
+    } else if (ev.key === 'End') {
+      ev.preventDefault();
+      items[items.length - 1].focus();
+    } else if (ev.key === 'Escape') {
+      ev.preventDefault();
+      hideContextMenu();
+    } else if (ev.key === 'Enter' || ev.key === ' ') {
+      ev.preventDefault();
+      document.activeElement?.click();
+    }
+  });
 
-      // adjust if out of viewport
-      const rect = el.getBoundingClientRect();
-      const pad = 8;
-      if (rect.right > window.innerWidth) {
-        el.style.left = Math.max(pad, window.innerWidth - rect.width - pad) + 'px';
-      }
-      if (rect.bottom > window.innerHeight) {
-        el.style.top = Math.max(pad, window.innerHeight - rect.height - pad) + 'px';
-      }
+  document.body.appendChild(menuEl);
+  return menuEl;
+}
 
-      // attach outside listener and keyboard (deferred to avoid immediate close)
-      setTimeout(() => {
-        outsideListener = (ev) => {
-          if (!el.contains(ev.target)) hideContextMenu();
-        };
-        document.addEventListener('pointerdown', outsideListener, { capture: true });
+function showContextMenuAt(x, y, folder) {
+  const el = createContextMenuDom();
+  ctxFolder.value = folder;
 
-        scrollListener = () => hideContextMenu();
-        window.addEventListener('scroll', scrollListener, { passive: true, capture: true });
+  // update pin label/icon
+  const pinBtn = el.querySelector('[data-action="pin"]');
+  if (pinBtn) {
+    const icon = pinBtn.querySelector('i');
+    const label = pinBtn.querySelector('.ctx-label');
+    if (folder && folder.isPinned) {
+      if (icon) icon.className = 'bi bi-pin-fill';
+      if (label) label.textContent = 'Открепить';
+    } else {
+      if (icon) icon.className = 'bi bi-pin';
+      if (label) label.textContent = 'Закрепить';
+    }
+  }
 
-        keyListener = (ev) => {
-          if (ev.key === 'Escape') hideContextMenu();
-          // support opening via keyboard for focused folder card (ContextMenu or Shift+F10)
-          if (
-            (ev.key === 'ContextMenu' || (ev.shiftKey && ev.key === 'F10')) &&
-            document.activeElement
-          ) {
-            const elFocus = document.activeElement;
-            const folderName = elFocus.getAttribute?.('data-folder-name');
-            if (folderName) {
-              const f = folders.value.find((ff) => ff.name === folderName);
-              if (f) {
-                const rect2 = elFocus.getBoundingClientRect();
-                showContextMenuAt(rect2.left + 8, rect2.bottom - 8, f);
-              }
-            }
+  // set position (only here we set inline left/top — that's OK)
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  el.setAttribute('aria-hidden', 'false');
+  el.classList.add('visible');
+
+  // ensure not going out of viewport
+  const rect = el.getBoundingClientRect();
+  const pad = 8;
+  if (rect.right > window.innerWidth) {
+    const newLeft = Math.max(pad, window.innerWidth - rect.width - pad);
+    el.style.left = newLeft + 'px';
+  }
+  if (rect.bottom > window.innerHeight) {
+    const newTop = Math.max(pad, window.innerHeight - rect.height - pad);
+    el.style.top = newTop + 'px';
+  }
+
+  // attach outside listener and keyboard (deferred to avoid immediate close)
+  setTimeout(() => {
+    outsideListener = (ev) => {
+      if (!el.contains(ev.target)) hideContextMenu();
+    };
+    document.addEventListener('pointerdown', outsideListener, { capture: true });
+
+    scrollListener = () => hideContextMenu();
+    window.addEventListener('scroll', scrollListener, { passive: true, capture: true });
+
+    // single key listener for global keys (Escape handled by menu too)
+    keyListener = (ev) => {
+      if (ev.key === 'Escape') hideContextMenu();
+
+      // support ContextMenu/Shift+F10 on focused folder card
+      if ((ev.key === 'ContextMenu' || (ev.shiftKey && ev.key === 'F10')) && document.activeElement) {
+        const elFocus = document.activeElement;
+        const folderName = elFocus.getAttribute?.('data-folder-name');
+        if (folderName) {
+          const f = folders.value.find((ff) => ff.name === folderName);
+          if (f) {
+            const rect2 = elFocus.getBoundingClientRect();
+            showContextMenuAt(rect2.left + 8, rect2.bottom - 8, f);
           }
-        };
-        window.addEventListener('keydown', keyListener);
-      }, 0);
-    }
+        }
+      }
+    };
+    window.addEventListener('keydown', keyListener);
 
-    function hideContextMenu() {
-      if (!menuEl) return;
-      menuEl.style.display = 'none';
-      ctxFolder.value = null;
-      try {
-        if (outsideListener)
-          document.removeEventListener('pointerdown', outsideListener, { capture: true });
-      } catch (e) {}
-      outsideListener = null;
-      try {
-        if (scrollListener) window.removeEventListener('scroll', scrollListener, { capture: true });
-      } catch (e) {}
-      scrollListener = null;
-      try {
-        if (keyListener) window.removeEventListener('keydown', keyListener);
-      } catch (e) {}
-      keyListener = null;
+    // focus first item for keyboard users
+    const first = el.querySelector('.ctx-item');
+    if (first) {
+      // mark keyboard usage (for focus styling)
+      el.setAttribute('data-keyboard', 'true');
+      first.focus();
     }
+  }, 0);
+}
+
+function hideContextMenu() {
+  if (!menuEl) return;
+  menuEl.classList.remove('visible');
+  menuEl.setAttribute('aria-hidden', 'true');
+  ctxFolder.value = null;
+
+  try {
+    if (outsideListener) document.removeEventListener('pointerdown', outsideListener, { capture: true });
+  } catch (e) {}
+  outsideListener = null;
+
+  try {
+    if (scrollListener) window.removeEventListener('scroll', scrollListener, { capture: true });
+  } catch (e) {}
+  scrollListener = null;
+
+  try {
+    if (keyListener) window.removeEventListener('keydown', keyListener);
+  } catch (e) {}
+  keyListener = null;
+
+  // small delay then hide to allow transition (optional)
+  setTimeout(() => {
+    if (menuEl && !menuEl.classList.contains('visible')) {
+      menuEl.style.left = '';
+      menuEl.style.top = '';
+      // keep in DOM for reuse
+    }
+  }, 200);
+}
+
 
     // -----------------------
     // Context actions routed from menu (use existing helpers)
@@ -582,6 +791,36 @@ createApp({
     async function ctxTogglePin(folder) {
       await togglePin(folder);
       hideContextMenu();
+    }
+
+    const generateRandomFolders = async () => {
+      try {
+        const randomPrefix = 'folder_' + Math.random().toString(36).substring(2, 8);
+        
+        const response = await fetch('data/api/api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'createFolders',
+            count: 5,
+            prefix: randomPrefix
+          })
+        })
+        
+        const result = await response.json()
+        if (result.success) {
+          notifier.success({
+            message: 'Папки успешно созданы!'
+          });
+
+          setTimeout(() => window.location.reload(), 750);
+        } else {
+          alert('Ошибка: ' + result.error)
+        }
+      } catch (error) {
+        console.error('Ошибка:', error)
+        alert('Ошибка при создании папок')
+      }
     }
 
     function ctxOpen(folder) {
@@ -743,6 +982,10 @@ createApp({
 
     onMounted(async () => {
       // restore settings
+      const saved = localStorage.getItem('showDbButton')
+      if (saved !== null) {
+        showDbButton.value = saved === 'true'
+      }
       try {
         const raw = localStorage.getItem('efm_settings');
         if (raw) {
@@ -820,6 +1063,10 @@ createApp({
           v === 'auto' ? calculateOptimalItemsPerPage() : settings.value.perPageValue;
       }
     );
+    
+    watch(showDbButton, (newValue) => {
+      localStorage.setItem('showDbButton', newValue);
+    });
     // -----------------------
     // RETURN (to template)
     // -----------------------
@@ -885,7 +1132,10 @@ createApp({
       applySettings,
       onRightClickFolder,
       filterFolders,
-      showDbButton
+      showDbButton,
+      generateRandomFolders,
+      ProjectStatus,
+      toggleSidebar
     };
   },
 }).mount('#app');
