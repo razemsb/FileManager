@@ -38,6 +38,12 @@
     /* semantic aliases used by base */
     --primary: var(--red);
     --accent: var(--gold);
+
+    --ctx-bg: linear-gradient(180deg, rgba(8,14,26,0.97), rgba(4,10,18,0.985));
+    --ctx-color: var(--ink);
+    --ctx-accent: var(--red);
+    --ctx-hover-bg: rgba(74,134,168,0.08);
+    --ctx-hover-color: var(--ink);
 }
 
 /* backdrop: чуть светлее, мягче */

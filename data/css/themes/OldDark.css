@@ -32,6 +32,14 @@
   --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
   --shadow-glow: 0 0 0 4px rgba(108, 142, 255, 0.15);
   --glass-bg: rgba(30, 41, 59, 0.7);
+
+  --ctx-bg: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  --ctx-color: #f1f5f9; /* основной текст */
+  --ctx-accent: #6c8eff; /* твой primary */
+  --ctx-hover-bg: rgba(108, 142, 255, 0.12); /* при наведении */
+  --ctx-hover-color: #ffffff; /* яркий контрастный */
+  --ctx-border: 1px solid rgba(108, 142, 255, 0.25);
+  --ctx-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
 }
 
 /* === BODY BG === */
@@ -224,3 +232,4 @@ body::after {
 input[type="number"] {
   background: var(--cloud) !important;
 }
+

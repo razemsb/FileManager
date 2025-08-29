@@ -218,7 +218,6 @@ createApp({
       ],
       custom: [
         { id: 'NeoTokyo', label: 'Neo Tokyo' },
-        { id: 'HelloKitty', label: 'Hello Kitty'},
         { id: 'Aurora', label: 'Aurora'},
         { id: 'GithubDark', label: 'Github Dark'}
       ],
@@ -234,12 +233,9 @@ createApp({
       ...themes.value.custom,
     ]);
 
-    const theme = ref('japan');
+    const theme = ref('NeoTokyo');
     const selectedThemeSetting = ref(theme.value);
 
-    // -----------------------
-    // CONTEXT MENU (DOM-created fallback)
-    // -----------------------
     let menuEl = null; // DOM node for menu (created on mount)
     let outsideListener = null;
     let keyListener = null;
@@ -267,8 +263,8 @@ createApp({
 
       if (aspectRatio >= 1.7 && aspectRatio <= 1.8) {
         if (screenWidth >= 3840) return 32;
-        if (screenWidth >= 2560) return 35;
-        if (screenWidth >= 1920) return 16;
+        if (screenWidth >= 2560) return 28;
+        if (screenWidth >= 1920) return 24;
         if (screenWidth >= 1600) return 20;
         return 16;
       }
@@ -334,7 +330,13 @@ createApp({
       } catch (err) {
         error.value = err.message || String(err);
         folders.value = [];
-        console.error('Ошибка загрузки папок:', err);
+        notifier.error({
+          title: 'Ошибка загрузки папок.',
+          message: 'Ошибка см консоль.',
+          autoClose: false,
+          showClose: true
+        });
+        console.error(err);
       } finally {
         isLoading.value = false;
       }
@@ -353,6 +355,12 @@ createApp({
           throw new Error(response.data?.error || 'Ошибка при изменении статуса');
         await loadFolders();
       } catch (err) {
+        notifier.error({
+          title: 'Ошибка закрепления.',
+          message: 'Ошибка см консоль.',
+          autoClose: false,
+          showClose: true
+        });
         console.error('togglePin error:', err);
       } finally {
         isLoading.value = false;
@@ -365,6 +373,12 @@ createApp({
         await axios.post('data/api/api.php', { action: 'addRecent', folder: folder.name });
         window.location.href = folder.name;
       } catch (err) {
+        notifier.error({
+          title: 'Ошибка открытия папки.',
+          message: 'Ошибка см консоль.',
+          autoClose: false,
+          showClose: true
+        });
         console.error('openFolder error:', err);
       }
     };
@@ -399,6 +413,12 @@ createApp({
               throw new Error('ZIP_ARCHIVE_ERROR');
             }
           } catch (e) {
+            notifier.error({
+              title: 'Ошибка скачивания.',
+              message: 'Ошибка см консоль.',
+              autoClose: false,
+              showClose: true
+            });
             console.error('Не удалось прочитать ошибку:', e);
           }
 

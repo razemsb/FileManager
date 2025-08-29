@@ -20,6 +20,15 @@
 
     --bg-vertical: 36%;
     --bg-overlay: rgba(245, 240, 242, 0.4);
+
+    --ctx-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.985), rgba(250, 248, 249, 0.975));
+    --ctx-color: var(--ink);
+    --ctx-accent: var(--accent-pink);
+    --ctx-hover-bg: rgba(212, 141, 171, 0.08);  /* лёгкий розовый хайлайт */
+    --ctx-hover-color: var(--ink);
+    --ctx-border: 1px solid rgba(34, 37, 42, 0.08);
+    --ctx-shadow: 0 8px 22px rgba(36, 37, 40, 0.08),
+                  0 2px 6px rgba(36, 37, 40, 0.04);
 }
 
 body {
