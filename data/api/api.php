@@ -1,7 +1,36 @@
 <?php
 header('Content-Type: application/json');
 define('BASE_DIR', __DIR__ . '/../..');
-define('DATA_DIR', BASE_DIR . '/data/files');
+define('DATA_DIR', BASE_DIR . '/data/memory');
+define('DATA_FILE', DATA_DIR . '/folders.json');
+
+function loadData()
+{
+    if (!file_exists(DATA_FILE)) {
+        return ['pinned' => [], 'recent' => []];
+    }
+
+    $json = file_get_contents(DATA_FILE);
+    $data = json_decode($json, true);
+
+    if (!is_array($data)) {
+        return ['pinned' => [], 'recent' => []];
+    }
+
+    // чтобы точно были оба ключа
+    return [
+        'pinned' => $data['pinned'] ?? [],
+        'recent' => $data['recent'] ?? []
+    ];
+}
+
+function saveData($data)
+{
+    if (!is_dir(DATA_DIR)) {
+        mkdir(DATA_DIR, 0755, true);
+    }
+    file_put_contents(DATA_FILE, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+}
 
 function getFoldersList()
 {
@@ -15,30 +44,28 @@ function getFoldersList()
 
 function getPinnedFolders()
 {
-    $file = DATA_DIR . '/pinned_folders.txt';
-    if (!file_exists($file))
-        return [];
-    return array_filter(explode("\n", file_get_contents($file)));
+    $data = loadData();
+    return $data['pinned'];
 }
 
 function getRecentFolders()
 {
-    $file = DATA_DIR . '/recent_folders.txt';
-    if (!file_exists($file))
-        return [];
-    return array_filter(explode("\n", file_get_contents($file)));
+    $data = loadData();
+    return $data['recent'];
 }
 
 function savePinnedFolders($folders)
 {
-    $file = DATA_DIR . '/pinned_folders.txt';
-    file_put_contents($file, implode("\n", $folders));
+    $data = loadData();
+    $data['pinned'] = array_values($folders);
+    saveData($data);
 }
 
 function saveRecentFolders($folders)
 {
-    $file = DATA_DIR . '/recent_folders.txt';
-    file_put_contents($file, implode("\n", $folders));
+    $data = loadData();
+    $data['recent'] = array_values($folders);
+    saveData($data);
 }
 
 function downloadFolder($folderName)
