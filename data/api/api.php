@@ -17,7 +17,6 @@ function loadData()
         return ['pinned' => [], 'recent' => []];
     }
 
-    // чтобы точно были оба ключа
     return [
         'pinned' => $data['pinned'] ?? [],
         'recent' => $data['recent'] ?? []
@@ -144,7 +143,7 @@ function downloadFolder($folderName)
     exit;
 }
 
-function createTestFolders($count = 5, $prefix = 'test_folder')
+function createTestFolders($count = 4, $prefix = 'folder')
 {
     $basePath = realpath(BASE_DIR);
     $createdFolders = [];
@@ -207,13 +206,13 @@ try {
         if ($action === 'createFolders') {
             $count = $input['count'] ?? 5;
             $prefix = $input['prefix'] ?? 'test_folder';
-            
-            $count = min(max(1, (int)$count), 50);
-            
+
+            $count = min(max(1, (int) $count), 50);
+
             $createdFolders = createTestFolders($count, $prefix);
-            
+
             echo json_encode([
-                'success' => true, 
+                'success' => true,
                 'message' => 'Создано папок: ' . count($createdFolders),
                 'folders' => $createdFolders
             ]);

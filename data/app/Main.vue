@@ -1,182 +1,183 @@
 class PopupNotifier {
   constructor(options = {}) {
-      this.settings = {
-          theme: 'light',
-          colors: {
-              success: '#22c55e',
-              error: '#ef4444',
-              info: '#3b82f6',
-              warning: '#facc15'
-          },
-          position: 'bottom-right',
-          duration: 3000,
-          maxNotifications: 5,
-          showTime: true,
-          showClose: true,
-          autoClose: true,
-          ...options
-      };
+    this.settings = {
+      theme: 'light',
+      colors: {
+        success: '#22c55e',
+        error: '#ef4444',
+        info: '#3b82f6',
+        warning: '#facc15',
+      },
+      position: 'bottom-right',
+      duration: 3000,
+      maxNotifications: 5,
+      showTime: true,
+      showClose: true,
+      autoClose: true,
+      ...options,
+    };
 
-      this.icons = {
-          success: '<i class="fa-solid fa-circle-check"></i>',
-          error: '<i class="fa-solid fa-circle-xmark"></i>',
-          info: '<i class="fa-solid fa-circle-info"></i>',
-          warning: '<i class="fa-solid fa-triangle-exclamation"></i>'
-      };
+    this.icons = {
+      success: '<i class="fa-solid fa-circle-check"></i>',
+      error: '<i class="fa-solid fa-circle-xmark"></i>',
+      info: '<i class="fa-solid fa-circle-info"></i>',
+      warning: '<i class="fa-solid fa-triangle-exclamation"></i>',
+    };
 
-      this.initTheme();
-      this.initContainers();
+    this.initTheme();
+    this.initContainers();
   }
 
   initTheme() {
-      document.body.classList.add(`popupx-theme-${this.settings.theme}`);
-      
-      const root = document.documentElement;
-      root.style.setProperty('--popup-success', this.settings.colors.success);
-      root.style.setProperty('--popup-error', this.settings.colors.error);
-      root.style.setProperty('--popup-info', this.settings.colors.info);
-      root.style.setProperty('--popup-warning', this.settings.colors.warning);
+    document.body.classList.add(`popupx-theme-${this.settings.theme}`);
+
+    const root = document.documentElement;
+    root.style.setProperty('--popup-success', this.settings.colors.success);
+    root.style.setProperty('--popup-error', this.settings.colors.error);
+    root.style.setProperty('--popup-info', this.settings.colors.info);
+    root.style.setProperty('--popup-warning', this.settings.colors.warning);
   }
 
   initContainers() {
-      const positions = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
-      positions.forEach(pos => {
-          const container = document.createElement('div');
-          container.id = `popup-container-${pos}`;
-          container.className = `popup-container ${pos}`;
-          document.body.appendChild(container);
-      });
+    const positions = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+    positions.forEach((pos) => {
+      const container = document.createElement('div');
+      container.id = `popup-container-${pos}`;
+      container.className = `popup-container ${pos}`;
+      document.body.appendChild(container);
+    });
   }
 
   setTheme(theme) {
-      this.settings.theme = theme;
-      document.body.classList.remove('popupx-theme-light', 'popupx-theme-dark');
-      document.body.classList.add(`popupx-theme-${theme}`);
+    this.settings.theme = theme;
+    document.body.classList.remove('popupx-theme-light', 'popupx-theme-dark');
+    document.body.classList.add(`popupx-theme-${theme}`);
   }
 
   setColors(colors) {
-      this.settings.colors = {...this.settings.colors, ...colors};
-      this.initTheme();
+    this.settings.colors = { ...this.settings.colors, ...colors };
+    this.initTheme();
   }
 
   show({
-      type = 'info',
-      message = '',
-      title = '',
-      duration = this.settings.duration,
-      position = this.settings.position,
-      showTime = this.settings.showTime,
-      showClose = this.settings.showClose,
-      autoClose = this.settings.autoClose,
-      color = null
+    type = 'info',
+    message = '',
+    title = '',
+    duration = this.settings.duration,
+    position = this.settings.position,
+    showTime = this.settings.showTime,
+    showClose = this.settings.showClose,
+    autoClose = this.settings.autoClose,
+    color = null,
   } = {}) {
-      const container = document.getElementById(`popup-container-${position}`);
-      if (!container) return;
+    const container = document.getElementById(`popup-container-${position}`);
+    if (!container) return;
 
-      if (container.children.length >= this.settings.maxNotifications) {
-          container.removeChild(container.children[0]);
-      }
+    if (container.children.length >= this.settings.maxNotifications) {
+      container.removeChild(container.children[0]);
+    }
 
-      const currentTime = this.getCurrentTime();
-      const popupId = `popup-${Date.now()}`;
-      const customColor = color || this.settings.colors[type];
+    const currentTime = this.getCurrentTime();
+    const popupId = `popup-${Date.now()}`;
+    const customColor = color || this.settings.colors[type];
 
-      const popup = document.createElement('div');
-      popup.id = popupId;
-      popup.className = `popup popup-${type}`;
-      popup.style.setProperty('--popup-color', customColor);
-      popup.setAttribute('role', 'alert');
-      popup.setAttribute('aria-live', 'assertive');
+    const popup = document.createElement('div');
+    popup.id = popupId;
+    popup.className = `popup popup-${type}`;
+    popup.style.setProperty('--popup-color', customColor);
+    popup.setAttribute('role', 'alert');
+    popup.setAttribute('aria-live', 'assertive');
 
-      popup.innerHTML = `
+    popup.innerHTML = `
           <div class="popup-icon">${this.icons[type] || this.icons.info}</div>
           <div class="popup-content">
               ${title ? `<div class="popup-title">${title}</div>` : ''}
               <div class="popup-message">${message}</div>
               ${showTime ? `<div class="popup-time">${currentTime}</div>` : ''}
           </div>
-          ${showClose ? `
+          ${
+            showClose
+              ? `
               <button class="popup-close" aria-label="Закрыть уведомление">
                   <i class="fa-solid fa-xmark"></i>
               </button>
-          ` : ''}
+          `
+              : ''
+          }
       `;
 
-      container.appendChild(popup);
-      setTimeout(() => popup.classList.add('show'), 10);
+    container.appendChild(popup);
+    setTimeout(() => popup.classList.add('show'), 10);
 
-      const closePopup = () => {
-          popup.classList.remove('show');
-          popup.classList.add('hide');
-          popup.addEventListener('transitionend', () => popup.remove());
-      };
+    const closePopup = () => {
+      popup.classList.remove('show');
+      popup.classList.add('hide');
+      popup.addEventListener('transitionend', () => popup.remove());
+    };
 
-      let timeoutId;
+    let timeoutId;
 
+    if (autoClose) {
+      timeoutId = setTimeout(closePopup, duration);
+    }
+
+    const closeBtn = popup.querySelector('.popup-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        if (timeoutId) clearTimeout(timeoutId);
+        closePopup();
+      });
+    }
+
+    popup.addEventListener('mouseenter', () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    });
+
+    popup.addEventListener('mouseleave', () => {
       if (autoClose) {
-          timeoutId = setTimeout(closePopup, duration);
+        timeoutId = setTimeout(closePopup, duration);
       }
+    });
 
-      const closeBtn = popup.querySelector('.popup-close');
-      if (closeBtn) {
-          closeBtn.addEventListener('click', () => {
-              if (timeoutId) clearTimeout(timeoutId);
-              closePopup();
-          });
-      }
-
-      popup.addEventListener('mouseenter', () => {
-          if (timeoutId) clearTimeout(timeoutId);
-      });
-
-      popup.addEventListener('mouseleave', () => {
-          if (autoClose) {
-              timeoutId = setTimeout(closePopup, duration);
-          }
-      });
-
-      return {
-          close: () => {
-              if (timeoutId) clearTimeout(timeoutId);
-              closePopup();
-          },
-          update: (newOptions) => {
-
-          }
-      };
+    return {
+      close: () => {
+        if (timeoutId) clearTimeout(timeoutId);
+        closePopup();
+      },
+      update: (newOptions) => {},
+    };
   }
 
   getCurrentTime() {
-      const now = new Date();
-      return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const now = new Date();
+    return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
   success(options) {
-      return this.show({ ...options, type: 'success' });
+    return this.show({ ...options, type: 'success' });
   }
 
   error(options) {
-      return this.show({ ...options, type: 'error' });
+    return this.show({ ...options, type: 'error' });
   }
 
   info(options) {
-      return this.show({ ...options, type: 'info' });
+    return this.show({ ...options, type: 'info' });
   }
 
   warning(options) {
-      return this.show({ ...options, type: 'warning' });
+    return this.show({ ...options, type: 'warning' });
   }
 }
 
-const notifier = new PopupNotifier();
+const notifier = new PopupNotifier({
+  theme: 'dark'
+});
 
 const { createApp, ref, computed, onMounted, nextTick, watch, onBeforeUnmount } = Vue;
 
 createApp({
   setup() {
-    // -----------------------
-    // STATE
-    // -----------------------
     const folders = ref([]);
     const searchQuery = ref('');
     const isLoading = ref(false);
@@ -192,7 +193,16 @@ createApp({
     const showFolderCreator = ref(false);
     const testFolderCount = ref(50);
     const testFolderPrefix = ref('test_folder');
-    const ProjectStatus = ref('Productionn');
+    const ProjectStatus = ref('Production');
+    const categories = ref([]);
+    const isCategoryModalOpen = ref(false);
+    const categoryModalTargetFolder = ref(null);
+    const newCategoryName = ref('');
+    const showCategoriesPanel = ref(false);
+    const showCategoryChips = ref(true);
+    const initialVisibleCategories = 5;
+    const showAllCategories = ref(false);
+    const selectedCategoryId = ref(null);
 
     const settings = ref({
       perPageMode: 'auto',
@@ -205,12 +215,8 @@ createApp({
       message: '',
     });
 
-    const categories = ref({});
-
     const themes = ref({
-      light: [
-        { id: 'japan', label: 'Japan' }
-      ],
+      light: [{ id: 'japan', label: 'Japan' }],
       dark: [
         { id: 'china', label: 'China' },
         { id: 'MidNightBlue', label: 'Midnight Blue' },
@@ -218,13 +224,14 @@ createApp({
       ],
       custom: [
         { id: 'NeoTokyo', label: 'Neo Tokyo' },
-        { id: 'Aurora', label: 'Aurora'},
-        { id: 'GithubDark', label: 'Github Dark'}
+        { id: 'Aurora', label: 'Aurora' },
+        { id: 'GithubDark', label: 'Github Dark' },
+        { id: 'Anarchy', label: 'Anarchy' },
       ],
     });
 
-    function toggleSidebar() { 
-      sidebarCollapsed.value = !sidebarCollapsed.value; 
+    function toggleSidebar() {
+      sidebarCollapsed.value = !sidebarCollapsed.value;
     }
 
     const flatThemes = computed(() => [
@@ -236,16 +243,13 @@ createApp({
     const theme = ref('NeoTokyo');
     const selectedThemeSetting = ref(theme.value);
 
-    let menuEl = null; // DOM node for menu (created on mount)
+    let menuEl = null;
     let outsideListener = null;
     let keyListener = null;
     let scrollListener = null;
-    // track currently opened folder object
+
     const ctxFolder = ref(null);
 
-    // -----------------------
-    // HELPERS
-    // -----------------------
     function debounce(fn, wait = 160) {
       let timeout;
       return function () {
@@ -279,9 +283,6 @@ createApp({
       return 12;
     }
 
-    // -----------------------
-    // TOOLTIP helpers (Bootstrap)
-    // -----------------------
     const initTooltips = () => {
       try {
         destroyTooltips();
@@ -289,18 +290,53 @@ createApp({
         tooltipInstances.value = Array.from(tooltipElements).map(
           (el) => new bootstrap.Tooltip(el, { placement: 'bottom', trigger: 'hover' })
         );
-      } catch (err) {
-        // silently ignore if bootstrap not present
-      }
+      } catch (err) {}
     };
+
+    function selectCategory(catId) {
+      selectedCategoryId.value = catId;
+      activeFilter.value = 'categories';
+      currentPage.value = 1;
+    }
+
+    function toggleShowAllCategories() {
+      showAllCategories.value = !showAllCategories.value;
+    }
+
+    const visibleCategories = computed(() => {
+      if (showAllCategories.value) return categories.value;
+      return categories.value.slice(0, initialVisibleCategories);
+    });
+
+    const filteredFolders = computed(() => {
+      let result = folders.value.slice();
+
+      if (activeFilter.value === 'pinned') {
+        result = result.filter((f) => f.isPinned);
+      } else if (activeFilter.value === 'recent') {
+        result = result.filter((f) => f.isRecent);
+      } else if (activeFilter.value === 'categories' && selectedCategoryId.value) {
+        const cat = categories.value.find((c) => c.id === selectedCategoryId.value);
+        if (cat && Array.isArray(cat.folders)) {
+          result = result.filter((f) => cat.folders.includes(f.name));
+        } else {
+          result = [];
+        }
+      }
+
+      if (searchQuery.value) {
+        const q = searchQuery.value.toLowerCase();
+        result = result.filter((f) => f.name.toLowerCase().includes(q));
+      }
+
+      return result;
+    });
 
     const destroyTooltips = () => {
       tooltipInstances.value.forEach((t) => {
         try {
           t.dispose();
-        } catch (e) {
-          /* noop */
-        }
+        } catch (e) {}
       });
       tooltipInstances.value = [];
     };
@@ -312,9 +348,158 @@ createApp({
       });
     };
 
-    // -----------------------
-    // API / folders
-    // -----------------------
+    async function loadCategories() {
+      try {
+        const resp = await axios.get('data/api/categories.php?action=getCategories');
+        if (resp.data?.success) {
+          categories.value = resp.data.data || [];
+        } else {
+          categories.value = [];
+          console.warn('categories load failed', resp.data);
+        }
+      } catch (e) {
+        categories.value = [];
+        console.error('loadCategories error', e);
+      }
+    }
+
+    function openCategoryModalForFolder(folder = null) {
+      categoryModalTargetFolder.value = folder || null;
+      isCategoryModalOpen.value = true;
+      newCategoryName.value = '';
+    }
+
+    function closeCategoryModal() {
+      isCategoryModalOpen.value = false;
+      categoryModalTargetFolder.value = null;
+      newCategoryName.value = '';
+    }
+
+    async function createCategory() {
+      const name = (newCategoryName.value || '').trim();
+      if (!name) {
+        notifier.info({ message: 'Введи имя категории' });
+        return;
+      }
+      try {
+        const resp = await axios.post('data/api/categories.php', {
+          action: 'createCategory',
+          name: name,
+        });
+        if (resp.data?.success) {
+          notifier.success({ message: 'Категория создана' });
+          await loadCategories();
+          newCategoryName.value = '';
+        } else {
+          notifier.error({ message: resp.data.error || 'Ошибка создания' });
+        }
+      } catch (e) {
+        console.error(e);
+        notifier.error({ message: 'Ошибка при создании категории' });
+      }
+    }
+
+    async function addFolderToCategory(categoryId, folderName) {
+      if (!categoryId || !folderName) return;
+      try {
+        const resp = await axios.post('data/api/categories.php', {
+          action: 'addFolder',
+          categoryId,
+          folderName,
+        });
+        if (resp.data?.success) {
+          notifier.success({ message: 'Папка добавлена в категорию' });
+          await loadCategories();
+          closeCategoryModal();
+          hideContextMenu();
+        } else {
+          notifier.error({ message: resp.data.error || 'Ошибка добавления' });
+        }
+      } catch (e) {
+        console.error(e);
+        notifier.error({ message: 'Ошибка при добавлении в категорию' });
+      }
+    }
+
+    async function removeFolderFromCategory(categoryId, folderName) {
+      if (!categoryId || !folderName) return;
+      try {
+        const resp = await axios.post('data/api/categories.php', {
+          action: 'removeFolder',
+          categoryId,
+          folderName,
+        });
+        if (resp.data?.success) {
+          notifier.success({ message: 'Папка убрана из категории' });
+          await loadCategories();
+          closeCategoryModal();
+          hideContextMenu();
+        } else {
+          notifier.error({ message: resp.data.error || 'Ошибка удаления из категории' });
+        }
+      } catch (e) {
+        console.error(e);
+        notifier.error({ message: 'Ошибка при удалении из категории' });
+      }
+    }
+
+    function addSelectedFolderToCategory(categoryId) {
+      const folder = categoryModalTargetFolder.value;
+      if (!folder) {
+        notifier.info({ message: 'Нужно открыть модалку через контекстное меню на папке' });
+        return;
+      }
+      addFolderToCategory(categoryId, folder.name);
+    }
+
+    function ctxAddToCategory(folder) {
+      openCategoryModalForFolder(folder);
+      hideContextMenu();
+    }
+
+    async function deleteCategory(categoryId) {
+      if (!confirm('Удалить категорию?')) return;
+      try {
+        const resp = await axios.post('data/api/categories.php', {
+          action: 'deleteCategory',
+          categoryId,
+        });
+        if (resp.data?.success) {
+          notifier.success({ message: 'Категория удалена' });
+          await loadCategories();
+        } else {
+          notifier.error({ message: resp.data.error || 'Ошибка удаления' });
+        }
+      } catch (e) {
+        console.error(e);
+        notifier.error({ message: 'Ошибка при удалении категории' });
+      }
+    }
+
+    function openRenameCategoryPrompt(cat) {
+      const newName = prompt('Новое имя категории', cat.name);
+      if (!newName || !newName.trim()) return;
+      renameCategory(cat.id, newName.trim());
+    }
+
+    async function renameCategory(categoryId, newName) {
+      try {
+        const resp = await axios.post('data/api/categories.php', {
+          action: 'renameCategory',
+          categoryId,
+          newName,
+        });
+        if (resp.data?.success) {
+          notifier.success({ message: 'Переименовано' });
+          await loadCategories();
+        } else {
+          notifier.error({ message: resp.data.error || 'Ошибка' });
+        }
+      } catch (e) {
+        console.error(e);
+        notifier.error({ message: 'Ошибка при переименовании' });
+      }
+    }
 
     const loadFolders = async () => {
       try {
@@ -334,7 +519,7 @@ createApp({
           title: 'Ошибка загрузки папок.',
           message: 'Ошибка см консоль.',
           autoClose: false,
-          showClose: true
+          showClose: true,
         });
         console.error(err);
       } finally {
@@ -359,7 +544,7 @@ createApp({
           title: 'Ошибка закрепления.',
           message: 'Ошибка см консоль.',
           autoClose: false,
-          showClose: true
+          showClose: true,
         });
         console.error('togglePin error:', err);
       } finally {
@@ -377,7 +562,7 @@ createApp({
           title: 'Ошибка открытия папки.',
           message: 'Ошибка см консоль.',
           autoClose: false,
-          showClose: true
+          showClose: true,
         });
         console.error('openFolder error:', err);
       }
@@ -417,7 +602,7 @@ createApp({
               title: 'Ошибка скачивания.',
               message: 'Ошибка см консоль.',
               autoClose: false,
-              showClose: true
+              showClose: true,
             });
             console.error('Не удалось прочитать ошибку:', e);
           }
@@ -507,40 +692,36 @@ createApp({
       };
     };
 
-    // Функция для закрытия модалки
     const closeErrorModal = () => {
       errorModal.value.isOpen = false;
     };
 
-    // Функция для копирования информации об ошибке
     const copyErrorToClipboard = async () => {
       const errorText = `Ошибка ZipArchive: ${errorModal.value.title}\n\n${errorModal.value.message}`;
 
       try {
         await navigator.clipboard.writeText(errorText);
-        // Можно показать уведомление об успешном копировании
+
         alert('Информация об ошибке скопирована в буфер обмена');
       } catch (err) {
         console.error('Не удалось скопировать текст:', err);
       }
     };
 
-    // -----------------------
-    // FILTERS / PAGINATION
-    // -----------------------
-    const filteredFolders = computed(() => {
-      let result = (folders.value || []).slice();
+    function applyCategoryFilter(categoryId) {
+      selectedCategoryId.value = categoryId;
+      activeFilter.value = 'categories';
+      showCategoriesPanel.value = false;
+      currentPage.value = 1;
+      updateTooltips();
+    }
 
-      if (activeFilter.value === 'pinned') result = result.filter((f) => f.isPinned);
-      else if (activeFilter.value === 'recent') result = result.filter((f) => f.isRecent);
-
-      if (searchQuery.value) {
-        const q = searchQuery.value.toLowerCase();
-        result = result.filter((f) => (f.name || '').toLowerCase().includes(q));
-      }
-
-      return result;
-    });
+    function clearCategoryFilter() {
+      selectedCategoryId.value = null;
+      activeFilter.value = 'all';
+      currentPage.value = 1;
+      updateTooltips();
+    }
 
     const totalPages = computed(() =>
       Math.max(1, Math.ceil(filteredFolders.value.length / itemsPerPage.value))
@@ -572,9 +753,6 @@ createApp({
     const pinnedCount = computed(() => (folders.value || []).filter((f) => f.isPinned).length);
     const recentCount = computed(() => (folders.value || []).filter((f) => f.isRecent).length);
 
-    // -----------------------
-    // SETTINGS / helpers (minimal)
-    // -----------------------
     const resolvedItemsPerPage = computed(() =>
       settings.value.perPageMode === 'auto'
         ? calculateOptimalItemsPerPage()
@@ -603,211 +781,342 @@ createApp({
       } catch (e) {}
     }
 
-    // -----------------------
-    // SEARCH debounce (template uses filterFolders)
-    // -----------------------
     const filterFolders = debounce(() => {
       currentPage.value = 1;
       updateTooltips();
     }, 160);
 
-    // -----------------------
-    // CONTEXT MENU: create DOM menu (robust)
-    // -----------------------
-    // replace existing createContextMenuDom / showContextMenuAt / hideContextMenu with this
+    function createContextMenuDom() {
+      if (menuEl) return menuEl;
 
-function createContextMenuDom() {
-  if (menuEl) return menuEl;
+      menuEl = document.createElement('div');
+      menuEl.className = 'efm-context-menu';
+      menuEl.setAttribute('role', 'menu');
+      menuEl.setAttribute('aria-hidden', 'true');
+      menuEl.tabIndex = -1;
 
-  // create menu container
-  menuEl = document.createElement('div');
-  menuEl.className = 'efm-context-menu';
-  menuEl.setAttribute('role', 'menu');
-  menuEl.setAttribute('aria-hidden', 'true');
-  menuEl.tabIndex = -1; 
+      menuEl.innerHTML = `
+      <button type="button" class="ctx-item" data-action="open" role="menuitem" tabindex="-1">
+        <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i><span class="ctx-label">Открыть</span>
+      </button>
+      <button type="button" class="ctx-item" data-action="pin" role="menuitem" tabindex="-1">
+        <i class="bi bi-pin" aria-hidden="true"></i><span class="ctx-label">Закрепить</span>
+      </button>
+      <button type="button" class="ctx-item" data-action="download" role="menuitem" tabindex="-1">
+        <i class="bi bi-cloud-arrow-down" aria-hidden="true"></i><span class="ctx-label">Скачать</span>
+      </button>
+    
+      <button type="button" class="ctx-item" data-action="add-to-category" role="menuitem" tabindex="-1">
+        <i class="fa-solid fa-tags" aria-hidden="true"></i><span class="ctx-label">Добавить в категорию</span>
+      </button>
+    
+      <button type="button" class="ctx-item" data-action="remove-from-category" role="menuitem" tabindex="-1">
+        <i class="bi bi-folder-x" aria-hidden="true"></i><span class="ctx-label">Убрать из категории</span>
+      </button>
+    
+      <div class="ctx-sep" role="separator"></div>
+      <button type="button" class="ctx-item danger" data-action="delete" role="menuitem" tabindex="-1" data-bs-toggle="tooltip" data-bs-placement="right" title="Осторожно, папка удалиться без возможности восстановления!">
+        <i class="bi bi-trash" aria-hidden="true"></i><span class="ctx-label">Удалить</span>
+      </button>
+    `;
 
-  // inner markup — no inline styles here
-  menuEl.innerHTML = `
-    <button type="button" class="ctx-item" data-action="open" role="menuitem" tabindex="-1">
-      <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i><span class="ctx-label">Открыть</span>
-    </button>
-    <button type="button" class="ctx-item" data-action="pin" role="menuitem" tabindex="-1">
-      <i class="bi bi-pin" aria-hidden="true"></i><span class="ctx-label">Закрепить</span>
-    </button>
-    <button type="button" class="ctx-item" data-action="download" role="menuitem" tabindex="-1">
-      <i class="bi bi-cloud-arrow-down" aria-hidden="true"></i><span class="ctx-label">Скачать</span>
-    </button>
-    <div class="ctx-sep" role="separator"></div>
-    <button type="button" class="ctx-item danger" data-action="delete" role="menuitem" tabindex="-1">
-      <i class="bi bi-trash" aria-hidden="true"></i><span class="ctx-label">Удалить</span>
-    </button>
-  `;
+      function createCategoryDropdown(categoriesList, parentBtn, folder, mode = 'add') {
+        if (!parentBtn || !folder) return;
 
-  // handle clicks (event delegation)
-  menuEl.addEventListener('click', (ev) => {
-    const btn = ev.target.closest('[data-action]');
-    if (!btn) return;
-    ev.stopPropagation();
-    ev.preventDefault();
-    const action = btn.getAttribute('data-action');
-    const folder = ctxFolder.value;
-    if (!folder) {
-      hideContextMenu();
-      return;
-    }
+        const existing = parentBtn.querySelector('.ctx-category-dropdown');
+        if (existing) existing.remove();
 
-    switch (action) {
-      case 'open': ctxOpen(folder); break;
-      case 'pin': ctxTogglePin(folder); break;
-      case 'download': ctxDownload(folder); break;
-      case 'delete': ctxDelete(folder); break;
-      case 'rename': ctxRename(folder); break;
-      case 'copy': ctxCopyLink(folder); break;
-      default: break;
-    }
-  });
+        parentBtn.classList.add('has-dropdown');
 
-  // keyboard nav inside menu
-  menuEl.addEventListener('keydown', (ev) => {
-    const items = Array.from(menuEl.querySelectorAll('.ctx-item'));
-    const idx = items.indexOf(document.activeElement);
-    if (ev.key === 'ArrowDown') {
-      ev.preventDefault();
-      const next = items[(idx + 1) % items.length];
-      next.focus();
-    } else if (ev.key === 'ArrowUp') {
-      ev.preventDefault();
-      const prev = items[(idx - 1 + items.length) % items.length];
-      prev.focus();
-    } else if (ev.key === 'Home') {
-      ev.preventDefault();
-      items[0].focus();
-    } else if (ev.key === 'End') {
-      ev.preventDefault();
-      items[items.length - 1].focus();
-    } else if (ev.key === 'Escape') {
-      ev.preventDefault();
-      hideContextMenu();
-    } else if (ev.key === 'Enter' || ev.key === ' ') {
-      ev.preventDefault();
-      document.activeElement?.click();
-    }
-  });
+        const dropdown = document.createElement('div');
+        dropdown.className = 'ctx-category-dropdown';
+        dropdown.setAttribute('role', 'menu');
 
-  document.body.appendChild(menuEl);
-  return menuEl;
-}
+        if (!Array.isArray(categoriesList) || categoriesList.length === 0) {
+          const emptyBtn = document.createElement('div');
+          emptyBtn.className = 'ctx-item ctx-category-item disabled';
+          emptyBtn.textContent =
+            mode === 'add' ? 'Нет доступных категорий' : 'В этой папке нет категорий';
+          dropdown.appendChild(emptyBtn);
+        } else {
+          categoriesList.forEach((cat) => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'ctx-item ctx-category-item';
+            item.setAttribute('data-cat-id', cat.id);
+            item.setAttribute('role', 'menuitem');
+            item.textContent = cat.name;
+            dropdown.appendChild(item);
+          });
+        }
 
-function showContextMenuAt(x, y, folder) {
-  const el = createContextMenuDom();
-  ctxFolder.value = folder;
+        parentBtn.appendChild(dropdown);
 
-  // update pin label/icon
-  const pinBtn = el.querySelector('[data-action="pin"]');
-  if (pinBtn) {
-    const icon = pinBtn.querySelector('i');
-    const label = pinBtn.querySelector('.ctx-label');
-    if (folder && folder.isPinned) {
-      if (icon) icon.className = 'bi bi-pin-fill';
-      if (label) label.textContent = 'Открепить';
-    } else {
-      if (icon) icon.className = 'bi bi-pin';
-      if (label) label.textContent = 'Закрепить';
-    }
-  }
+        try {
+          const rect = parentBtn.getBoundingClientRect();
+          const ddW = dropdown.offsetWidth || 180;
+          if (rect.right + ddW + 8 > window.innerWidth) parentBtn.classList.add('flip');
 
-  // set position (only here we set inline left/top — that's OK)
-  el.style.left = x + 'px';
-  el.style.top = y + 'px';
-  el.setAttribute('aria-hidden', 'false');
-  el.classList.add('visible');
+          const ddH = dropdown.offsetHeight || 240;
+          if (rect.bottom + ddH > window.innerHeight) parentBtn.classList.add('align-bottom');
+        } catch (e) {}
 
-  // ensure not going out of viewport
-  const rect = el.getBoundingClientRect();
-  const pad = 8;
-  if (rect.right > window.innerWidth) {
-    const newLeft = Math.max(pad, window.innerWidth - rect.width - pad);
-    el.style.left = newLeft + 'px';
-  }
-  if (rect.bottom > window.innerHeight) {
-    const newTop = Math.max(pad, window.innerHeight - rect.height - pad);
-    el.style.top = newTop + 'px';
-  }
+        const clickHandler = (ev) => {
+          const target = ev.target.closest('.ctx-category-item');
+          if (!target) return;
+          const catId = target.getAttribute('data-cat-id');
+          if (!catId) return;
 
-  // attach outside listener and keyboard (deferred to avoid immediate close)
-  setTimeout(() => {
-    outsideListener = (ev) => {
-      if (!el.contains(ev.target)) hideContextMenu();
-    };
-    document.addEventListener('pointerdown', outsideListener, { capture: true });
-
-    scrollListener = () => hideContextMenu();
-    window.addEventListener('scroll', scrollListener, { passive: true, capture: true });
-
-    // single key listener for global keys (Escape handled by menu too)
-    keyListener = (ev) => {
-      if (ev.key === 'Escape') hideContextMenu();
-
-      // support ContextMenu/Shift+F10 on focused folder card
-      if ((ev.key === 'ContextMenu' || (ev.shiftKey && ev.key === 'F10')) && document.activeElement) {
-        const elFocus = document.activeElement;
-        const folderName = elFocus.getAttribute?.('data-folder-name');
-        if (folderName) {
-          const f = folders.value.find((ff) => ff.name === folderName);
-          if (f) {
-            const rect2 = elFocus.getBoundingClientRect();
-            showContextMenuAt(rect2.left + 8, rect2.bottom - 8, f);
+          if (mode === 'add') {
+            addFolderToCategory(catId, folder.name);
+          } else {
+            removeFolderFromCategory(catId, folder.name);
           }
+          removeDropdown();
+        };
+
+        dropdown.addEventListener('click', clickHandler);
+
+        const outsideClick = (ev) => {
+          if (!parentBtn.contains(ev.target)) {
+            removeDropdown();
+            document.removeEventListener('click', outsideClick);
+          }
+        };
+        setTimeout(() => document.addEventListener('click', outsideClick), 0);
+
+        function removeDropdown() {
+          try {
+            dropdown.removeEventListener('click', clickHandler);
+          } catch (e) {}
+          try {
+            if (dropdown && dropdown.parentElement) dropdown.remove();
+          } catch (e) {}
+          parentBtn.classList.remove('has-dropdown', 'flip', 'align-bottom');
+        }
+
+        return {
+          remove: removeDropdown,
+        };
+      }
+
+      menuEl.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('[data-action]');
+        if (!btn) return;
+        ev.stopPropagation();
+        ev.preventDefault();
+        const action = btn.getAttribute('data-action');
+        const folder = ctxFolder.value;
+        if (!folder) {
+          hideContextMenu();
+          return;
+        }
+
+        switch (action) {
+          case 'open':
+            ctxOpen(folder);
+            break;
+          case 'pin':
+            ctxTogglePin(folder);
+            break;
+          case 'download':
+            ctxDownload(folder);
+            break;
+          case 'add-to-category': {
+            const folderName = ctxFolder.value?.name;
+            const available = (categories.value || []).filter(
+              (c) => !(Array.isArray(c.folders) && c.folders.includes(folderName))
+            );
+            if (!available.length) {
+              notifier.info({ message: 'Папка уже везде или нет доступных категорий' });
+              hideContextMenu();
+              break;
+            }
+            createCategoryDropdown(available, btn, ctxFolder.value, 'add');
+            break;
+          }
+
+          case 'remove-from-category': {
+            const folderName = ctxFolder.value?.name;
+            const hasCats = (categories.value || []).filter(
+              (c) => Array.isArray(c.folders) && c.folders.includes(folderName)
+            );
+            if (!hasCats.length) {
+              notifier.info({ message: 'Эта папка не привязана ни к одной категории' });
+              hideContextMenu();
+              break;
+            }
+            createCategoryDropdown(hasCats, btn, ctxFolder.value, 'remove');
+            break;
+          }
+
+          case 'delete':
+            ctxDelete(folder);
+            break;
+          case 'rename':
+            ctxRename(folder);
+            break;
+          case 'copy':
+            ctxCopyLink(folder);
+            break;
+          default:
+            break;
+        }
+      });
+
+      menuEl.addEventListener('keydown', (ev) => {
+        const items = Array.from(menuEl.querySelectorAll('.ctx-item'));
+        const idx = items.indexOf(document.activeElement);
+        if (ev.key === 'ArrowDown') {
+          ev.preventDefault();
+          const next = items[(idx + 1) % items.length];
+          next.focus();
+        } else if (ev.key === 'ArrowUp') {
+          ev.preventDefault();
+          const prev = items[(idx - 1 + items.length) % items.length];
+          prev.focus();
+        } else if (ev.key === 'Home') {
+          ev.preventDefault();
+          items[0].focus();
+        } else if (ev.key === 'End') {
+          ev.preventDefault();
+          items[items.length - 1].focus();
+        } else if (ev.key === 'Escape') {
+          ev.preventDefault();
+          hideContextMenu();
+        } else if (ev.key === 'Enter' || ev.key === ' ') {
+          ev.preventDefault();
+          document.activeElement?.click();
+        }
+      });
+
+      document.body.appendChild(menuEl);
+      return menuEl;
+    }
+
+    function showContextMenuAt(x, y, folder) {
+      const el = createContextMenuDom();
+      ctxFolder.value = folder;
+
+      const folderName = folder?.name || '';
+
+      const inCats = (categories.value || []).filter(
+        (c) => Array.isArray(c.folders) && c.folders.includes(folderName)
+      );
+
+      const notInCats = (categories.value || []).filter(
+        (c) => !(Array.isArray(c.folders) && c.folders.includes(folderName))
+      );
+
+      const addBtn = el.querySelector('[data-action="add-to-category"]');
+      const removeBtn = el.querySelector('[data-action="remove-from-category"]');
+
+      if (addBtn) {
+        addBtn.style.display = notInCats.length ? '' : 'none';
+      }
+      if (removeBtn) {
+        removeBtn.style.display = inCats.length ? '' : 'none';
+      }
+
+      const pinBtn = el.querySelector('[data-action="pin"]');
+      if (pinBtn) {
+        const icon = pinBtn.querySelector('i');
+        const label = pinBtn.querySelector('.ctx-label');
+        if (folder && folder.isPinned) {
+          if (icon) icon.className = 'bi bi-pin-fill';
+          if (label) label.textContent = 'Открепить';
+        } else {
+          if (icon) icon.className = 'bi bi-pin';
+          if (label) label.textContent = 'Закрепить';
         }
       }
-    };
-    window.addEventListener('keydown', keyListener);
 
-    // focus first item for keyboard users
-    const first = el.querySelector('.ctx-item');
-    if (first) {
-      // mark keyboard usage (for focus styling)
-      el.setAttribute('data-keyboard', 'true');
-      first.focus();
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      el.setAttribute('aria-hidden', 'false');
+      el.classList.add('visible');
+
+      const rect = el.getBoundingClientRect();
+      const pad = 8;
+      if (rect.right > window.innerWidth) {
+        const newLeft = Math.max(pad, window.innerWidth - rect.width - pad);
+        el.style.left = newLeft + 'px';
+      }
+      if (rect.bottom > window.innerHeight) {
+        const newTop = Math.max(pad, window.innerHeight - rect.height - pad);
+        el.style.top = newTop + 'px';
+      }
+
+      setTimeout(() => {
+        outsideListener = (ev) => {
+          if (!el.contains(ev.target)) hideContextMenu(), removeDropdown();
+        };
+        document.addEventListener('pointerdown', outsideListener, { capture: true });
+
+        scrollListener = () => hideContextMenu();
+        window.addEventListener('scroll', scrollListener, { passive: true, capture: true });
+
+        keyListener = (ev) => {
+          if (ev.key === 'Escape') hideContextMenu();
+
+          if (
+            (ev.key === 'ContextMenu' || (ev.shiftKey && ev.key === 'F10')) &&
+            document.activeElement
+          ) {
+            const elFocus = document.activeElement;
+            const folderName = elFocus.getAttribute?.('data-folder-name');
+            if (folderName) {
+              const f = folders.value.find((ff) => ff.name === folderName);
+              if (f) {
+                const rect2 = elFocus.getBoundingClientRect();
+                showContextMenuAt(rect2.left + 8, rect2.bottom - 8, f);
+              }
+            }
+          }
+        };
+        window.addEventListener('keydown', keyListener);
+
+        const first = el.querySelector('.ctx-item');
+        if (first) {
+          el.setAttribute('data-keyboard', 'true');
+          first.focus();
+        }
+      }, 0);
     }
-  }, 0);
-}
 
-function hideContextMenu() {
-  if (!menuEl) return;
-  menuEl.classList.remove('visible');
-  menuEl.setAttribute('aria-hidden', 'true');
-  ctxFolder.value = null;
+    function hideContextMenu() {
+      if (!menuEl) return;
+      menuEl.classList.remove('visible');
+      menuEl.setAttribute('aria-hidden', 'true');
+      ctxFolder.value = null;
 
-  try {
-    if (outsideListener) document.removeEventListener('pointerdown', outsideListener, { capture: true });
-  } catch (e) {}
-  outsideListener = null;
+      try {
+        if (outsideListener)
+          document.removeEventListener('pointerdown', outsideListener, { capture: true });
+      } catch (e) {}
+      outsideListener = null;
 
-  try {
-    if (scrollListener) window.removeEventListener('scroll', scrollListener, { capture: true });
-  } catch (e) {}
-  scrollListener = null;
+      try {
+        if (scrollListener) window.removeEventListener('scroll', scrollListener, { capture: true });
+      } catch (e) {}
+      scrollListener = null;
 
-  try {
-    if (keyListener) window.removeEventListener('keydown', keyListener);
-  } catch (e) {}
-  keyListener = null;
+      try {
+        if (keyListener) window.removeEventListener('keydown', keyListener);
+      } catch (e) {}
+      keyListener = null;
+      try {
+        removeDropdown();
+      } catch(e) {}
 
-  // small delay then hide to allow transition (optional)
-  setTimeout(() => {
-    if (menuEl && !menuEl.classList.contains('visible')) {
-      menuEl.style.left = '';
-      menuEl.style.top = '';
-      // keep in DOM for reuse
+      setTimeout(() => {
+        if (menuEl && !menuEl.classList.contains('visible')) {
+          menuEl.style.left = '';
+          menuEl.style.top = '';
+        }
+      }, 200);
     }
-  }, 200);
-}
 
-
-    // -----------------------
-    // Context actions routed from menu (use existing helpers)
-    // -----------------------
     async function ctxTogglePin(folder) {
       await togglePin(folder);
       hideContextMenu();
@@ -816,32 +1125,32 @@ function hideContextMenu() {
     const generateRandomFolders = async () => {
       try {
         const randomPrefix = 'folder_' + Math.random().toString(36).substring(2, 8);
-        
+
         const response = await fetch('data/api/api.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'createFolders',
             count: 5,
-            prefix: randomPrefix
-          })
-        })
-        
-        const result = await response.json()
+            prefix: randomPrefix,
+          }),
+        });
+
+        const result = await response.json();
         if (result.success) {
           notifier.success({
-            message: 'Папки успешно созданы!'
+            message: 'Папки успешно созданы!',
           });
 
           setTimeout(() => window.location.reload(), 750);
         } else {
-          alert('Ошибка: ' + result.error)
+          alert('Ошибка: ' + result.error);
         }
       } catch (error) {
-        console.error('Ошибка:', error)
-        alert('Ошибка при создании папок')
+        console.error('Ошибка:', error);
+        alert('Ошибка при создании папок');
       }
-    }
+    };
 
     function ctxOpen(folder) {
       openFolder(folder);
@@ -909,14 +1218,10 @@ function hideContextMenu() {
       }
     }
 
-    // -----------------------
-    // Template binding: handler to call on right-click on folder
-    // Expectation: in HTML you have @contextmenu.prevent="onRightClickFolder($event, folder)" or similar
-    // -----------------------
     function onRightClickFolder(event, folder) {
       event.preventDefault();
-      if (isSettingsOpen.value) return; // don't open if settings modal active
-      // Prefer client coords; fallback to mouse event pageX/pageY
+      if (isSettingsOpen.value) return;
+
       const x =
         event.clientX ||
         event.pageX ||
@@ -930,9 +1235,6 @@ function hideContextMenu() {
       showContextMenuAt(x, y, folder);
     }
 
-    // -----------------------
-    // Misc UI helpers
-    // -----------------------
     const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
     const formatDate = (timestamp) => {
@@ -958,14 +1260,26 @@ function hideContextMenu() {
     };
 
     const setFilter = (filter) => {
+      if (filter === 'categories') {
+        showCategoriesPanel.value = !showCategoriesPanel.value;
+        if (showCategoriesPanel.value) {
+          activeFilter.value = 'categories';
+        } else {
+          activeFilter.value = 'all';
+          selectedCategoryId.value = null;
+        }
+        currentPage.value = 1;
+        updateTooltips();
+        return;
+      }
+
+      showCategoriesPanel.value = false;
+      selectedCategoryId.value = null;
       activeFilter.value = filter;
       currentPage.value = 1;
       updateTooltips();
     };
 
-    // -----------------------
-    // LIFECYCLE
-    // -----------------------
     const onResizeHandler = debounce(() => {
       if (settings.value.perPageMode === 'auto') {
         itemsPerPage.value = calculateOptimalItemsPerPage();
@@ -1001,10 +1315,9 @@ function hideContextMenu() {
     }
 
     onMounted(async () => {
-      // restore settings
-      const saved = localStorage.getItem('showDbButton')
+      const saved = localStorage.getItem('showDbButton');
       if (saved !== null) {
-        showDbButton.value = saved === 'true'
+        showDbButton.value = saved === 'true';
       }
       try {
         const raw = localStorage.getItem('efm_settings');
@@ -1017,11 +1330,8 @@ function hideContextMenu() {
             settings.value.perPageValue = parsed.perPageValue;
           }
         }
-      } catch (_) {
-        /* ignore */
-      }
+      } catch (_) {}
 
-      // theme init
       try {
         const saved = localStorage.getItem('efm_theme');
         const systemPrefersDark =
@@ -1032,12 +1342,11 @@ function hideContextMenu() {
         } else {
           applyTheme(systemPrefersDark ? 'china' : 'japan');
         }
-      } catch (e) {
-        /* noop */
-      }
+      } catch (e) {}
 
       itemsPerPage.value = resolvedItemsPerPage.value;
       await loadFolders();
+      await loadCategories();
       initTooltips();
 
       window.addEventListener('resize', onResizeHandler);
@@ -1049,18 +1358,15 @@ function hideContextMenu() {
 
       window.addEventListener('keydown', onEsc);
 
-      // create menu DOM proactively so it's ready
       createContextMenuDom();
     });
 
     onBeforeUnmount(() => {
       window.removeEventListener('resize', onResizeHandler);
-      window.removeEventListener('resize', () => {
-        /* noop */
-      });
+      window.removeEventListener('resize', () => {});
       window.removeEventListener('keydown', onEsc);
       destroyTooltips();
-      // remove created menu and listeners
+
       try {
         if (menuEl) menuEl.remove();
       } catch (e) {}
@@ -1083,13 +1389,11 @@ function hideContextMenu() {
           v === 'auto' ? calculateOptimalItemsPerPage() : settings.value.perPageValue;
       }
     );
-    
+
     watch(showDbButton, (newValue) => {
       localStorage.setItem('showDbButton', newValue);
     });
-    // -----------------------
-    // RETURN (to template)
-    // -----------------------
+
     return {
       folders,
       searchQuery,
@@ -1155,7 +1459,27 @@ function hideContextMenu() {
       showDbButton,
       generateRandomFolders,
       ProjectStatus,
-      toggleSidebar
+      toggleSidebar,
+      categories,
+      isCategoryModalOpen,
+      categoryModalTargetFolder,
+      newCategoryName,
+      loadCategories,
+      openCategoryModalForFolder,
+      closeCategoryModal,
+      createCategory,
+      addSelectedFolderToCategory,
+      ctxAddToCategory,
+      deleteCategory,
+      openRenameCategoryPrompt,
+      showCategoryChips,
+      visibleCategories,
+      showAllCategories,
+      toggleShowAllCategories,
+      selectCategory,
+      selectedCategoryId,
+      filteredFolders,
+      removeFolderFromCategory,
     };
   },
 }).mount('#app');

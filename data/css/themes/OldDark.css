@@ -1,5 +1,4 @@
 :root {
-  /* ===== ОБНОВЛЁННАЯ ПАЛИТРА ===== */
   --primary: #6c8eff;
   --primary-dark: #5a7aeb;
   --secondary: #6d65e6;
@@ -22,27 +21,24 @@
   --muted: #94a3b8;
   --border: #334155;
 
-  /* для совместимости */
   --gold: var(--primary);
   --gold-600: var(--primary-dark);
   --red: var(--secondary);
   --jade: var(--accent);
 
-  /* Новые переменные для апгрейда */
   --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
   --shadow-glow: 0 0 0 4px rgba(108, 142, 255, 0.15);
   --glass-bg: rgba(30, 41, 59, 0.7);
 
   --ctx-bg: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-  --ctx-color: #f1f5f9; /* основной текст */
-  --ctx-accent: #6c8eff; /* твой primary */
-  --ctx-hover-bg: rgba(108, 142, 255, 0.12); /* при наведении */
-  --ctx-hover-color: #ffffff; /* яркий контрастный */
+  --ctx-color: #f1f5f9;
+  --ctx-accent: #6c8eff;
+  --ctx-hover-bg: rgba(108, 142, 255, 0.12);
+  --ctx-hover-color: #ffffff;
   --ctx-border: 1px solid rgba(108, 142, 255, 0.25);
   --ctx-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
 }
 
-/* === BODY BG === */
 body {
   background: var(--bg);
   color: var(--ink);
@@ -50,7 +46,7 @@ body {
 }
 
 body::before {
-  content: "";
+  content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
@@ -60,107 +56,106 @@ body::before {
   background-size: cover;
   background-position: center var(--bg-vertical);
   opacity: 0.28;
-  filter: blur(4px); /* Увеличил блюр для более мягкого эффекта */
+  filter: blur(4px);
   transform: translateZ(0);
 }
 
 body::after {
-  content: "";
+  content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-image:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.015) 0 1px, transparent 1px 6px),
+  background-image: repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.015) 0 1px,
+      transparent 1px 6px
+    ),
     radial-gradient(circle at 20% 20%, rgba(108, 142, 255, 0.06), transparent 12%),
     radial-gradient(circle at 80% 80%, rgba(107, 176, 255, 0.05), transparent 10%),
-    radial-gradient(circle at 50% 50%, rgba(108, 142, 255, 0.04), transparent 15%); /* Добавил третий градиент для глубины */
+    radial-gradient(circle at 50% 50%, rgba(108, 142, 255, 0.04), transparent 15%);
   mix-blend-mode: overlay;
-  animation: subtlePulse 20s infinite ease-in-out; /* Добавил мягкую анимацию пульсации */
+  animation: subtlePulse 20s infinite ease-in-out;
+}
+
+.search-input {
+  background-color: var(--paper) !important;
+}
+
+.search-input {
+  border: 1px solid rgba(242, 204, 89, 0.3) !important;
+  background: #12161c;
+  color: var(--ink);
 }
 
 @keyframes subtlePulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
 
-/* === SEARCH === */
-.search-input {
-  border: 1px solid var(--line);
-  background: var(--glass-bg); /* Применил glassmorphism для прозрачности */
-  color: var(--ink);
-  border-radius: 12px; /* Слегка увеличил радиус для современности */
-  padding: 12px 16px;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(8px); /* Добавил блюр для glass эффекта */
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: var(--shadow-glow);
-  background: rgba(45, 58, 82, 0.8); /* Сделал чуть прозрачнее при фокусе */
-  transform: scale(1.02); /* Легкий зум для интерактивности */
-}
-
-/* === MODAL === */
 .settings-overlay {
-  background: rgba(5, 8, 12, 0.7); /* Увеличил opacity для лучшей фокусировки */
-  backdrop-filter: blur(16px) saturate(150%); /* Улучшил фильтры */
+  background: rgba(5, 8, 12, 0.7);
+  backdrop-filter: blur(16px) saturate(150%);
 }
 
 .settings-modal {
   width: min(780px, 96vw);
-  border-radius: 20px; /* Увеличил радиус для более плавного вида */
+  border-radius: 20px;
   background: linear-gradient(180deg, #1e293b, #0f172a);
   border: 1px solid rgba(108, 142, 255, 0.3);
   color: var(--ink);
-  box-shadow:
-    0 20px 50px rgba(0, 0, 0, 0.6),
-    0 8px 20px rgba(0, 0, 0, 0.3); /* Усилил тени для глубины */
-  animation: modalPop 0.4s ease-out; /* Увеличил длительность анимации */
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 8px 20px rgba(0, 0, 0, 0.3);
+  animation: modalPop 0.4s ease-out;
 }
 
 @keyframes modalPop {
-  from { transform: scale(0.92) translateY(20px); opacity: 0; }
-  to { transform: scale(1) translateY(0); opacity: 1; }
+  from {
+    transform: scale(0.92) translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
 }
 
-/* === HEADER === */
 .settings-header {
   background: linear-gradient(180deg, #243447, #1e293b);
   border-bottom: 1px solid rgba(108, 142, 255, 0.22);
-  padding: 16px 24px; /* Увеличил отступы для простора */
+  padding: 16px 24px;
   font-weight: 700;
   letter-spacing: 0.4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Добавил легкую тень снизу */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* === TABS === */
 .settings-tabs .tab {
   color: var(--ink-2);
   font-weight: 600;
-  border-radius: 12px; /* Увеличил радиус */
+  border-radius: 12px;
   padding: 12px 16px;
   transition: all 0.25s ease;
-  position: relative; /* Для псевдоэлементов */
+  position: relative;
 }
 
 .settings-tabs .tab:hover {
   background: rgba(108, 142, 255, 0.15);
   color: var(--ink);
-  transform: translateY(-1px); /* Легкий подъем при hover */
+  transform: translateY(-1px);
 }
 
 .settings-tabs .tab.active {
   color: var(--ink);
   background: linear-gradient(180deg, rgba(108, 142, 255, 0.18), rgba(34, 37, 42, 0.1));
-  box-shadow: inset 0 -3px 0 var(--primary); /* Утолстил индикатор */
+  box-shadow: inset 0 -3px 0 var(--primary);
 }
 
-/* === BUTTONS === */
 .btn {
-  padding: 12px 18px; /* Увеличил размер для лучшей кликабельности */
+  padding: 12px 18px;
   border-radius: 14px;
   background: linear-gradient(180deg, #1e293b, #0f172a);
   border: 1px solid rgba(108, 142, 255, 0.3);
@@ -168,13 +163,13 @@ body::after {
   font-weight: 600;
   letter-spacing: 0.3px;
   transition: all 0.3s ease;
-  box-shadow: var(--shadow-soft); /* Добавил мягкую тень */
+  box-shadow: var(--shadow-soft);
 }
 
 .btn:hover {
   border-color: var(--primary);
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(108, 142, 255, 0.2); /* Усилил тень при hover */
+  box-shadow: 0 6px 24px rgba(108, 142, 255, 0.2);
 }
 
 .btn.primary {
@@ -187,14 +182,14 @@ body::after {
 .btn.primary:hover {
   box-shadow: 0 12px 36px rgba(108, 142, 255, 0.4);
   transform: translateY(-3px);
-  filter: brightness(1.05); /* Легкое осветление при hover */
+  filter: brightness(1.05);
 }
 
 .btn.ghost {
   background: transparent;
   border: 1px solid rgba(108, 142, 255, 0.3);
   color: var(--ink-2);
-  box-shadow: none; /* Убрал тень для ghost */
+  box-shadow: none;
 }
 
 .btn.ghost:hover {
@@ -203,33 +198,30 @@ body::after {
   border-color: var(--primary);
 }
 
-/* === BADGES === */
 .app-sidebar .badge {
   background: linear-gradient(90deg, var(--primary), var(--accent));
   color: #fff;
   font-weight: 700;
-  padding: 6px 14px; /* Слегка увеличил */
+  padding: 6px 14px;
   border-radius: 12px;
-  box-shadow: 0 3px 8px rgba(108, 142, 255, 0.3); /* Усилил тень */
+  box-shadow: 0 3px 8px rgba(108, 142, 255, 0.3);
   transition: transform 0.2s ease;
 }
 
 .app-sidebar .badge:hover {
-  transform: scale(1.05); /* Легкий зум при hover */
+  transform: scale(1.05);
 }
 
-/* === TOOLTIP === */
 .tooltip-inner {
   background: var(--line);
   color: var(--ink);
-  padding: 8px 12px; /* Увеличил отступы */
+  padding: 8px 12px;
   border-radius: 8px;
   font-size: 0.85rem;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.5); /* Усилил тень */
-  backdrop-filter: blur(4px); /* Добавил легкий блюр */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
 }
 
-input[type="number"] {
+input[type='number'] {
   background: var(--cloud) !important;
 }
-

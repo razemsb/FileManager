@@ -10,10 +10,10 @@
     <link rel="shortcut icon" href="data/img/favicon/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="data/img/favicon/apple-touch-icon.png" />
     <link rel="manifest" href="data/img/favicon/site.webmanifest" />
-    <link rel="stylesheet" href="data/css/style.css" />
+    <link rel="stylesheet" href="data/css/style.min.css" />
     <link rel="stylesheet" href="data/vendors/fontawesome/css/all.min.css" />
     <link rel="stylesheet" href="data/vendors/bootstrap/icons/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="data/vendors/popups/style.css">
+    <link rel="stylesheet" href="data/vendors/popups/style.css" />
     <link rel="stylesheet" href="data/vendors/bootstrap/css/bootstrap.min.css" />
     <script src="data/vendors/vue/vue.global.js"></script>
     <script src="data/vendors/axios/axios.js"></script>
@@ -22,21 +22,17 @@
     <script src="data/vendors/bootstrap/js/bootstrap.js" defer></script>
     <script src="data/vendors/popperjs/popper.js"></script>
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
+      document.addEventListener('DOMContentLoaded', function () {
         function setMenuAccentFromTheme() {
           const menu = document.querySelector('.efm-context-menu');
           if (!menu) return;
           const root = getComputedStyle(document.documentElement);
           const primary = root.getPropertyValue('--primary').trim() || '#6c8eff';
           menu.style.setProperty('--menu-accent-solid', primary);
-          menu.style.setProperty('--menu-glow', primary + '22'); 
+          menu.style.setProperty('--menu-glow', primary + '22');
         }
-        setTimeout(setMenuAccentFromTheme, 300); 
-
-        window.addEventListener('contextmenu', (e) => {
-          e.preventDefault();
-        });
-    });
+        setTimeout(setMenuAccentFromTheme, 300);
+      });
     </script>
   </head>
   <body>
@@ -46,20 +42,42 @@
           <button class="sidebar-toggle" @click="toggleSidebar">
             <i class="bi bi-list"></i>
           </button>
-          <h1 class="app-title" title="Enigma File Manager">
-            <img src="data/img/favicon/favicon.svg" class="app-logo" width="38" height="38" alt="EFM logo" />
+          <h1 class="app-title" title="Enigma File Manager" role="heading" aria-level="1">
+            <img
+              src="data/img/favicon/favicon.svg"
+              class="app-logo"
+              width="44"
+              height="44"
+              alt="EFM logo"
+            />
             <span class="logo-text">
-              <span class="logo-first">E</span><span class="logo-rest">FM</span>
+              <span class="logo-line">
+                <span class="logo-first">E</span><span class="logo-rest">FM</span>
+              </span>
+              <span class="logo-sub">Enigma File Manager</span>
             </span>
           </h1>
         </div>
         <div class="top-bar">
-          <button class="theme-toggle" @click="openSettings" data-bs-toggle="tooltip" 
-          :title="'Настройки, Тема: ' + (theme.charAt(0).toUpperCase() + theme.slice(1))">
-          <img src="data/img/themes/dragon.svg">
+          <button
+            class="theme-toggle"
+            @click="openSettings"
+            data-bs-toggle="tooltip"
+            :title="'Настройки, Тема: ' + (theme.charAt(0).toUpperCase() + theme.slice(1))"
+          >
+            <img src="data/img/themes/dragon.svg" />
           </button>
-          <a v-if="showDbButton === true" class="db-toggle" id="db-toggle" href="http://localhost/phpmyadmin/" target="_blank" data-bs-toggle="tooltip" title="Перейти к phpMyAdmin" data-bs-original-title="Перейти к phpMyAdmin">
-            <img src="data/img/other/favicon.ico" style="width: 30px; height: 30px;">
+          <a
+            v-if="showDbButton === true"
+            class="db-toggle"
+            id="db-toggle"
+            href="http://localhost/phpmyadmin/"
+            target="_blank"
+            data-bs-toggle="tooltip"
+            title="Перейти к phpMyAdmin"
+            data-bs-original-title="Перейти к phpMyAdmin"
+          >
+            <img src="data/img/other/favicon.ico" style="width: 30px; height: 30px" />
           </a>
           <div class="search-bar">
             <i class="bi bi-search"></i>
@@ -106,6 +124,36 @@
                 <span class="btn-text">Недавние</span>
                 <span class="badge">{{ recentCount }}</span>
               </button>
+              <button class="sidebar-btn" @click="openCategoryModalForFolder()">
+                <i class="bi bi-plus-lg"></i>
+                <span class="btn-text">Настройки категорий</span>
+              </button>
+              <div v-if="categories.length && showCategoryChips" class="category-chips mt-2 px-2">
+                <div class="d-inline-flex flex-column gap-2">
+                  <button
+                    v-for="cat in visibleCategories"
+                    :key="cat.id"
+                    class="btn btn-sm"
+                    :class="{'btn-primary': selectedCategoryId === cat.id, 'btn-outline-secondary': selectedCategoryId !== cat.id}"
+                    @click="selectCategory(cat.id)"
+                    :title="cat.name + (cat.folders?.length ? ' (' + cat.folders.length + ' папок)' : '')"
+                    :disabled="cat.folders?.length === 0"
+                    :title="cat.folders?.length === 0 ? 'В категории нет папок' : ''"
+                    :data-bs-original-title="cat.folders?.length === 0 ? 'В категории нет папок' : ''"
+                    :aria-disabled="cat.folders?.length === 0"
+                    :aria-label="cat.folders?.length === 0 ? 'В категории нет папок' : ''"
+                  >
+                    {{ cat.name + (cat.folders?.length ? ' (' + cat.folders.length + ')' : '') }}
+                  </button>
+                </div>
+                <button
+                  v-if="categories.length > initialVisibleCategories"
+                  class="btn btn-link btn-sm mt-1 p-0"
+                  @click="toggleShowAllCategories"
+                >
+                  {{ showAllCategories ? 'Скрыть' : 'Показать все' }}
+                </button>
+              </div>
             </div>
           </nav>
         </aside>
@@ -124,6 +172,7 @@
                 <h3
                   class="folder-name"
                   data-bs-toggle="tooltip"
+                  data-bs-placement="right"
                   :title="folder.name"
                   :data-bs-original-title="folder.name"
                 >
@@ -173,6 +222,72 @@
         <div class="spinner-container">
           <div class="spinner"></div>
           <p>Подождите, идет загрузка...</p>
+        </div>
+      </div>
+
+      <div
+        class="settings-overlay"
+        :class="{ 'is-open': isCategoryModalOpen }"
+        @click.self="closeCategoryModal"
+        aria-hidden="true"
+      >
+        <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="catModalTitle">
+          <div class="settings-header">
+            <h3 id="catModalTitle"><i class="fa-solid fa-tags"></i> Категории</h3>
+            <button class="icon-btn" @click="closeCategoryModal" aria-label="Закрыть">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <div class="settings-body">
+            <section>
+              <fieldset class="set">
+                <legend class="mb-3">Создать новую категорию</legend>
+                <div class="row">
+                  <input
+                    v-model="newCategoryName"
+                    class="categories-input"
+                    placeholder="Имя категории"
+                  />
+                  <button class="btn ms-2 btn-primary" @click="createCategory">Создать</button>
+                </div>
+              </fieldset>
+
+              <fieldset class="set mt-3">
+                <legend>Существующие категории</legend>
+                <div v-if="categories.length === 0" class="muted">Категорий пока нет</div>
+                <ul class="list-unstyled">
+                  <li
+                    v-for="cat in categories"
+                    :key="cat.id"
+                    style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px"
+                  >
+                    <div style="flex: 1">
+                      <strong>{{ cat.name }}</strong>
+                      <div class="s" v-if="cat.folders && cat.folders.length">
+                        Папок: {{ cat.folders.length }}
+                      </div>
+                    </div>
+                    <div style="display: flex; gap: 6px">
+                      <button
+                        class="btn btn-sm btn-outline-secondary"
+                        @click="openRenameCategoryPrompt(cat)"
+                      >
+                        Переименовать
+                      </button>
+                      <button class="btn btn-sm btn-outline-danger" @click="deleteCategory(cat.id)">
+                        Удалить
+                      </button>
+                    </div>
+                  </li>
+                </ul>
+              </fieldset>
+            </section>
+          </div>
+
+          <div class="settings-footer">
+            <button class="btn ghost" @click="closeCategoryModal">Закрыть</button>
+          </div>
         </div>
       </div>
 
@@ -349,17 +464,23 @@
 
             <section v-show="activeTab==='settings'">
               <fieldset class="set">
-                <legend style="margin-bottom: 1.15rem"><i class="fa-solid fa-keyboard"></i> Допольнительные настройки</legend>
-                
+                <legend style="margin-bottom: 1.15rem">
+                  <i class="fa-solid fa-keyboard"></i> Допольнительные настройки
+                </legend>
+
                 <button v-if="!showDbButton" @click="showDbButton = true" class="btn btn-primary">
                   <i class="fa-solid fa-eye"></i> Показать кнопку БД
                 </button>
-                
+
                 <button v-else @click="showDbButton = false" class="btn btn-secondary">
                   <i class="fa-solid fa-eye-slash"></i> Скрыть кнопку БД
                 </button>
 
-                <button v-if="ProjectStatus !== 'Production'" @click="generateRandomFolders" class="btn btn-primary ms-1">
+                <button
+                  v-if="ProjectStatus !== 'Production'"
+                  @click="generateRandomFolders"
+                  class="btn btn-primary ms-1"
+                >
                   <i class="fa-solid fa-folder-plus"></i> Создать тестовые папки
                 </button>
               </fieldset>
@@ -385,51 +506,6 @@
             <button class="btn primary" @click="applySettings">
               <i class="fa-solid fa-floppy-disk"></i> Применить
             </button>
-          </div>
-        </div>
-
-        <div
-          class="modal-overlay"
-          :class="{ 'is-open': errorModal.isOpen }"
-          @click.self="closeErrorModal"
-          aria-hidden="true"
-        >
-          <div class="modal" role="dialog" aria-modal="true" aria-labelledby="errorModalTitle">
-            <div class="modal-header error">
-              <h3 id="errorModalTitle">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                {{ errorModal.title }}
-              </h3>
-              <button class="icon-btn" @click="closeErrorModal" aria-label="Закрыть">
-                <i class="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-
-            <div class="modal-body">
-              <p style="white-space: pre-line">{{ errorModal.message }}</p>
-              <div v-if="errorModal.title.includes('ZipArchive')" class="error-details">
-                <h4>Возможные решения:</h4>
-                <ul>
-                  <li>Установить PHP расширение zip</li>
-                  <li>Проверить настройки php.ini</li>
-                  <li>Обратиться к бумычу</li>
-                </ul>
-              </div>
-            </div>
-
-            <div class="modal-footer">
-              <button class="btn primary" @click="closeErrorModal">
-                <i class="fa-solid fa-check"></i> Понятно
-              </button>
-
-              <button
-                v-if="errorModal.title.includes('ZipArchive')"
-                class="btn secondary"
-                @click="copyErrorToClipboard"
-              >
-                <i class="fa-solid fa-copy"></i> Скопировать информацию
-              </button>
-            </div>
           </div>
         </div>
       </div>
