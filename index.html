@@ -477,7 +477,6 @@
                 </button>
 
                 <button
-                  v-if="ProjectStatus !== 'Production'"
                   @click="generateRandomFolders"
                   class="btn btn-primary ms-1"
                 >
@@ -510,5 +509,6 @@
         </div>
       </div>
     </div>
+    <div class="bg-overlay"></div>
   </body>
 </html>

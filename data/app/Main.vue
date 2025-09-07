@@ -1256,7 +1256,7 @@ createApp({
     const formatFolderName = (name) => {
       if (!name) return '';
       if (name.length <= 8) return name;
-      return name.slice(0, 8) + '...';
+      return name.slice(0, 30) + '...';
     };
 
     const setFilter = (filter) => {

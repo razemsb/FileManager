@@ -714,7 +714,7 @@ input {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 16px 16px 6px 16px;
+  padding: 16px 16px 10px 16px;
   border-bottom: 1px dashed var(--border);
 }
 
@@ -733,7 +733,7 @@ input {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 220px;
+  max-width: 300px;
   background-image: linear-gradient(currentColor, currentColor);
   background-size: 0% 2px;
   background-repeat: no-repeat;
@@ -745,14 +745,9 @@ input {
   background-size: 100% 2px;
 }
 
-.folder-actions {
-  margin-left: auto;
-  display: flex;
-  gap: 6px;
-}
-
 .folder-footer {
-  padding: 0 12px 12px;
+  margin-top: auto;
+  padding: 12px 12px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;

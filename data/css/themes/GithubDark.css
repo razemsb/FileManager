@@ -881,7 +881,7 @@ select {
 .efm-context-menu .ctx-item:hover {
   background: var(--ctx-hover-bg);
   color: var(--ctx-hover-color);
-  border: 1px solid var(--border);
+  outline: 1px solid var(--border);
 }
 .context-menu .ctx-item.ctx-delete {
   color: var(--danger);
