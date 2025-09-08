@@ -58,7 +58,7 @@ body::before {
   z-index: -1;
   pointer-events: none;
 
-  background-image: url('../../img/themes/neo-tokyo-back.jpg');
+  background-image: url("../../img/themes/neo-tokyo-back.jpg");
 
   background-repeat: no-repeat;
   background-position: center var(--bg-vertical);
