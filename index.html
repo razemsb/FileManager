@@ -193,9 +193,15 @@
             </div>
           </div>
           <div v-if="filteredFolders.length === 0" class="empty-state">
-            <i class="bi bi-folder-x"></i>
-            <h3>Папки не найдены</h3>
-            <p>Попробуйте изменить параметры поиска</p>
+            <div class="empty-state-content">
+              <div class="empty-state-image">
+                <img src="data/img/other/404.png" alt="Папка не найдена" class="empty-state-img" draggable="false">
+              </div>
+              <div class="empty-state-text">
+                <h3>Папки не найдены</h3>
+                <p>Попробуйте изменить параметры поиска</p>
+              </div>
+            </div>
           </div>
           <div class="pagination" v-if="totalPages > 1">
             <button class="pagination-btn" @click="prevPage" :disabled="currentPage === 1">
@@ -476,10 +482,7 @@
                   <i class="fa-solid fa-eye-slash"></i> Скрыть кнопку БД
                 </button>
 
-                <button
-                  @click="generateRandomFolders"
-                  class="btn btn-primary ms-1"
-                >
+                <button @click="generateRandomFolders" class="btn btn-primary ms-1">
                   <i class="fa-solid fa-folder-plus"></i> Создать тестовые папки
                 </button>
               </fieldset>

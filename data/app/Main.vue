@@ -205,7 +205,7 @@ createApp({
     const selectedCategoryId = ref(null);
 
     const settings = ref({
-      perPageMode: 'auto',
+      perPageMode: 'manual',
       perPageValue: 16,
     });
 
@@ -350,7 +350,7 @@ createApp({
 
     async function loadCategories() {
       try {
-        const resp = await axios.get('data/api/categories.php?action=getCategories');
+        const resp = await axios.get('data/api/api.php?action=getCategories');
         if (resp.data?.success) {
           categories.value = resp.data.data || [];
         } else {
@@ -382,7 +382,7 @@ createApp({
         return;
       }
       try {
-        const resp = await axios.post('data/api/categories.php', {
+        const resp = await axios.post('data/api/api.php', {
           action: 'createCategory',
           name: name,
         });
@@ -402,7 +402,7 @@ createApp({
     async function addFolderToCategory(categoryId, folderName) {
       if (!categoryId || !folderName) return;
       try {
-        const resp = await axios.post('data/api/categories.php', {
+        const resp = await axios.post('data/api/api.php', {
           action: 'addFolder',
           categoryId,
           folderName,
@@ -424,7 +424,7 @@ createApp({
     async function removeFolderFromCategory(categoryId, folderName) {
       if (!categoryId || !folderName) return;
       try {
-        const resp = await axios.post('data/api/categories.php', {
+        const resp = await axios.post('data/api/api.php', {
           action: 'removeFolder',
           categoryId,
           folderName,
@@ -460,7 +460,7 @@ createApp({
     async function deleteCategory(categoryId) {
       if (!confirm('Удалить категорию?')) return;
       try {
-        const resp = await axios.post('data/api/categories.php', {
+        const resp = await axios.post('data/api/api.php', {
           action: 'deleteCategory',
           categoryId,
         });
@@ -484,7 +484,7 @@ createApp({
 
     async function renameCategory(categoryId, newName) {
       try {
-        const resp = await axios.post('data/api/categories.php', {
+        const resp = await axios.post('data/api/api.php', {
           action: 'renameCategory',
           categoryId,
           newName,
@@ -1306,11 +1306,40 @@ createApp({
     }
 
     function applySettings() {
+      if (settings.value.perPageMode === 'manual') {
+        if (settings.value.perPageValue <= 0) {
+          notifier.error({
+            title: 'Некорректное значение',
+            message: 'Количество папок на странице должно быть больше 0',
+            duration: 3000
+          });
+          settings.value.perPageValue = 1;
+          closeSettings();
+        }
+        if (settings.value.perPageValue > 100) {
+          notifier.warning({
+            title: 'Большое значение',
+            message: 'Установлено максимальное значение: 100 папок на странице',
+            duration: 3000
+          });
+          settings.value.perPageValue = 100;
+        }
+      }
+      
       itemsPerPage.value = resolvedItemsPerPage.value;
       currentPage.value = 1;
       localStorage.setItem('efm_settings', JSON.stringify(settings.value));
-      if (selectedThemeSetting.value && selectedThemeSetting.value !== theme.value)
+      
+      if (selectedThemeSetting.value && selectedThemeSetting.value !== theme.value) {
         applyTheme(selectedThemeSetting.value);
+      }
+
+      notifier.info({
+        title: 'Инфо',
+        message: 'Настройки изменены.',
+        duration: '3000'
+      })
+
       closeSettings();
     }
 

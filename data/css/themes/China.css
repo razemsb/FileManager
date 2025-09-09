@@ -16,7 +16,7 @@
   --paper-2: #0b0d10;
   --line: #242931;
 
-  --bg: radial-gradient(100% 100% at center, #1a1f26 0%, #0e1217 60%, #0b0d10 100%);
+  --bg-fallback: radial-gradient(100% 100% at center, #1a1f26 0%, #0e1217 60%, #0b0d10 100%);
   --card: #12161c;
   --folder-card: #12161cda;
   --muted: #aeb6c2;

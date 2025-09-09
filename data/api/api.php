@@ -1,317 +1,473 @@
 <?php
-header('Content-Type: application/json');
-define('BASE_DIR', __DIR__ . '/../..');
-define('DATA_DIR', BASE_DIR . '/data/memory');
-define('DATA_FILE', DATA_DIR . '/folders.json');
+header('Content-Type: application/json; charset=utf-8');
 
-function loadData()
-{
-    if (!file_exists(DATA_FILE)) {
-        return ['pinned' => [], 'recent' => []];
+class FileManagerAPI {
+    private $baseDir;
+    private $dataDir;
+    private $foldersFile;
+    private $categoriesFile;
+    
+    public function __construct() {
+        $this->baseDir = realpath(__DIR__ . '/../..');
+        $this->dataDir = $this->baseDir . '/data/memory';
+        $this->foldersFile = $this->dataDir . '/folders.json';
+        $this->categoriesFile = $this->dataDir . '/categories.json';
+        
+        $this->ensureDirectoryExists();
     }
-
-    $json = file_get_contents(DATA_FILE);
-    $data = json_decode($json, true);
-
-    if (!is_array($data)) {
-        return ['pinned' => [], 'recent' => []];
-    }
-
-    return [
-        'pinned' => $data['pinned'] ?? [],
-        'recent' => $data['recent'] ?? []
-    ];
-}
-
-function saveData($data)
-{
-    if (!is_dir(DATA_DIR)) {
-        mkdir(DATA_DIR, 0755, true);
-    }
-    file_put_contents(DATA_FILE, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-}
-
-function getFoldersList()
-{
-    $excludedFolders = ['data', '.git', '.vscode'];
-
-    $folders = array_filter(scandir(BASE_DIR), function ($item) use ($excludedFolders) {
-        return $item !== '.' && $item !== '..' && !in_array($item, $excludedFolders) && $item && is_dir(BASE_DIR . '/' . $item);
-    });
-    return array_values($folders);
-}
-
-function getPinnedFolders()
-{
-    $data = loadData();
-    return $data['pinned'];
-}
-
-function getRecentFolders()
-{
-    $data = loadData();
-    return $data['recent'];
-}
-
-function savePinnedFolders($folders)
-{
-    $data = loadData();
-    $data['pinned'] = array_values($folders);
-    saveData($data);
-}
-
-function saveRecentFolders($folders)
-{
-    $data = loadData();
-    $data['recent'] = array_values($folders);
-    saveData($data);
-}
-
-function downloadFolder($folderName)
-{
-
-    if (!extension_loaded('zip')) {
-        throw new Exception("ZipArchive error");
-    }
-
-    if (empty($folderName)) {
-        throw new Exception("Имя папки не указано");
-    }
-
-    $basePath = realpath(BASE_DIR);
-    $folderPath = realpath($basePath . DIRECTORY_SEPARATOR . $folderName);
-
-    if ($folderPath === false || strpos($folderPath, $basePath) !== 0) {
-        throw new Exception("Недопустимый путь к папке");
-    }
-
-    if (!is_dir($folderPath)) {
-        throw new Exception("Папка '$folderName' не существует или недоступна");
-    }
-
-    $tempZip = tempnam(sys_get_temp_dir(), 'zip_');
-    if ($tempZip === false) {
-        throw new Exception("Ошибка создания временного файла");
-    }
-
-    $zip = new ZipArchive();
-    if ($zip->open($tempZip, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
-        unlink($tempZip);
-        throw new Exception("Не удалось создать ZIP-архив");
-    }
-
-    $files = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($folderPath, RecursiveDirectoryIterator::SKIP_DOTS),
-        RecursiveIteratorIterator::SELF_FIRST
-    );
-
-    foreach ($files as $file) {
-        $filePath = $file->getRealPath();
-        $relativePath = substr($filePath, strlen($folderPath) + 1);
-
-        if ($file->isDir()) {
-            $zip->addEmptyDir($folderName . '/' . $relativePath);
-        } else {
-            $zip->addFile($filePath, $folderName . '/' . $relativePath);
+    
+    private function ensureDirectoryExists() {
+        if (!is_dir($this->dataDir)) {
+            mkdir($this->dataDir, 0755, true);
         }
     }
-
-    if (!$zip->close()) {
+     
+    private function loadFoldersData() {
+        if (!file_exists($this->foldersFile)) {
+            return ['pinned' => [], 'recent' => []];
+        }
+        
+        $json = file_get_contents($this->foldersFile);
+        $data = json_decode($json, true);
+        
+        return [
+            'pinned' => $data['pinned'] ?? [],
+            'recent' => $data['recent'] ?? []
+        ];
+    }
+    
+    private function saveFoldersData($data) {
+        file_put_contents($this->foldersFile, 
+            json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    }
+    
+    private function loadCategories() {
+        if (!file_exists($this->categoriesFile)) {
+            return [];
+        }
+        
+        $json = file_get_contents($this->categoriesFile);
+        $data = json_decode($json, true);
+        
+        return is_array($data) ? $data : [];
+    }
+    
+    private function saveCategories($data) {
+        $tempFile = $this->categoriesFile . '.tmp';
+        file_put_contents($tempFile, 
+            json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        rename($tempFile, $this->categoriesFile);
+    }
+    
+    private function getFoldersList() {
+        $excludedFolders = ['data', '.git', '.vscode'];
+        
+        $folders = array_filter(scandir($this->baseDir), function ($item) use ($excludedFolders) {
+            $fullPath = $this->baseDir . '/' . $item;
+            return $item !== '.' && 
+                   $item !== '..' && 
+                   !in_array($item, $excludedFolders) && 
+                   $item && 
+                   is_dir($fullPath);
+        });
+        
+        return array_values($folders);
+    }
+    
+    private function validateFolderPath($folderName) {
+        if (empty($folderName)) {
+            throw new Exception("Имя папки не указано");
+        }
+        
+        $folderPath = realpath($this->baseDir . DIRECTORY_SEPARATOR . $folderName);
+        
+        if ($folderPath === false || strpos($folderPath, $this->baseDir) !== 0) {
+            throw new Exception("Недопустимый путь к папке");
+        }
+        
+        return $folderPath;
+    }
+    
+    private function sendResponse($success, $data = []) {
+        echo json_encode(array_merge(['success' => $success], $data));
+        exit;
+    }
+      
+    public function getFolders() {
+        $folders = $this->getFoldersList();
+        $foldersData = $this->loadFoldersData();
+        $pinned = $foldersData['pinned'] ?? [];
+        $recent = $foldersData['recent'] ?? [];
+        
+        $result = array_map(function ($folder) use ($pinned, $recent) {
+            return [
+                'name' => $folder,
+                'modified' => filemtime($this->baseDir . '/' . $folder),
+                'isPinned' => in_array($folder, $pinned),
+                'isRecent' => in_array($folder, $recent)
+            ];
+        }, $folders);
+        
+        $this->sendResponse(true, ['data' => $result]);
+    }
+    
+    public function downloadFolder($folderName) {
+        if (!extension_loaded('zip')) {
+            throw new Exception("ZipArchive не доступен");
+        }
+        
+        $folderPath = $this->validateFolderPath($folderName);
+        
+        if (!is_dir($folderPath)) {
+            throw new Exception("Папка '$folderName' не существует");
+        }
+        
+        $tempZip = tempnam(sys_get_temp_dir(), 'zip_');
+        $zip = new ZipArchive();
+        
+        if ($zip->open($tempZip, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            unlink($tempZip);
+            throw new Exception("Не удалось создать ZIP-архив");
+        }
+        
+        $files = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($folderPath, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+        
+        foreach ($files as $file) {
+            $filePath = $file->getRealPath();
+            $relativePath = substr($filePath, strlen($folderPath) + 1);
+            
+            if ($file->isDir()) {
+                $zip->addEmptyDir($folderName . '/' . $relativePath);
+            } else {
+                $zip->addFile($filePath, $folderName . '/' . $relativePath);
+            }
+        }
+        
+        if (!$zip->close()) {
+            unlink($tempZip);
+            throw new Exception("Ошибка при закрытии архива");
+        }
+        
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="' . $folderName . '.zip"');
+        header('Content-Length: ' . filesize($tempZip));
+        readfile($tempZip);
         unlink($tempZip);
-        throw new Exception("Ошибка при закрытии архива");
+        exit;
     }
-
-    if (!file_exists($tempZip) || filesize($tempZip) === 0) {
-        unlink($tempZip);
-        throw new Exception("Создан пустой архив");
-    }
-
-    header('Content-Type: application/zip');
-    header('Content-Disposition: attachment; filename="' . $folderName . '.zip"');
-    header('Content-Length: ' . filesize($tempZip));
-    header('Content-Transfer-Encoding: binary');
-    header('Cache-Control: no-cache, must-revalidate');
-    header('Pragma: no-cache');
-    header('Expires: 0');
-
-    while (ob_get_level()) {
-        ob_end_clean();
-    }
-
-    readfile($tempZip);
-    unlink($tempZip);
-    exit;
-}
-
-function createTestFolders($count = 4, $prefix = 'folder')
-{
-    $basePath = realpath(BASE_DIR);
-    $createdFolders = [];
-
-    for ($i = 1; $i <= $count; $i++) {
-        $folderName = $prefix . '_' . uniqid() . '_' . $i;
-        $folderPath = $basePath . '/' . $folderName;
-
-        if (!file_exists($folderPath)) {
-            if (mkdir($folderPath, 0755, true)) {
+    
+    public function createTestFolders($count, $prefix) {
+        $count = min(max(1, (int)$count), 50);
+        $createdFolders = [];
+        
+        for ($i = 1; $i <= $count; $i++) {
+            $folderName = $prefix . '_' . uniqid() . '_' . $i;
+            $folderPath = $this->baseDir . '/' . $folderName;
+            
+            if (!file_exists($folderPath) && mkdir($folderPath, 0755, true)) {
                 $createdFolders[] = $folderName;
-
+                
                 $fileCount = rand(1, 3);
                 for ($j = 1; $j <= $fileCount; $j++) {
                     $fileName = $folderPath . '/test_file_' . $j . '.txt';
-                    file_put_contents($fileName, "Тестовое содержимое файла " . $j . "\nСоздано: " . date('Y-m-d H:i:s'));
+                    file_put_contents($fileName, "Тестовое содержимое файла $j\nСоздано: " . date('Y-m-d H:i:s'));
                 }
             }
         }
+        
+        $this->sendResponse(true, [
+            'message' => 'Создано папок: ' . count($createdFolders),
+            'folders' => $createdFolders
+        ]);
     }
-
-    return $createdFolders;
-}
-
-try {
-    $method = $_SERVER['REQUEST_METHOD'];
-    $action = $_GET['action'] ?? '';
-
-    if ($method === 'GET') {
-        if ($action === 'getFolders') {
-            $folders = getFoldersList();
-            $pinned = getPinnedFolders();
-            $recent = getRecentFolders();
-
-            $result = array_map(function ($folder) use ($pinned, $recent) {
-                return [
-                    'name' => $folder,
-                    'modified' => filemtime(BASE_DIR . '/' . $folder),
-                    'isPinned' => in_array($folder, $pinned),
-                    'isRecent' => in_array($folder, $recent)
-                ];
-            }, $folders);
-
-            echo json_encode(['success' => true, 'data' => $result]);
-            exit;
+    
+    public function togglePin($folder, $pinned) {
+        $data = $this->loadFoldersData();
+        $pinnedFolders = $data['pinned'] ?? [];
+        
+        if ($pinned) {
+            $pinnedFolders = array_diff($pinnedFolders, [$folder]);
+        } else {
+            array_unshift($pinnedFolders, $folder);
+            $pinnedFolders = array_slice($pinnedFolders, 0, 30);
         }
-
-        if ($action === 'download') {
-            $folder = $_GET['folder'] ?? '';
-            downloadFolder($folder);
-            exit;
-        }
-
+        
+        $data['pinned'] = array_values($pinnedFolders);
+        $this->saveFoldersData($data);
+        
+        $this->sendResponse(true);
     }
-
-    if ($method === 'POST') {
-        $input = json_decode(file_get_contents('php://input'), true);
-        $action = $input['action'] ?? '';
-
-        if ($action === 'createFolders') {
-            $count = $input['count'] ?? 5;
-            $prefix = $input['prefix'] ?? 'test_folder';
-
-            $count = min(max(1, (int) $count), 50);
-
-            $createdFolders = createTestFolders($count, $prefix);
-
-            echo json_encode([
-                'success' => true,
-                'message' => 'Создано папок: ' . count($createdFolders),
-                'folders' => $createdFolders
-            ]);
-            exit;
+    
+    public function addRecent($folder) {
+        $data = $this->loadFoldersData();
+        $recentFolders = $data['recent'] ?? [];
+        
+        if (!in_array($folder, $recentFolders)) {
+            array_unshift($recentFolders, $folder);
+            $recentFolders = array_slice($recentFolders, 0, 30);
+            $data['recent'] = array_values($recentFolders);
+            $this->saveFoldersData($data);
         }
-
-        if ($action === 'togglePin') {
-            $folder = $input['folder'] ?? '';
-            $pinned = $input['pinned'] ?? false;
-
-            $pinnedFolders = getPinnedFolders();
-
-            if ($pinned) {
-                $pinnedFolders = array_diff($pinnedFolders, [$folder]);
-            } else {
-                array_unshift($pinnedFolders, $folder);
-                $pinnedFolders = array_slice($pinnedFolders, 0, 30);
-            }
-
-            savePinnedFolders($pinnedFolders);
-            echo json_encode(['success' => true]);
-            exit;
+        
+        $this->sendResponse(true);
+    }
+    
+    public function deleteFolder($folder) {
+        $folderPath = $this->validateFolderPath($folder);
+        
+        if (!is_dir($folderPath)) {
+            throw new Exception("Папка '$folder' не существует");
         }
-
-        if ($action === 'addRecent') {
-            $folder = $input['folder'] ?? '';
-            $recentFolders = getRecentFolders();
-
-            if (!in_array($folder, $recentFolders)) {
-                array_unshift($recentFolders, $folder);
-                $recentFolders = array_slice($recentFolders, 0, 30);
-                saveRecentFolders($recentFolders);
+        
+        $this->deleteDirectory($folderPath);
+        
+        $data = $this->loadFoldersData();
+        $data['pinned'] = array_values(array_diff($data['pinned'] ?? [], [$folder]));
+        $data['recent'] = array_values(array_diff($data['recent'] ?? [], [$folder]));
+        $this->saveFoldersData($data);
+        
+        $this->sendResponse(true);
+    }
+    
+    private function deleteDirectory($dir) {
+        if (!file_exists($dir)) return true;
+        if (!is_dir($dir)) return unlink($dir);
+        
+        foreach (scandir($dir) as $item) {
+            if ($item == '.' || $item == '..') continue;
+            
+            if (!$this->deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
+                return false;
             }
-
-            echo json_encode(['success' => true]);
-            exit;
         }
-
-        if ($action === 'deleteFolder') {
-            $folder = $input['folder'] ?? '';
-
-            if (empty($folder)) {
-                throw new Exception("Имя папки не указано");
+        
+        return rmdir($dir);
+    }
+    
+    
+    public function getCategories() {
+        $categories = $this->loadCategories();
+        $this->sendResponse(true, ['data' => $categories]);
+    }
+    
+    public function createCategory($name) {
+        $name = trim($name);
+        if (empty($name)) {
+            throw new Exception("Имя категории не может быть пустым");
+        }
+        
+        if (mb_strlen($name) > 150) {
+            throw new Exception("Имя категории слишком длинное");
+        }
+        
+        $name = preg_replace('/[\/\\\\]/u', '-', $name);
+        $categories = $this->loadCategories();
+        
+        $newCategory = [
+            'id' => 'cat_' . uniqid(),
+            'name' => $name,
+            'folders' => []
+        ];
+        
+        $categories[] = $newCategory;
+        $this->saveCategories($categories);
+        
+        $this->sendResponse(true, ['category' => $newCategory]);
+    }
+    
+    public function deleteCategory($categoryId) {
+        $categories = $this->loadCategories();
+        $found = false;
+        
+        foreach ($categories as $key => $category) {
+            if (($category['id'] ?? '') === $categoryId) {
+                unset($categories[$key]);
+                $found = true;
+                break;
             }
-
-            $basePath = realpath(BASE_DIR);
-            $folderPath = realpath($basePath . DIRECTORY_SEPARATOR . $folder);
-
-            // Проверка безопасности
-            if ($folderPath === false || strpos($folderPath, $basePath) !== 0) {
-                throw new Exception("Недопустимый путь к папке");
+        }
+        
+        if (!$found) {
+            throw new Exception("Категория не найдена");
+        }
+        
+        $this->saveCategories(array_values($categories));
+        $this->sendResponse(true);
+    }
+    
+    public function renameCategory($categoryId, $newName) {
+        $newName = trim($newName);
+        if (empty($newName)) {
+            throw new Exception("Имя категории не может быть пустым");
+        }
+        
+        $newName = preg_replace('/[\/\\\\]/u', '-', $newName);
+        $categories = $this->loadCategories();
+        $found = false;
+        
+        foreach ($categories as $key => $category) {
+            if (($category['id'] ?? '') === $categoryId) {
+                $categories[$key]['name'] = $newName;
+                $found = true;
+                break;
             }
-
-            if (!is_dir($folderPath)) {
-                throw new Exception("Папка '$folder' не существует");
-            }
-
-            function deleteDirectory($dir)
-            {
-                if (!file_exists($dir))
-                    return true;
-
-                if (!is_dir($dir)) {
-                    return unlink($dir);
+        }
+        
+        if (!$found) {
+            throw new Exception("Категория не найдена");
+        }
+        
+        $this->saveCategories($categories);
+        $this->sendResponse(true);
+    }
+    
+    public function addFolderToCategory($categoryId, $folderName) {
+        $folderName = trim($folderName);
+        if (empty($folderName)) {
+            throw new Exception("Имя папки не может быть пустым");
+        }
+        
+        $categories = $this->loadCategories();
+        $found = false;
+        
+        foreach ($categories as $key => $category) {
+            if (($category['id'] ?? '') === $categoryId) {
+                if (!in_array($folderName, $categories[$key]['folders'])) {
+                    $categories[$key]['folders'][] = $folderName;
                 }
-
-                foreach (scandir($dir) as $item) {
-                    if ($item == '.' || $item == '..')
-                        continue;
-
-                    if (!deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
-                        return false;
+                $found = true;
+                break;
+            }
+        }
+        
+        if (!$found) {
+            throw new Exception("Категория не найдена");
+        }
+        
+        $this->saveCategories($categories);
+        $this->sendResponse(true);
+    }
+    
+    public function removeFolderFromCategory($categoryId, $folderName) {
+        $folderName = trim($folderName);
+        $categories = $this->loadCategories();
+        $found = false;
+        
+        foreach ($categories as $key => $category) {
+            if (($category['id'] ?? '') === $categoryId) {
+                $categories[$key]['folders'] = array_values(array_filter(
+                    $categories[$key]['folders'],
+                    function ($f) use ($folderName) {
+                        return $f !== $folderName;
                     }
-                }
-
-                return rmdir($dir);
+                ));
+                $found = true;
+                break;
             }
-
-            if (deleteDirectory($folderPath)) {
-                $pinnedFolders = getPinnedFolders();
-                $pinnedFolders = array_diff($pinnedFolders, [$folder]);
-                savePinnedFolders($pinnedFolders);
-                $recentFolders = getRecentFolders();
-                $recentFolders = array_diff($recentFolders, [$folder]);
-                saveRecentFolders($recentFolders);
-                echo json_encode(['success' => true]);
-            } else {
-                throw new Exception("Не удалось удалить папку");
-            }
-            exit;
         }
-
-        throw new Exception('Неизвестный запрос');
+        
+        if (!$found) {
+            throw new Exception("Категория не найдена");
+        }
+        
+        $this->saveCategories($categories);
+        $this->sendResponse(true);
     }
+    
+    // запросы
 
-    throw new Exception('Неизвестный запрос');
-
-} catch (Exception $e) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-    exit;
+    public function handleRequest() {
+        try {
+            $method = $_SERVER['REQUEST_METHOD'];
+            $action = $_GET['action'] ?? '';
+            
+            if ($method === 'POST') {
+                $input = json_decode(file_get_contents('php://input'), true) ?: [];
+                $action = $input['action'] ?? $action;
+            }
+            
+            if (empty($action)) {
+                throw new Exception("Не указано действие (action)");
+            }
+            
+            if ($method === 'GET') {
+                switch ($action) {
+                    case 'getFolders':
+                        $this->getFolders();
+                        break;
+                    case 'getCategories':
+                        $this->getCategories();
+                        break;
+                    case 'download':
+                        $folder = $_GET['folder'] ?? '';
+                        $this->downloadFolder($folder);
+                        break;
+                    default:
+                        throw new Exception("Неизвестное действие: $action");
+                }
+            }
+            
+            if ($method === 'POST') {
+                $input = json_decode(file_get_contents('php://input'), true) ?: [];
+                
+                switch ($action) {
+                    case 'createFolders':
+                        $count = $input['count'] ?? 5;
+                        $prefix = $input['prefix'] ?? 'test_folder';
+                        $this->createTestFolders($count, $prefix);
+                        break;
+                    case 'togglePin':
+                        $folder = $input['folder'] ?? '';
+                        $pinned = $input['pinned'] ?? false;
+                        $this->togglePin($folder, $pinned);
+                        break;
+                    case 'addRecent':
+                        $folder = $input['folder'] ?? '';
+                        $this->addRecent($folder);
+                        break;
+                    case 'deleteFolder':
+                        $folder = $input['folder'] ?? '';
+                        $this->deleteFolder($folder);
+                        break;
+                    case 'createCategory':
+                        $name = $input['name'] ?? '';
+                        $this->createCategory($name);
+                        break;
+                    case 'deleteCategory':
+                        $categoryId = $input['categoryId'] ?? '';
+                        $this->deleteCategory($categoryId);
+                        break;
+                    case 'renameCategory':
+                        $categoryId = $input['categoryId'] ?? '';
+                        $newName = $input['newName'] ?? '';
+                        $this->renameCategory($categoryId, $newName);
+                        break;
+                    case 'addFolder':
+                        $categoryId = $input['categoryId'] ?? '';
+                        $folderName = $input['folderName'] ?? '';
+                        $this->addFolderToCategory($categoryId, $folderName);
+                        break;
+                    case 'removeFolder':
+                        $categoryId = $input['categoryId'] ?? '';
+                        $folderName = $input['folderName'] ?? '';
+                        $this->removeFolderFromCategory($categoryId, $folderName);
+                        break;
+                    default:
+                        throw new Exception("Неизвестное действие: $action");
+                }
+            }
+            
+            throw new Exception("Метод не поддерживается");
+            
+        } catch (Exception $e) {
+            http_response_code(400);
+            $this->sendResponse(false, ['error' => $e->getMessage()]);
+        }
+    }
 }
+
+$api = new FileManagerAPI();
+$api->handleRequest();
