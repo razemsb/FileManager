@@ -1,517 +1,441 @@
 <!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EFM | MANAGER</title>
-    <meta name="apple-mobile-web-app-title" content="MyWebSite" />
-    <link rel="icon" type="image/png" href="data/img/favicon/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="data/img/favicon/favicon.svg" />
-    <link rel="shortcut icon" href="data/img/favicon/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="data/img/favicon/apple-touch-icon.png" />
-    <link rel="manifest" href="data/img/favicon/site.webmanifest" />
-    <link rel="stylesheet" href="data/css/style.min.css" />
-    <link rel="stylesheet" href="data/vendors/fontawesome/css/all.min.css" />
-    <link rel="stylesheet" href="data/vendors/bootstrap/icons/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="data/vendors/popups/style.css" />
-    <link rel="stylesheet" href="data/vendors/bootstrap/css/bootstrap.min.css" />
-    <script src="data/vendors/vue/vue.global.js"></script>
-    <script src="data/vendors/axios/axios.js"></script>
-    <script src="data/vendors/popups/script.js" async></script>
-    <script src="data/app/Main.vue" defer></script>
-    <script src="data/vendors/bootstrap/js/bootstrap.js" defer></script>
-    <script src="data/vendors/popperjs/popper.js"></script>
-    <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        function setMenuAccentFromTheme() {
-          const menu = document.querySelector('.efm-context-menu');
-          if (!menu) return;
-          const root = getComputedStyle(document.documentElement);
-          const primary = root.getPropertyValue('--primary').trim() || '#6c8eff';
-          menu.style.setProperty('--menu-accent-solid', primary);
-          menu.style.setProperty('--menu-glow', primary + '22');
-        }
-        setTimeout(setMenuAccentFromTheme, 300);
-      });
-    </script>
-  </head>
-  <body>
-    <div id="app">
-      <header class="app-header">
-        <div class="header-left">
-          <button class="sidebar-toggle" @click="toggleSidebar">
-            <i class="bi bi-list"></i>
-          </button>
-          <h1 class="app-title" title="Enigma File Manager" role="heading" aria-level="1">
-            <img
-              src="data/img/favicon/favicon.svg"
-              class="app-logo"
-              width="44"
-              height="44"
-              alt="EFM logo"
-            />
-            <span class="logo-text">
-              <span class="logo-line">
-                <span class="logo-first">E</span><span class="logo-rest">FM</span>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EFM | MANAGER</title>
+  <meta name="author" content="razemsb">
+  <meta name="apple-mobile-web-app-title" content="MyWebSite" />
+  <link rel="icon" type="image/png" href="data/img/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="data/img/favicon/favicon.svg" />
+  <link rel="shortcut icon" href="data/img/favicon/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="data/img/favicon/apple-touch-icon.png" />
+  <link rel="manifest" href="data/img/favicon/site.webmanifest" />
+  <link rel="stylesheet" href="data/css/style.min.css" />
+  <link rel="stylesheet" href="data/vendors/fontawesome/css/all.min.css" />
+  <link rel="stylesheet" href="data/vendors/bootstrap/icons/bootstrap-icons.min.css" />
+  <link rel="stylesheet" href="data/vendors/popups/style.css" />
+  <link rel="stylesheet" href="data/vendors/bootstrap/css/bootstrap.min.css" />
+  <script src="data/vendors/vue/vue.global.js"></script>
+  <script src="data/vendors/axios/axios.js"></script>
+  <script src="data/vendors/popups/script.js" async></script>
+  <script src="data/app/Main.vue" defer></script>
+  <script src="data/vendors/bootstrap/js/bootstrap.js" defer></script>
+  <script src="data/vendors/popperjs/popper.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      function setMenuAccentFromTheme() {
+        const menu = document.querySelector('.efm-context-menu');
+        if (!menu) return;
+        const root = getComputedStyle(document.documentElement);
+        const primary = root.getPropertyValue('--primary').trim() || '#6c8eff';
+        menu.style.setProperty('--menu-accent-solid', primary);
+        menu.style.setProperty('--menu-glow', primary + '22');
+      }
+      setTimeout(setMenuAccentFromTheme, 300);
+    });
+  </script>
+</head>
+
+<body>
+  <div id="app">
+    <header class="app-header">
+      <div class="header-left">
+        <button class="sidebar-toggle" @click="toggleSidebar" title="Меню">
+          <i class="bi bi-list"></i>
+        </button>
+
+        <a href="#" class="app-brand" title="Enigma File Manager">
+          <div class="logo-mark">
+            <img src="data/img/favicon/favicon.svg" alt="EFM" />
+          </div>
+          <div class="brand-text">
+            <div class="brand-primary">EFM</div>
+            <div class="brand-secondary">File Manager</div>
+          </div>
+        </a>
+      </div>
+      <div class="top-bar">
+        <button class="theme-toggle" @click="openSettings" data-bs-toggle="tooltip"
+          :title="'Настройки, Тема: ' + (theme.charAt(0).toUpperCase() + theme.slice(1))">
+          <img src="data/img/themes/dragon.svg" />
+        </button>
+        <a v-if="showDbButton === true" class="db-toggle" id="db-toggle" href="http://localhost/phpmyadmin/"
+          target="_blank" data-bs-toggle="tooltip" title="Перейти к phpMyAdmin"
+          data-bs-original-title="Перейти к phpMyAdmin">
+          <img src="data/img/other/favicon.ico" style="width: 30px; height: 30px" />
+        </a>
+        <div class="search-bar">
+          <i class="bi bi-search"></i>
+          <input type="text" class="search-input" v-model="searchQuery" @input="filterFolders"
+            placeholder="Поиск папок..." />
+        </div>
+      </div>
+    </header>
+    <div class="app-container">
+      <aside class="app-sidebar" :class="{ 'collapsed': sidebarCollapsed }">
+        <div class="sidebar-bg"></div>
+        <nav class="sidebar-nav">
+          <div class="sidebar-section">
+            <h3 class="sidebar-title">МЕНЮ</h3>
+            <button class="sidebar-btn" :class="{ active: activeFilter === 'all' }" @click="setFilter('all')">
+              <i class="bi bi-collection"></i>
+              <span class="btn-text">Все папки</span>
+              <span class="badge">{{ totalCount }}</span>
+            </button>
+            <button class="sidebar-btn" :class="{ active: activeFilter === 'pinned' }" @click="setFilter('pinned')">
+              <i class="bi bi-pin"></i>
+              <span class="btn-text">Закрепленные</span>
+              <span class="badge">{{ pinnedCount }}</span>
+            </button>
+            <button class="sidebar-btn" :class="{ active: activeFilter === 'recent' }" @click="setFilter('recent')">
+              <i class="bi bi-clock"></i>
+              <span class="btn-text">Недавние</span>
+              <span class="badge">{{ recentCount }}</span>
+            </button>
+            <button class="sidebar-btn" @click="openCreateFolderModal">
+              <i class="bi bi-folder-plus"></i>
+              <span class="btn-text">Создать папку</span>
+            </button>
+            <button class="sidebar-btn" @click="openCategoryModalForFolder()">
+              <i class="bi bi-plus-lg"></i>
+              <span class="btn-text">Настройки категорий</span>
+            </button>
+            <div v-if="categories.length && showCategoryChips" class="category-chips mt-2 px-2">
+              <div class="d-inline-flex flex-column gap-2">
+                <button v-for="cat in visibleCategories" :key="cat.id" class="btn btn-sm"
+                  :class="{'btn-primary': selectedCategoryId === cat.id, 'btn-outline-secondary': selectedCategoryId !== cat.id}"
+                  @click="selectCategory(cat.id)"
+                  :title="cat.name + (cat.folders?.length ? ' (' + cat.folders.length + ' папок)' : '')"
+                  :disabled="cat.folders?.length === 0"
+                  :title="cat.folders?.length === 0 ? 'В категории нет папок' : ''"
+                  :data-bs-original-title="cat.folders?.length === 0 ? 'В категории нет папок' : ''"
+                  :aria-disabled="cat.folders?.length === 0"
+                  :aria-label="cat.folders?.length === 0 ? 'В категории нет папок' : ''">
+                  {{ cat.name }}
+                </button>
+              </div>
+              <button v-if="categories.length > initialVisibleCategories" class="btn btn-link btn-sm mt-1 p-0"
+                @click="toggleShowAllCategories">
+                {{ showAllCategories ? 'Скрыть' : 'Показать все' }}
+              </button>
+            </div>
+          </div>
+        </nav>
+      </aside>
+      <main class="app-main">
+        <div class="folder-grid">
+          <div v-for="folder in paginatedFolders" class="folder-card"
+            :class="{ 'pinned': folder.isPinned, 'recent': folder.isRecent }" :key="folder.id"
+            @contextmenu.prevent="onRightClickFolder($event, folder)" :data-folder-name="folder.name">
+            <div class="folder-header">
+              <i class="bi bi-folder"></i>
+              <h3 class="folder-name" data-bs-toggle="tooltip" data-bs-placement="right" :title="folder.name"
+                :data-bs-original-title="folder.name">
+                {{ formatFolderName(folder.name) }}
+              </h3>
+            </div>
+            <div class="folder-footer relative">
+              <span class="modified-date" data-bs-toggle="tooltip"
+                :title="folder.modified ? formatDate(folder.modified) : '-'"
+                :data-bs-original-title="folder.modified ? formatDate(folder.modified) : '-'">
+                <i class="bi bi-calendar"></i> {{ folder.modified ? formatDate(folder.modified) :
+                '-' }}
               </span>
-              <span class="logo-sub">Enigma File Manager</span>
-            </span>
-          </h1>
+            </div>
+          </div>
         </div>
-        <div class="top-bar">
-          <button
-            class="theme-toggle"
-            @click="openSettings"
-            data-bs-toggle="tooltip"
-            :title="'Настройки, Тема: ' + (theme.charAt(0).toUpperCase() + theme.slice(1))"
-          >
-            <img src="data/img/themes/dragon.svg" />
+        <div v-if="filteredFolders.length === 0" class="empty-state">
+          <div class="empty-state-content">
+            <div class="empty-state-icon">
+              <i class="bi bi-folder-x"></i>
+            </div>
+            <div class="empty-state-text">
+              <h3 class="empty-state-title">Папки не найдены</h3>
+              <p class="empty-state-description" style="font-family: 'AddFont';">
+                <span v-if="searchQuery">По запросу "{{ searchQuery }}" ничего не найдено</span>
+                <span v-else-if="activeFilter === 'pinned'">У вас пока нет закрепленных папок</span>
+                <span v-else-if="activeFilter === 'recent'">Вы еще не открывали папки</span>
+                <span v-else-if="activeFilter === 'categories' && selectedCategoryId">В этой категории нет папок</span>
+                <span v-else>В этой директории пока нет папок. Создайте первую папку!</span>
+              </p>
+              <div class="empty-state-actions" v-if="!searchQuery && activeFilter === 'all'">
+                <button class="btn btn-primary empty-state-btn" @click="openCreateFolderModal"
+                  style="font-family: 'MainFont';">
+                  <i class="bi bi-folder-plus"></i>
+                  <span class="ms-2">Создать папку</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pagination" v-if="totalPages > 1">
+          <button class="pagination-btn" @click="prevPage" :disabled="currentPage === 1">
+            <i class="bi bi-chevron-left"></i>
           </button>
-          <a
-            v-if="showDbButton === true"
-            class="db-toggle"
-            id="db-toggle"
-            href="http://localhost/phpmyadmin/"
-            target="_blank"
-            data-bs-toggle="tooltip"
-            title="Перейти к phpMyAdmin"
-            data-bs-original-title="Перейти к phpMyAdmin"
-          >
-            <img src="data/img/other/favicon.ico" style="width: 30px; height: 30px" />
-          </a>
-          <div class="search-bar">
-            <i class="bi bi-search"></i>
-            <input
-              type="text"
-              class="search-input"
-              v-model="searchQuery"
-              @input="filterFolders"
-              placeholder="Поиск папок..."
-            />
+          <div class="page-numbers">
+            <button v-for="page in visiblePages" :key="page" class="page-btn" :class="{ active: page === currentPage }"
+              @click="goToPage(page)">
+              {{ page }}
+            </button>
           </div>
+          <button class="pagination-btn" @click="nextPage" :disabled="currentPage === totalPages">
+            <i class="bi bi-chevron-right"></i>
+          </button>
         </div>
-      </header>
-      <div class="app-container">
-        <aside class="app-sidebar" :class="{ 'collapsed': sidebarCollapsed }">
-          <div class="sidebar-bg"></div>
-          <nav class="sidebar-nav">
-            <div class="sidebar-section">
-              <h3 class="sidebar-title">МЕНЮ</h3>
-              <button
-                class="sidebar-btn"
-                :class="{ active: activeFilter === 'all' }"
-                @click="setFilter('all')"
-              >
-                <i class="bi bi-collection"></i>
-                <span class="btn-text">Все папки</span>
-                <span class="badge">{{ totalCount }}</span>
-              </button>
-              <button
-                class="sidebar-btn"
-                :class="{ active: activeFilter === 'pinned' }"
-                @click="setFilter('pinned')"
-              >
-                <i class="bi bi-pin"></i>
-                <span class="btn-text">Закрепленные</span>
-                <span class="badge">{{ pinnedCount }}</span>
-              </button>
-              <button
-                class="sidebar-btn"
-                :class="{ active: activeFilter === 'recent' }"
-                @click="setFilter('recent')"
-              >
-                <i class="bi bi-clock"></i>
-                <span class="btn-text">Недавние</span>
-                <span class="badge">{{ recentCount }}</span>
-              </button>
-              <button class="sidebar-btn" @click="openCategoryModalForFolder()">
-                <i class="bi bi-plus-lg"></i>
-                <span class="btn-text">Настройки категорий</span>
-              </button>
-              <div v-if="categories.length && showCategoryChips" class="category-chips mt-2 px-2">
-                <div class="d-inline-flex flex-column gap-2">
-                  <button
-                    v-for="cat in visibleCategories"
-                    :key="cat.id"
-                    class="btn btn-sm"
-                    :class="{'btn-primary': selectedCategoryId === cat.id, 'btn-outline-secondary': selectedCategoryId !== cat.id}"
-                    @click="selectCategory(cat.id)"
-                    :title="cat.name + (cat.folders?.length ? ' (' + cat.folders.length + ' папок)' : '')"
-                    :disabled="cat.folders?.length === 0"
-                    :title="cat.folders?.length === 0 ? 'В категории нет папок' : ''"
-                    :data-bs-original-title="cat.folders?.length === 0 ? 'В категории нет папок' : ''"
-                    :aria-disabled="cat.folders?.length === 0"
-                    :aria-label="cat.folders?.length === 0 ? 'В категории нет папок' : ''"
-                  >
-                    {{ cat.name }}
-                  </button>
-                </div>
-                <button
-                  v-if="categories.length > initialVisibleCategories"
-                  class="btn btn-link btn-sm mt-1 p-0"
-                  @click="toggleShowAllCategories"
-                >
-                  {{ showAllCategories ? 'Скрыть' : 'Показать все' }}
-                </button>
-              </div>
-            </div>
-          </nav>
-        </aside>
-        <main class="app-main">
-          <div class="folder-grid">
-            <div
-              v-for="folder in paginatedFolders"
-              class="folder-card"
-              :class="{ 'pinned': folder.isPinned, 'recent': folder.isRecent }"
-              :key="folder.id"
-              @contextmenu.prevent="onRightClickFolder($event, folder)"
-              :data-folder-name="folder.name"
-            >
-              <div class="folder-header">
-                <i class="bi bi-folder"></i>
-                <h3
-                  class="folder-name"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="right"
-                  :title="folder.name"
-                  :data-bs-original-title="folder.name"
-                >
-                  {{ formatFolderName(folder.name) }}
-                </h3>
-              </div>
-              <div class="folder-footer relative">
-                <span
-                  class="modified-date"
-                  data-bs-toggle="tooltip"
-                  :title="folder.modified ? formatDate(folder.modified) : '-'"
-                  :data-bs-original-title="folder.modified ? formatDate(folder.modified) : '-'"
-                >
-                  <i class="bi bi-calendar"></i> {{ folder.modified ? formatDate(folder.modified) :
-                  '-' }}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div v-if="filteredFolders.length === 0" class="empty-state">
-            <div class="empty-state-content">
-              <div class="empty-state-image">
-                <img src="data/img/other/404.png" alt="Папка не найдена" class="empty-state-img" draggable="false">
-              </div>
-              <div class="empty-state-text">
-                <h3>Папки не найдены</h3>
-                <p>Попробуйте изменить параметры поиска</p>
-              </div>
-            </div>
-          </div>
-          <div class="pagination" v-if="totalPages > 1">
-            <button class="pagination-btn" @click="prevPage" :disabled="currentPage === 1">
-              <i class="bi bi-chevron-left"></i>
-            </button>
-            <div class="page-numbers">
-              <button
-                v-for="page in visiblePages"
-                :key="page"
-                class="page-btn"
-                :class="{ active: page === currentPage }"
-                @click="goToPage(page)"
-              >
-                {{ page }}
-              </button>
-            </div>
-            <button class="pagination-btn" @click="nextPage" :disabled="currentPage === totalPages">
-              <i class="bi bi-chevron-right"></i>
-            </button>
-          </div>
-        </main>
+      </main>
+    </div>
+    <div class="overlay" :class="{ active: isLoading }">
+      <div class="spinner-container">
+        <div class="spinner"></div>
+        <p>Подождите, идет загрузка...</p>
       </div>
-      <div class="overlay" :class="{ active: isLoading }">
-        <div class="spinner-container">
-          <div class="spinner"></div>
-          <p>Подождите, идет загрузка...</p>
+    </div>
+
+    <div class="settings-overlay" :class="{ 'is-open': isCategoryModalOpen }" @click.self="closeCategoryModal"
+      aria-hidden="true" style="font-family: 'MainFont';">
+      <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="catModalTitle">
+        <div class="settings-header">
+          <h3 id="catModalTitle"><i class="fa-solid fa-tags"></i> Категории</h3>
+          <button class="icon-btn" @click="closeCategoryModal" aria-label="Закрыть">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
-      </div>
 
-      <div
-        class="settings-overlay"
-        :class="{ 'is-open': isCategoryModalOpen }"
-        @click.self="closeCategoryModal"
-        aria-hidden="true"
-      >
-        <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="catModalTitle">
-          <div class="settings-header">
-            <h3 id="catModalTitle"><i class="fa-solid fa-tags"></i> Категории</h3>
-            <button class="icon-btn" @click="closeCategoryModal" aria-label="Закрыть">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </div>
+        <div class="settings-body">
+          <section>
+            <fieldset class="set">
+              <legend class="mb-3">Создать новую категорию</legend>
+              <div class="row">
+                <input v-model="newCategoryName" class="categories-input" placeholder="Имя категории" />
+                <button class="btn ms-2 btn-primary" @click="createCategory">Создать</button>
+              </div>
+            </fieldset>
 
-          <div class="settings-body">
-            <section>
-              <fieldset class="set">
-                <legend class="mb-3">Создать новую категорию</legend>
-                <div class="row">
-                  <input
-                    v-model="newCategoryName"
-                    class="categories-input"
-                    placeholder="Имя категории"
-                  />
-                  <button class="btn ms-2 btn-primary" @click="createCategory">Создать</button>
-                </div>
-              </fieldset>
-
-              <fieldset class="set mt-3">
-                <legend>Существующие категории</legend>
-                <div v-if="categories.length === 0" class="muted">Категорий пока нет</div>
-                <ul class="list-unstyled">
-                  <li
-                    v-for="cat in categories"
-                    :key="cat.id"
-                    style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px"
-                  >
-                    <div style="flex: 1">
-                      <strong>{{ cat.name }}</strong>
-                      <div class="s" v-if="cat.folders && cat.folders.length">
-                        Папок: {{ cat.folders.length }}
-                      </div>
+            <fieldset class="set mt-3">
+              <legend>Существующие категории</legend>
+              <div v-if="categories.length === 0" class="muted">Категорий пока нет</div>
+              <ul class="list-unstyled">
+                <li v-for="cat in categories" :key="cat.id"
+                  style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px">
+                  <div style="flex: 1">
+                    <strong>{{ cat.name }}</strong>
+                    <div class="s" v-if="cat.folders && cat.folders.length">
+                      Папок: {{ cat.folders.length }}
                     </div>
-                    <div style="display: flex; gap: 6px">
-                      <button
-                        class="btn btn-sm btn-outline-secondary"
-                        @click="openRenameCategoryPrompt(cat)"
-                      >
-                        Переименовать
-                      </button>
-                      <button class="btn btn-sm btn-outline-danger" @click="deleteCategory(cat.id)">
-                        Удалить
-                      </button>
-                    </div>
-                  </li>
-                </ul>
-              </fieldset>
-            </section>
-          </div>
-
-          <div class="settings-footer">
-            <button class="btn ghost" @click="closeCategoryModal">Закрыть</button>
-          </div>
+                  </div>
+                  <div style="display: flex; gap: 6px">
+                    <button class="btn btn-sm btn-outline-secondary" @click="openRenameCategoryPrompt(cat)">
+                      Переименовать
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" @click="deleteCategory(cat.id)">
+                      Удалить
+                    </button>
+                  </div>
+                </li>
+              </ul>
+            </fieldset>
+          </section>
         </div>
-      </div>
 
-      <div
-        class="settings-overlay"
-        :class="{ 'is-open': isSettingsOpen }"
-        @click.self="closeSettings"
-        aria-hidden="true"
-      >
-        <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-          <div class="settings-header">
-            <h3 id="settingsTitle"><i class="fa-solid fa-sliders"></i> Настройки</h3>
-            <button class="icon-btn" @click="closeSettings" aria-label="Закрыть">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </div>
-          <div class="settings-tabs" role="tablist">
-            <button
-              class="tab ms-1"
-              :class="{active: activeTab==='general'}"
-              @click="activeTab='general'"
-              role="tab"
-            >
-              <i class="fa-solid fa-table-cells-large"></i> Отображение
-            </button>
-            <button
-              class="tab ms-1"
-              :class="{active: activeTab==='ui'}"
-              @click="activeTab='ui'"
-              role="tab"
-            >
-              <i class="fa-solid fa-wand-magic-sparkles"></i> Внешний вид
-            </button>
-            <button
-              class="tab ms-1"
-              :class="{active: activeTab==='settings'}"
-              @click="activeTab='settings'"
-              role="tab"
-            >
-              <i class="fa-solid fa-gear"></i> Настройки
-            </button>
-            <button
-              class="tab ms-1"
-              :class="{active: activeTab==='about'}"
-              @click="activeTab='about'"
-              role="tab"
-            >
-              <i class="fa-solid fa-circle-info"></i> О приложении
-            </button>
-          </div>
-
-          <div class="settings-body">
-            <section v-show="activeTab==='general'">
-              <fieldset class="set">
-                <legend>
-                  <i class="fa-solid fa-layer-group"></i> Количество папок на странице
-                </legend>
-
-                <label class="radio">
-                  <input type="radio" value="auto" v-model="settings.perPageMode" />
-                  <span>Авто (по размеру экрана)</span>
-                </label>
-
-                <label class="radio">
-                  <input type="radio" value="manual" v-model="settings.perPageMode" />
-                  <span>Вручную</span>
-                </label>
-
-                <div class="manual-row" :class="{disabled: settings.perPageMode!=='manual'}">
-                  <label class="inline">
-                    <i class="fa-regular fa-square-check"></i>
-                    <span>Показывать по</span>
-                    <input
-                      type="number"
-                      min="4"
-                      max="96"
-                      step="1"
-                      v-model.number="settings.perPageValue"
-                      :disabled="settings.perPageMode!=='manual'"
-                    />
-                    <span>папок</span>
-                  </label>
-                  <small class="hint"
-                    >Текущее значение: {{ itemsPerPage }} • Страниц: {{ totalPages }}</small
-                  >
-                </div>
-              </fieldset>
-            </section>
-
-            <section v-show="activeTab==='ui'">
-              <fieldset class="set">
-                <legend><i class="fa-solid fa-palette"></i> Тема интерфейса</legend>
-
-                <div class="row mb-4" style="align-items: center">
-                  <div class="txt">
-                    <div class="t">Выберите тему</div>
-                    <div class="s">Выбор применяется после нажатия «Применить»</div>
-                  </div>
-                </div>
-
-                <div class="theme-category">
-                  <div class="theme-category-title s">Светлые</div>
-                  <div class="theme-chips">
-                    <button
-                      v-for="t in themes.light"
-                      :key="t.id"
-                      type="button"
-                      class="theme-chip"
-                      :class="{ active: t.id === selectedThemeSetting }"
-                      @click="selectedThemeSetting = t.id"
-                      :aria-pressed="t.id === selectedThemeSetting"
-                      :title="t.label"
-                    >
-                      <span class="theme-preview" :data-theme="t.id" aria-hidden="true"></span>
-                      <span class="theme-label">{{ t.label }}</span>
-                      <i
-                        v-if="t.id === theme"
-                        class="fa-solid fa-check"
-                        style="margin-left: 8px"
-                      ></i>
-                    </button>
-                  </div>
-                </div>
-
-                <div class="theme-category">
-                  <div class="theme-category-title s">Тёмные</div>
-                  <div class="theme-chips">
-                    <button
-                      v-for="t in themes.dark"
-                      :key="t.id"
-                      type="button"
-                      class="theme-chip"
-                      :class="{ active: t.id === selectedThemeSetting }"
-                      @click="selectedThemeSetting = t.id"
-                      :aria-pressed="t.id === selectedThemeSetting"
-                      :title="t.label"
-                    >
-                      <span class="theme-preview" :data-theme="t.id" aria-hidden="true"></span>
-                      <span class="theme-label">{{ t.label }}</span>
-                      <i
-                        v-if="t.id === theme"
-                        class="fa-solid fa-check"
-                        style="margin-left: 8px"
-                      ></i>
-                    </button>
-                  </div>
-                </div>
-
-                <div class="theme-category">
-                  <div class="theme-category-title s">Кастомные</div>
-                  <div class="theme-chips">
-                    <button
-                      v-for="t in themes.custom"
-                      :key="t.id"
-                      type="button"
-                      class="theme-chip"
-                      :class="{ active: t.id === selectedThemeSetting }"
-                      @click="selectedThemeSetting = t.id"
-                      :aria-pressed="t.id === selectedThemeSetting"
-                      :title="t.label"
-                    >
-                      <span class="theme-preview" :data-theme="t.id" aria-hidden="true"></span>
-                      <span class="theme-label">{{ t.label }}</span>
-                      <i
-                        v-if="t.id === theme"
-                        class="fa-solid fa-check"
-                        style="margin-left: 8px"
-                      ></i>
-                    </button>
-                  </div>
-                </div>
-              </fieldset>
-            </section>
-
-            <section v-show="activeTab==='settings'">
-              <fieldset class="set">
-                <legend style="margin-bottom: 1.15rem">
-                  <i class="fa-solid fa-keyboard"></i> Допольнительные настройки
-                </legend>
-
-                <button v-if="!showDbButton" @click="showDbButton = true" class="btn btn-primary">
-                  <i class="fa-solid fa-eye"></i> Показать кнопку БД
-                </button>
-
-                <button v-else @click="showDbButton = false" class="btn btn-secondary">
-                  <i class="fa-solid fa-eye-slash"></i> Скрыть кнопку БД
-                </button>
-
-                <button @click="generateRandomFolders" class="btn btn-primary ms-1">
-                  <i class="fa-solid fa-folder-plus"></i> Создать тестовые папки
-                </button>
-              </fieldset>
-            </section>
-
-            <section v-show="activeTab==='about'">
-              <fieldset class="set">
-                <legend><i class="fa-solid fa-dragon"></i> О приложении</legend>
-                <p class="muted">EFM — файловый менеджер. Версия 1.2</p>
-                <div class="badges">
-                  <span class="badge soft">Vue 3</span>
-                  <span class="badge soft">Axios</span>
-                  <span class="badge soft">Font Awesome</span>
-                </div>
-              </fieldset>
-            </section>
-          </div>
-
-          <div class="settings-footer">
-            <button class="btn ghost" @click="closeSettings">
-              <i class="fa-regular fa-circle-xmark"></i> Отмена
-            </button>
-            <button class="btn primary" @click="applySettings">
-              <i class="fa-solid fa-floppy-disk"></i> Применить
-            </button>
-          </div>
+        <div class="settings-footer">
+          <button class="btn ghost" @click="closeCategoryModal">Закрыть</button>
         </div>
       </div>
     </div>
-    <div class="bg-overlay"></div>
-  </body>
+
+
+
+    <div class="settings-overlay" :class="{ 'is-open': isCreateFolderModalOpen }" @click.self="closeCreateFolderModal"
+      aria-hidden="true" style="font-family: 'MainFont';">
+      <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="createFolderModalTitle">
+        <div class="settings-header">
+          <h3 id="createFolderModalTitle"><i class="bi bi-folder-plus"></i> Создать папку</h3>
+          <button class="icon-btn" @click="closeCreateFolderModal" aria-label="Закрыть">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="settings-body">
+          <section>
+            <fieldset class="set">
+              <legend class="mb-3">Название папки</legend>
+              <div class="row">
+                <input v-model="newFolderName" class="categories-input" placeholder="Введите название папки"
+                  @keyup.enter="createFolder" ref="folderNameInput" />
+              </div>
+              <small class="hint mt-2" style="display: block; margin-top: 8px;">
+                Имя папки не может содержать символы: / \ : * ? " &lt; &gt; |
+              </small>
+            </fieldset>
+          </section>
+        </div>
+
+        <div class="settings-footer">
+          <button class="btn ghost" @click="closeCreateFolderModal">
+            <i class="fa-regular fa-circle-xmark"></i> Отмена
+          </button>
+          <button class="btn primary" @click="createFolder" :disabled="!newFolderName || newFolderName.trim() === ''">
+            <i class="bi bi-folder-plus"></i> Создать
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-overlay" :class="{ 'is-open': isSettingsOpen }" @click.self="closeSettings" aria-hidden="true">
+      <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+        <div class="settings-header">
+          <h3 id="settingsTitle"><i class="fa-solid fa-sliders"></i> Настройки</h3>
+          <button class="icon-btn" @click="closeSettings" aria-label="Закрыть">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="settings-tabs" role="tablist">
+          <button class="tab ms-1" :class="{active: activeTab==='general'}" @click="activeTab='general'" role="tab">
+            <i class="fa-solid fa-table-cells-large"></i> Отображение
+          </button>
+          <button class="tab ms-1" :class="{active: activeTab==='ui'}" @click="activeTab='ui'" role="tab">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Внешний вид
+          </button>
+          <button class="tab ms-1" :class="{active: activeTab==='settings'}" @click="activeTab='settings'" role="tab">
+            <i class="fa-solid fa-gear"></i> Настройки
+          </button>
+          <button class="tab ms-1" :class="{active: activeTab==='about'}" @click="activeTab='about'" role="tab">
+            <i class="fa-solid fa-circle-info"></i> О приложении
+          </button>
+        </div>
+
+        <div class="settings-body">
+          <section v-show="activeTab==='general'">
+            <fieldset class="set">
+              <legend>
+                <i class="fa-solid fa-layer-group"></i> Количество папок на странице
+              </legend>
+
+              <label class="radio">
+                <input type="radio" value="auto" v-model="settings.perPageMode" />
+                <span>Авто (по размеру экрана)</span>
+              </label>
+
+              <label class="radio">
+                <input type="radio" value="manual" v-model="settings.perPageMode" />
+                <span>Вручную</span>
+              </label>
+
+              <div class="manual-row" :class="{disabled: settings.perPageMode!=='manual'}">
+                <label class="inline">
+                  <i class="fa-regular fa-square-check"></i>
+                  <span>Показывать по</span>
+                  <input type="number" min="4" max="96" step="1" v-model.number="settings.perPageValue"
+                    :disabled="settings.perPageMode!=='manual'" />
+                  <span>папок</span>
+                </label>
+                <small class="hint">Текущее значение: {{ itemsPerPage }} • Страниц: {{ totalPages }}</small>
+              </div>
+            </fieldset>
+          </section>
+
+          <section v-show="activeTab==='ui'">
+            <fieldset class="set">
+              <legend><i class="fa-solid fa-palette"></i> Тема интерфейса</legend>
+
+              <div class="row mb-4" style="align-items: center; font-family: 'AddFont';">
+                <div class="txt">
+                  <div class="t">Выберите тему</div>
+                  <div class="s">Выбор применяется после нажатия «Применить»</div>
+                </div>
+              </div>
+
+              <div class="theme-category">
+                <div class="theme-category-title s">Светлые</div>
+                <div class="theme-chips">
+                  <button v-for="t in themes.light" :key="t.id" type="button" class="theme-chip"
+                    :class="{ active: t.id === selectedThemeSetting }" @click="selectedThemeSetting = t.id"
+                    :aria-pressed="t.id === selectedThemeSetting" :title="t.label">
+                    <span class="theme-preview" :data-theme="t.id" aria-hidden="true"></span>
+                    <span class="theme-label">{{ t.label }}</span>
+                    <i v-if="t.id === theme" class="fa-solid fa-check" style="margin-left: 8px"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="theme-category">
+                <div class="theme-category-title s">Тёмные</div>
+                <div class="theme-chips">
+                  <button v-for="t in themes.dark" :key="t.id" type="button" class="theme-chip"
+                    :class="{ active: t.id === selectedThemeSetting }" @click="selectedThemeSetting = t.id"
+                    :aria-pressed="t.id === selectedThemeSetting" :title="t.label">
+                    <span class="theme-preview" :data-theme="t.id" aria-hidden="true"></span>
+                    <span class="theme-label">{{ t.label }}</span>
+                    <i v-if="t.id === theme" class="fa-solid fa-check" style="margin-left: 8px"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="theme-category">
+                <div class="theme-category-title s">Кастомные</div>
+                <div class="theme-chips">
+                  <button v-for="t in themes.custom" :key="t.id" type="button" class="theme-chip"
+                    :class="{ active: t.id === selectedThemeSetting }" @click="selectedThemeSetting = t.id"
+                    :aria-pressed="t.id === selectedThemeSetting" :title="t.label">
+                    <span class="theme-preview" :data-theme="t.id" aria-hidden="true"></span>
+                    <span class="theme-label">{{ t.label }}</span>
+                    <i v-if="t.id === theme" class="fa-solid fa-check" style="margin-left: 8px"></i>
+                  </button>
+                </div>
+              </div>
+            </fieldset>
+          </section>
+
+          <section v-show="activeTab==='settings'" style="font-family: 'AddFont';">
+            <fieldset class="set">
+              <legend style="margin-bottom: 1.15rem">
+                <i class="fa-solid fa-keyboard"></i> Допольнительные настройки
+              </legend>
+
+              <button v-if="!showDbButton" @click="showDbButton = true" class="btn btn-primary">
+                <i class="fa-solid fa-eye"></i> Показать кнопку БД
+              </button>
+
+              <button v-else @click="showDbButton = false" class="btn btn-secondary">
+                <i class="fa-solid fa-eye-slash"></i> Скрыть кнопку БД
+              </button>
+
+              <button v-show="ProjectStatus === 'Development'" @click="generateRandomFolders"
+                class="btn btn-primary ms-1">
+                <i class="fa-solid fa-folder-plus"></i> Создать тестовые папки
+              </button>
+            </fieldset>
+          </section>
+
+          <section v-show="activeTab==='about'" style="font-family: 'AddFont';">
+            <fieldset class="set">
+              <legend><i class="fa-solid fa-dragon"></i> О приложении</legend>
+              <p class="muted">EFM — файловый менеджер. Версия 1.2</p>
+              <div class="badges">
+                <span class="badge soft">Vue 3</span>
+                <span class="badge soft">Axios</span>
+                <span class="badge soft">Font Awesome</span>
+                <span class="badge soft">PHP</span>
+              </div>
+            </fieldset>
+          </section>
+        </div>
+
+        <div class="settings-footer" style="font-family: 'AddFont';">
+          <p class="settings-author">by razemsb &copy 2025</p>
+          <button class="btn ghost" @click="closeSettings">
+            <i class="fa-regular fa-circle-xmark"></i> Отмена
+          </button>
+          <button class="btn primary" @click="applySettings">
+            <i class="fa-solid fa-floppy-disk"></i> Применить
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bg-overlay"></div>
+</body>
+
 </html>

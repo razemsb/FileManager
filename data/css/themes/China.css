@@ -301,3 +301,29 @@ input[type='number'] {
 .app-sidebar .sidebar-btn .badge * {
   color: aliceblue !important;
 }
+
+.empty-state {
+  --empty-bg: linear-gradient(180deg, rgba(18, 22, 28, 0.96), rgba(15, 18, 22, 0.98));
+  --empty-border: rgba(242, 204, 89, 0.2);
+  --empty-overlay: radial-gradient(circle at 50% 50%, rgba(242, 204, 89, 0.04) 0%, transparent 70%);
+  --empty-icon-bg: radial-gradient(circle, rgba(242, 204, 89, 0.12) 0%, rgba(150, 129, 68, 0.06) 50%, transparent 70%);
+  --empty-icon-border: rgba(242, 204, 89, 0.25);
+  --empty-icon-color: var(--stone);
+  --empty-icon-hover: var(--gold);
+  --empty-icon-glow: radial-gradient(circle, rgba(242, 204, 89, 0.2) 0%, rgba(150, 129, 68, 0.1) 50%, transparent 70%);
+  --empty-title-color: var(--ink);
+  --empty-desc-color: var(--stone);
+  border-color: var(--empty-border);
+  background: var(--empty-bg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(242, 204, 89, 0.08);
+}
+
+.empty-state:hover {
+  border-color: rgba(242, 204, 89, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(242, 204, 89, 0.12), inset 0 1px 0 rgba(242, 204, 89, 0.12);
+}
+
+:root {
+  --scrollbar-thumb: rgba(242, 204, 89, 0.2);
+  --scrollbar-thumb-hover: rgba(242, 204, 89, 0.35);
+}

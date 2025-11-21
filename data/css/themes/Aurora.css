@@ -524,30 +524,31 @@ body .grain-fix {
 }
 
 .empty-state {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 68px 16px;
-  color: var(--muted);
-  background: radial-gradient(
-    560px 120px at 50% -40px,
-    rgba(102, 230, 225, 0.06) 0%,
-    transparent 70%
-  );
-  border: 1px dashed var(--border);
-  border-radius: var(--radius-lg);
+  --empty-bg: linear-gradient(180deg, rgba(10, 18, 22, 0.88), rgba(8, 16, 20, 0.92));
+  --empty-border: rgba(102, 230, 225, 0.15);
+  --empty-overlay: radial-gradient(circle at 50% 50%, rgba(102, 230, 225, 0.06) 0%, rgba(110, 168, 255, 0.04) 50%, transparent 70%);
+  --empty-icon-bg: radial-gradient(circle, rgba(102, 230, 225, 0.12) 0%, rgba(110, 168, 255, 0.06) 50%, transparent 70%);
+  --empty-icon-border: rgba(102, 230, 225, 0.2);
+  --empty-icon-color: var(--ink-3);
+  --empty-icon-hover: var(--primary);
+  --empty-icon-glow: radial-gradient(circle, rgba(102, 230, 225, 0.25) 0%, rgba(110, 168, 255, 0.15) 50%, transparent 70%);
+  --empty-title-color: var(--ink);
+  --empty-desc-color: var(--stone);
+  border-color: var(--empty-border);
+  background: var(--empty-bg);
+  box-shadow: 0 8px 32px rgba(4, 20, 37, 0.4), 0 0 20px rgba(102, 230, 225, 0.08), inset 0 1px 0 rgba(102, 230, 225, 0.1);
 }
-.empty-state i {
-  font-size: 40px;
-  color: var(--ink-3);
-  margin-bottom: 12px;
+
+.empty-state:hover {
+  border-color: rgba(102, 230, 225, 0.25);
+  box-shadow: 0 12px 40px rgba(4, 20, 37, 0.5), 0 0 32px rgba(102, 230, 225, 0.15), inset 0 1px 0 rgba(102, 230, 225, 0.15);
 }
-.empty-state h3 {
-  margin: 0 0 6px;
-  color: var(--ink);
+
+:root {
+  --scrollbar-thumb: rgba(102, 230, 225, 0.2);
+  --scrollbar-thumb-hover: rgba(102, 230, 225, 0.35);
 }
-.empty-state p {
-  margin: 0;
-}
+
 
 .pagination {
   display: flex;

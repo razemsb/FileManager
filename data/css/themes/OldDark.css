@@ -225,3 +225,29 @@ body::after {
 input[type='number'] {
   background: var(--cloud) !important;
 }
+
+.empty-state {
+  --empty-bg: linear-gradient(180deg, rgba(30, 41, 59, 0.94), rgba(15, 23, 42, 0.96));
+  --empty-border: rgba(108, 142, 255, 0.2);
+  --empty-overlay: radial-gradient(circle at 50% 50%, rgba(108, 142, 255, 0.05) 0%, rgba(109, 101, 230, 0.03) 50%, transparent 70%);
+  --empty-icon-bg: radial-gradient(circle, rgba(108, 142, 255, 0.12) 0%, rgba(109, 101, 230, 0.06) 50%, transparent 70%);
+  --empty-icon-border: rgba(108, 142, 255, 0.25);
+  --empty-icon-color: var(--ink-3);
+  --empty-icon-hover: var(--primary);
+  --empty-icon-glow: radial-gradient(circle, rgba(108, 142, 255, 0.2) 0%, rgba(109, 101, 230, 0.1) 50%, transparent 70%);
+  --empty-title-color: var(--ink);
+  --empty-desc-color: var(--stone);
+  border-color: var(--empty-border);
+  background: var(--empty-bg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(108, 142, 255, 0.1), inset 0 1px 0 rgba(108, 142, 255, 0.12);
+}
+
+.empty-state:hover {
+  border-color: rgba(108, 142, 255, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 32px rgba(108, 142, 255, 0.18), inset 0 1px 0 rgba(108, 142, 255, 0.18);
+}
+
+:root {
+  --scrollbar-thumb: rgba(108, 142, 255, 0.2);
+  --scrollbar-thumb-hover: rgba(108, 142, 255, 0.35);
+}

@@ -376,25 +376,6 @@ select {
   color: var(--ink-3);
 }
 
-.empty-state {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 56px 16px;
-  color: var(--ink-3);
-  background: #0d1117;
-  border: 1px dashed var(--border);
-  border-radius: var(--radius-lg);
-}
-.empty-state i {
-  font-size: 40px;
-  color: var(--ink-3);
-  margin-bottom: 12px;
-}
-.empty-state h3 {
-  margin: 0 0 6px;
-  color: var(--ink);
-}
-
 .pagination {
   display: flex;
   align-items: center;
@@ -1009,4 +990,9 @@ select {
     box-shadow: none !important;
     border-color: #999 !important;
   }
+}
+
+:root {
+  --scrollbar-thumb: rgba(47, 129, 247, 0.2);
+  --scrollbar-thumb-hover: rgba(47, 129, 247, 0.35);
 }

@@ -369,17 +369,29 @@ body::after {
 }
 
 .empty-state {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 68px 16px;
-  color: var(--stone);
-  background: radial-gradient(
-    560px 120px at 50% -40px,
-    rgba(255, 27, 27, 0.04) 0%,
-    transparent 70%
-  );
-  border: 1px dashed rgba(255, 27, 27, 0.03);
-  border-radius: var(--radius-lg);
+  --empty-bg: linear-gradient(180deg, rgba(11, 11, 11, 0.96), rgba(7, 7, 8, 0.98));
+  --empty-border: rgba(255, 27, 27, 0.15);
+  --empty-overlay: radial-gradient(circle at 50% 50%, rgba(255, 27, 27, 0.05) 0%, transparent 70%);
+  --empty-icon-bg: radial-gradient(circle, rgba(255, 27, 27, 0.12) 0%, rgba(209, 15, 15, 0.06) 50%, transparent 70%);
+  --empty-icon-border: rgba(255, 27, 27, 0.2);
+  --empty-icon-color: var(--ink-3);
+  --empty-icon-hover: var(--red);
+  --empty-icon-glow: radial-gradient(circle, rgba(255, 27, 27, 0.25) 0%, rgba(209, 15, 15, 0.15) 50%, transparent 70%);
+  --empty-title-color: var(--ink);
+  --empty-desc-color: var(--stone);
+  border-color: var(--empty-border);
+  background: var(--empty-bg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 27, 27, 0.1), inset 0 1px 0 rgba(255, 27, 27, 0.12);
+}
+
+.empty-state:hover {
+  border-color: rgba(255, 27, 27, 0.25);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 32px rgba(255, 27, 27, 0.18), inset 0 1px 0 rgba(255, 27, 27, 0.18);
+}
+
+:root {
+  --scrollbar-thumb: rgba(255, 27, 27, 0.2);
+  --scrollbar-thumb-hover: rgba(255, 27, 27, 0.35);
 }
 
 .context-menu,

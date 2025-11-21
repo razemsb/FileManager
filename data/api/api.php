@@ -158,6 +158,45 @@ class FileManagerAPI {
         unlink($tempZip);
         exit;
     }
+
+    public function createFolder($folderName) {
+        $folderName = trim($folderName);
+        
+        if (empty($folderName)) {
+            throw new Exception("Имя папки не может быть пустым");
+        }
+        
+        if (mb_strlen($folderName) > 255) {
+            throw new Exception("Имя папки слишком длинное");
+        }
+        
+        $folderName = preg_replace('/[\/\\\\:*?"<>|]/u', '-', $folderName);
+        $folderName = trim($folderName, '. ');
+        
+        if (empty($folderName)) {
+            throw new Exception("Недопустимое имя папки");
+        }
+        
+        $folderPath = $this->baseDir . DIRECTORY_SEPARATOR . $folderName;
+        
+        if (file_exists($folderPath)) {
+            throw new Exception("Папка '$folderName' уже существует");
+        }
+        
+        $excludedFolders = ['data', '.git', '.vscode'];
+        if (in_array($folderName, $excludedFolders)) {
+            throw new Exception("Недопустимое имя папки");
+        }
+        
+        if (!mkdir($folderPath, 0755, true)) {
+            throw new Exception("Не удалось создать папку '$folderName'");
+        }
+        
+        $this->sendResponse(true, [
+            'message' => 'Папка успешно создана',
+            'folder' => $folderName
+        ]);
+    }
     
     public function createTestFolders($count, $prefix) {
         $count = min(max(1, (int)$count), 50);
@@ -414,6 +453,10 @@ class FileManagerAPI {
                 $input = json_decode(file_get_contents('php://input'), true) ?: [];
                 
                 switch ($action) {
+                    case 'createFolder':
+                        $folderName = $input['folderName'] ?? '';
+                        $this->createFolder($folderName);
+                        break;
                     case 'createFolders':
                         $count = $input['count'] ?? 5;
                         $prefix = $input['prefix'] ?? 'test_folder';

@@ -194,6 +194,7 @@ createApp({
     const testFolderCount = ref(50);
     const testFolderPrefix = ref('test_folder');
     const ProjectStatus = ref('Production');
+    // Development / Production
     const categories = ref([]);
     const isCategoryModalOpen = ref(false);
     const categoryModalTargetFolder = ref(null);
@@ -203,6 +204,9 @@ createApp({
     const initialVisibleCategories = 5;
     const showAllCategories = ref(false);
     const selectedCategoryId = ref(null);
+    const isCreateFolderModalOpen = ref(false);
+    const newFolderName = ref('');
+    const folderNameInput = ref(null);
 
     const settings = ref({
       perPageMode: 'manual',
@@ -360,6 +364,49 @@ createApp({
       } catch (e) {
         categories.value = [];
         console.error('loadCategories error', e);
+      }
+    }
+
+    function openCreateFolderModal() {
+      isCreateFolderModalOpen.value = true;
+      newFolderName.value = '';
+      nextTick(() => {
+        if (folderNameInput.value) {
+          folderNameInput.value.focus();
+        }
+      });
+    }
+
+    function closeCreateFolderModal() {
+      isCreateFolderModalOpen.value = false;
+      newFolderName.value = '';
+    }
+
+    async function createFolder() {
+      const name = (newFolderName.value || '').trim();
+      if (!name) {
+        notifier.info({ message: 'Введите название папки' });
+        return;
+      }
+      try {
+        isLoading.value = true;
+        const resp = await axios.post('data/api/api.php', {
+          action: 'createFolder',
+          folderName: name,
+        });
+        if (resp.data?.success) {
+          notifier.success({ message: 'Папка успешно создана' });
+          closeCreateFolderModal();
+          await loadFolders();
+        } else {
+          notifier.error({ message: resp.data.error || 'Ошибка создания папки' });
+        }
+      } catch (e) {
+        console.error(e);
+        const errorMsg = e.response?.data?.error || e.message || 'Ошибка при создании папки';
+        notifier.error({ message: errorMsg });
+      } finally {
+        isLoading.value = false;
       }
     }
 
@@ -815,7 +862,7 @@ createApp({
       </button>
     
       <div class="ctx-sep" role="separator"></div>
-      <button type="button" class="ctx-item danger" data-action="delete" role="menuitem" tabindex="-1" data-bs-toggle="tooltip" data-bs-placement="right" title="Осторожно, папка удалиться без возможности восстановления!">
+      <button type="button" class="ctx-item danger" data-action="delete" role="menuitem" tabindex="-1" data-bs-toggle="tooltip" title="Осторожно, папка удалиться без возможности восстановления!">
         <i class="bi bi-trash" aria-hidden="true"></i><span class="ctx-label">Удалить</span>
       </button>
     `;
@@ -1047,6 +1094,43 @@ createApp({
         el.style.top = newTop + 'px';
       }
 
+      // Определяем позицию tooltip для кнопки удалить
+      const deleteBtn = el.querySelector('[data-action="delete"]');
+      if (deleteBtn) {
+        // Ждем пока меню полностью отобразится
+        setTimeout(() => {
+          try {
+            const deleteBtnRect = deleteBtn.getBoundingClientRect();
+            const screenWidth = window.innerWidth;
+            const tooltipWidth = 320; // Примерная ширина tooltip с текстом
+            const spaceOnRight = screenWidth - deleteBtnRect.right;
+            const spaceOnLeft = deleteBtnRect.left;
+            
+            // Если справа достаточно места (больше tooltipWidth + отступ) или справа больше места чем слева - показываем справа
+            // Иначе показываем слева
+            const minSpace = tooltipWidth + 20; // Минимальное пространство с отступом
+            const placement = (spaceOnRight >= minSpace || (spaceOnRight > spaceOnLeft && spaceOnRight >= 200)) ? 'right' : 'left';
+            deleteBtn.setAttribute('data-bs-placement', placement);
+            
+            // Удаляем старый tooltip если есть
+            const existingTooltip = bootstrap.Tooltip.getInstance(deleteBtn);
+            if (existingTooltip) {
+              existingTooltip.dispose();
+            }
+            
+            // Инициализируем tooltip с правильным placement
+            new bootstrap.Tooltip(deleteBtn, {
+              placement: placement,
+              trigger: 'hover',
+              html: false,
+              delay: { show: 300, hide: 100 }
+            });
+          } catch (e) {
+            console.warn('Failed to initialize delete button tooltip:', e);
+          }
+        }, 50); // Небольшая задержка для полного рендеринга меню
+      }
+
       setTimeout(() => {
         outsideListener = (ev) => {
           if (!el.contains(ev.target)) hideContextMenu(), removeDropdown();
@@ -1089,6 +1173,17 @@ createApp({
       menuEl.classList.remove('visible');
       menuEl.setAttribute('aria-hidden', 'true');
       ctxFolder.value = null;
+
+      // Очищаем tooltip кнопки удалить
+      try {
+        const deleteBtn = menuEl.querySelector('[data-action="delete"]');
+        if (deleteBtn) {
+          const tooltip = bootstrap.Tooltip.getInstance(deleteBtn);
+          if (tooltip) {
+            tooltip.dispose();
+          }
+        }
+      } catch (e) {}
 
       try {
         if (outsideListener)
@@ -1289,7 +1384,11 @@ createApp({
     }, 200);
 
     function onEsc(e) {
-      if (e.key === 'Escape' && isSettingsOpen.value) closeSettings();
+      if (e.key === 'Escape') {
+        if (isSettingsOpen.value) closeSettings();
+        if (isCreateFolderModalOpen.value) closeCreateFolderModal();
+        if (isCategoryModalOpen.value) closeCategoryModal();
+      }
     }
 
     function openSettings() {
@@ -1509,6 +1608,12 @@ createApp({
       selectedCategoryId,
       filteredFolders,
       removeFolderFromCategory,
+      isCreateFolderModalOpen,
+      newFolderName,
+      folderNameInput,
+      openCreateFolderModal,
+      closeCreateFolderModal,
+      createFolder,
     };
   },
 }).mount('#app');

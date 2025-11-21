@@ -283,6 +283,32 @@ input[type='number'] {
   border-radius: 8px;
 }
 
+:root {
+  --scrollbar-thumb: rgba(255, 60, 166, 0.2);
+  --scrollbar-thumb-hover: rgba(255, 60, 166, 0.35);
+}
+
+.empty-state {
+  --empty-bg: linear-gradient(180deg, rgba(6, 8, 12, 0.92), rgba(4, 6, 10, 0.96));
+  --empty-border: rgba(255, 60, 166, 0.12);
+  --empty-overlay: radial-gradient(circle at 50% 50%, rgba(255, 60, 166, 0.04) 0%, transparent 70%);
+  --empty-icon-bg: radial-gradient(circle, rgba(255, 60, 166, 0.08) 0%, rgba(0, 240, 209, 0.04) 50%, transparent 70%);
+  --empty-icon-border: rgba(255, 60, 166, 0.15);
+  --empty-icon-color: var(--ink-3);
+  --empty-icon-hover: var(--gold);
+  --empty-icon-glow: radial-gradient(circle, rgba(0, 240, 209, 0.2) 0%, rgba(255, 60, 166, 0.1) 50%, transparent 70%);
+  --empty-title-color: var(--ink);
+  --empty-desc-color: var(--stone);
+  border-color: var(--empty-border);
+  background: var(--empty-bg);
+  box-shadow: 0 8px 32px rgba(3, 3, 6, 0.4), inset 0 1px 0 rgba(255, 60, 166, 0.06);
+}
+
+.empty-state:hover {
+  border-color: rgba(255, 60, 166, 0.2);
+  box-shadow: 0 12px 40px rgba(3, 3, 6, 0.5), 0 0 24px rgba(0, 240, 209, 0.08), inset 0 1px 0 rgba(255, 60, 166, 0.08);
+}
+
 @media (max-width: 560px) {
   .settings-modal {
     width: calc(100vw - 26px);

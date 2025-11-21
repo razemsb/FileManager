@@ -355,3 +355,29 @@ body::after {
 .ctx-item.danger:hover {
   color: var(--red-600) !important;
 }
+
+.empty-state {
+  --empty-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(250, 248, 249, 0.98));
+  --empty-border: rgba(212, 141, 171, 0.2);
+  --empty-overlay: radial-gradient(circle at 50% 50%, rgba(212, 141, 171, 0.03) 0%, transparent 70%);
+  --empty-icon-bg: radial-gradient(circle, rgba(212, 141, 171, 0.1) 0%, rgba(201, 164, 92, 0.05) 50%, transparent 70%);
+  --empty-icon-border: rgba(212, 141, 171, 0.25);
+  --empty-icon-color: var(--muted);
+  --empty-icon-hover: var(--accent-pink);
+  --empty-icon-glow: radial-gradient(circle, rgba(212, 141, 171, 0.15) 0%, rgba(201, 164, 92, 0.08) 50%, transparent 70%);
+  --empty-title-color: var(--ink);
+  --empty-desc-color: var(--muted);
+  border-color: var(--empty-border);
+  background: var(--empty-bg);
+  box-shadow: 0 8px 24px rgba(36, 37, 40, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.empty-state:hover {
+  border-color: rgba(212, 141, 171, 0.3);
+  box-shadow: 0 12px 32px rgba(36, 37, 40, 0.12), 0 0 20px rgba(212, 141, 171, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+:root {
+  --scrollbar-thumb: rgba(212, 141, 171, 0.25);
+  --scrollbar-thumb-hover: rgba(212, 141, 171, 0.4);
+}
