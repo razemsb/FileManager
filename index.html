@@ -153,7 +153,7 @@
             </div>
             <div class="empty-state-text">
               <h3 class="empty-state-title">Папки не найдены</h3>
-              <p class="empty-state-description" style="font-family: 'AddFont';">
+              <p class="empty-state-description">
                 <span v-if="searchQuery">По запросу "{{ searchQuery }}" ничего не найдено</span>
                 <span v-else-if="activeFilter === 'pinned'">У вас пока нет закрепленных папок</span>
                 <span v-else-if="activeFilter === 'recent'">Вы еще не открывали папки</span>
@@ -161,8 +161,7 @@
                 <span v-else>В этой директории пока нет папок. Создайте первую папку!</span>
               </p>
               <div class="empty-state-actions" v-if="!searchQuery && activeFilter === 'all'">
-                <button class="btn btn-primary empty-state-btn" @click="openCreateFolderModal"
-                  style="font-family: 'MainFont';">
+                <button class="btn btn-primary empty-state-btn" @click="openCreateFolderModal">
                   <i class="bi bi-folder-plus"></i>
                   <span class="ms-2">Создать папку</span>
                 </button>
@@ -194,7 +193,7 @@
     </div>
 
     <div class="settings-overlay" :class="{ 'is-open': isCategoryModalOpen }" @click.self="closeCategoryModal"
-      aria-hidden="true" style="font-family: 'MainFont';">
+      aria-hidden="true">
       <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="catModalTitle">
         <div class="settings-header">
           <h3 id="catModalTitle"><i class="fa-solid fa-tags"></i> Категории</h3>
@@ -248,7 +247,7 @@
 
 
     <div class="settings-overlay" :class="{ 'is-open': isCreateFolderModalOpen }" @click.self="closeCreateFolderModal"
-      aria-hidden="true" style="font-family: 'MainFont';">
+      aria-hidden="true">
       <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="createFolderModalTitle">
         <div class="settings-header">
           <h3 id="createFolderModalTitle"><i class="bi bi-folder-plus"></i> Создать папку</h3>
@@ -340,7 +339,7 @@
             <fieldset class="set">
               <legend><i class="fa-solid fa-palette"></i> Тема интерфейса</legend>
 
-              <div class="row mb-4" style="align-items: center; font-family: 'AddFont';">
+              <div class="row mb-4" style="align-items: center">
                 <div class="txt">
                   <div class="t">Выберите тему</div>
                   <div class="s">Выбор применяется после нажатия «Применить»</div>
@@ -388,7 +387,7 @@
             </fieldset>
           </section>
 
-          <section v-show="activeTab==='settings'" style="font-family: 'AddFont';">
+          <section v-show="activeTab==='settings'">
             <fieldset class="set">
               <legend style="margin-bottom: 1.15rem">
                 <i class="fa-solid fa-keyboard"></i> Допольнительные настройки
@@ -409,7 +408,7 @@
             </fieldset>
           </section>
 
-          <section v-show="activeTab==='about'" style="font-family: 'AddFont';">
+          <section v-show="activeTab==='about'">
             <fieldset class="set">
               <legend><i class="fa-solid fa-dragon"></i> О приложении</legend>
               <p class="muted">EFM — файловый менеджер. Версия 1.2</p>
@@ -423,13 +422,37 @@
           </section>
         </div>
 
-        <div class="settings-footer" style="font-family: 'AddFont';">
+        <div class="settings-footer">
           <p class="settings-author">by razemsb &copy 2025</p>
           <button class="btn ghost" @click="closeSettings">
             <i class="fa-regular fa-circle-xmark"></i> Отмена
           </button>
           <button class="btn primary" @click="applySettings">
             <i class="fa-solid fa-floppy-disk"></i> Применить
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="delete-confirm-overlay" :class="{ 'is-open': deleteConfirmAlert.isOpen }"
+      @click.self="closeDeleteConfirm">
+      <div class="delete-confirm-modal">
+        <div class="delete-confirm-icon">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <div class="delete-confirm-content">
+          <h3 class="delete-confirm-title">Подтверждение удаления</h3>
+          <p class="delete-confirm-message">
+            Вы уверены, что хотите удалить папку <strong>«{{ deleteConfirmAlert.folder?.name }}»</strong>?
+          </p>
+          <p class="delete-confirm-warning">Это действие нельзя отменить.</p>
+        </div>
+        <div class="delete-confirm-footer">
+          <button class="btn ghost" @click="closeDeleteConfirm">
+            <i class="bi bi-x-circle"></i> Отмена
+          </button>
+          <button class="btn primary delete-confirm-btn" @click="confirmDelete">
+            <i class="bi bi-trash"></i> Удалить
           </button>
         </div>
       </div>

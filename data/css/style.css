@@ -42,6 +42,7 @@
 }
 
 .brand-primary {
+  font-family: 'Main', sans-serif;
   font-weight: 900;
   font-size: 18px;
   background: linear-gradient(135deg, #c7ccd3, #6c8eff);
@@ -51,12 +52,12 @@
 }
 
 .brand-secondary {
+  font-family: 'Main', sans-serif;
   font-size: 11px;
   color: var(--muted);
   font-weight: 600;
 }
 
-/* Для мобильных */
 @media (max-width: 768px) {
   .brand-secondary {
     display: none;
@@ -68,27 +69,19 @@
 }
 
 @font-face {
-  font-family: 'MainFont';
-  src: url('../vendors/Fonts/Open_Sans/OpenSans-Italic-VariableFont_wdth\,wght.ttf') format('truetype');
-  font-weight: 600;
+  font-family: 'Main';
+  src: url('../vendors/Fonts/Montserrat/Montserrat-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'AddFont';
-  src: url('../vendors/Fonts/Roboto/Roboto-Italic-VariableFont_wdth\,wght.ttf') format('truetype');
-  font-weight: 600;
+  font-family: 'Add Font';
+  src: url('../vendors/Fonts/Raleway/Raleway-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
-}
-
-input::placeholder {
-  font-family: 'MainFont';
-}
-
-.settingsTitle {
-  font-family: 'MainFont';
 }
  
 *,
@@ -105,14 +98,16 @@ html {
 
 body {
   margin: 0;
-  font-family: 'Inter', 'Noto Sans', 'Noto Sans SC', system-ui, -apple-system, 'Segoe UI', Roboto,
-    Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji',
-    'Segoe UI Symbol', sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--ink);
   background: var(--bg);
+  font-family: 'Add Font', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Main', sans-serif;
 }
 
 html:focus-within {
@@ -210,6 +205,7 @@ input {
 }
 
 .app-title {
+  font-family: 'Main', sans-serif;
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -246,6 +242,7 @@ input {
 }
 
 .logo-first {
+  font-family: 'Main', sans-serif;
   font-size: 22px;
   color: var(--primary, #c31a1a);
   letter-spacing: -0.5px;
@@ -259,6 +256,7 @@ input {
 }
 
 .logo-rest {
+  font-family: 'Main', sans-serif;
   font-size: 14px;
   color: var(--muted);
   font-weight: 800;
@@ -267,6 +265,7 @@ input {
 }
 
 .logo-sub {
+  font-family: 'Main', sans-serif;
   font-size: 11px;
   color: var(--stone);
   font-weight: 700;
@@ -552,11 +551,13 @@ input {
 }
 
 .sidebar-title {
+  font-family: 'Main', sans-serif;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--muted);
   margin: 8px 8px 14px;
+  font-weight: 700;
 }
 
 .app-main {
@@ -598,7 +599,7 @@ input {
 }
 
 .sidebar-btn {
-  font-family: 'MainFont';
+  font-family: 'Add Font';
   width: 100%;
   display: flex;
   align-items: center;
@@ -848,7 +849,7 @@ input {
 }
 
 .folder-name {
-  font-family: 'MainFont';
+  font-family: 'Main', sans-serif;
   font-size: 16px;
   font-weight: 700;
   margin: 2px 0 0;
@@ -880,7 +881,7 @@ input {
 
 .empty-state {
   grid-column: 1 / -1;
-  padding: 80px 24px;
+  padding: 56px 18px;
   background: var(--empty-bg, var(--card));
   border: 2px dashed var(--empty-border, var(--border));
   border-radius: var(--radius-xl);
@@ -960,7 +961,7 @@ input {
 }
 
 .empty-state-title {
-  font-family: 'MainFont';
+  font-family: 'Main', sans-serif;
   margin: 0;
   color: var(--empty-title-color, var(--ink));
   font-size: 24px;
@@ -1155,11 +1156,13 @@ input {
 }
 
 .modal-header h3 {
+  font-family: 'Main', sans-serif;
   margin: 0;
   font-size: 1.2rem;
   display: flex;
   align-items: center;
   gap: 10px;
+  font-weight: 700;
 }
 
 .modal-body {
@@ -1190,9 +1193,11 @@ input {
 }
 
 .error-details h4 {
+  font-family: 'Main', sans-serif;
   margin: 0 0 10px 0;
   color: #ff4757;
   font-size: 1rem;
+  font-weight: 700;
 }
 
 .error-details ul {
@@ -1256,11 +1261,13 @@ input {
 }
 
 .settings-header h3 {
+  font-family: 'Main', sans-serif;
   margin: 0;
   font-size: 18px;
   display: flex;
   gap: 10px;
   align-items: center;
+  font-weight: 700;
 }
 
 .settings-tabs {
@@ -1271,7 +1278,6 @@ input {
 }
 
 .settings-tabs .tab {
-  font-family: 'MainFont';
   border: 0;
   padding: 12px 10px;
   background: transparent;
@@ -1311,7 +1317,6 @@ input {
 }
 
 .settings-author {
-  font-family: 'AddFont';
   font-size: 0.7rem;
   margin: auto auto auto 0;
   color: #2b323c;
@@ -1325,6 +1330,7 @@ input {
 }
 
 .set legend {
+  font-family: 'Main', sans-serif;
   padding: 0 8px;
   margin-left: 6px;
   font-weight: 800;
@@ -1338,7 +1344,6 @@ input {
 }
 
 .radio {
-  font-family: 'AddFont';
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -1352,7 +1357,6 @@ input {
 }
 
 .manual-row {
-  font-family: 'AddFont';
   margin-top: 10px;
   display: grid;
   gap: 6px;
@@ -1425,7 +1429,6 @@ input {
   border-radius: 12px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
   padding: 6px 0;
-  font-family: 'Inter', sans-serif;
   font-size: 14px;
   user-select: none;
   display: none;
@@ -1435,7 +1438,6 @@ input {
 }
 
 .context-menu .ctx-item {
-  font-family: 'MainFont';
   display: flex;
   align-items: center;
   width: 100%;
@@ -1578,7 +1580,6 @@ input {
 }
 
 .theme-category {
-  font-family: 'MainFont';
   margin-bottom: 20px;
   padding: 12px 14px;
   border-radius: 12px;
@@ -1593,6 +1594,7 @@ input {
 }
 
 .theme-category-title {
+  font-family: 'Main', sans-serif;
   font-size: 0.9rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -1614,6 +1616,7 @@ input {
 }
 
 .txt .t {
+  font-family: 'Main', sans-serif;
   font-weight: 700;
 }
 
@@ -1808,7 +1811,7 @@ input {
 
 @media (max-width: 768px) {
   .empty-state {
-    padding: 60px 20px;
+    padding: 56px 18px;
   }
   
   .empty-state-content {
@@ -2058,6 +2061,177 @@ input {
   box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.12);
 }
 
-.popup {
-  font-family: 'MainFont' !important;
+.delete-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s var(--easing), visibility 0.25s var(--easing);
+  z-index: 1300;
+}
+
+.delete-confirm-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.delete-confirm-modal {
+  width: min(480px, 92vw);
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-3);
+  overflow: hidden;
+  transform: translateY(20px) scale(0.95);
+  opacity: 0;
+  transition: transform 0.3s var(--easing), opacity 0.3s var(--easing);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px 28px 24px;
+  gap: 20px;
+}
+
+.delete-confirm-overlay.is-open .delete-confirm-modal {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.delete-confirm-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, transparent 70%);
+  border: 3px solid color-mix(in srgb, var(--red) 40%, transparent);
+  display: grid;
+  place-items: center;
+  margin-bottom: 8px;
+  animation: deleteConfirmPulse 2s ease-in-out infinite;
+}
+
+.delete-confirm-icon i {
+  margin: auto auto auto auto;
+  font-size: 38px;
+  color: var(--red);
+  filter: drop-shadow(0 2px 8px rgba(239, 68, 68, 0.3));
+}
+
+@keyframes deleteConfirmPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+  }
+}
+
+.delete-confirm-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.delete-confirm-title {
+  font-family: 'Main', sans-serif;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.delete-confirm-message {
+  font-family: 'Add Font', sans-serif;
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.delete-confirm-message strong {
+  font-family: 'Main', sans-serif;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.delete-confirm-warning {
+  font-family: 'Add Font', sans-serif;
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--red);
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.delete-confirm-footer {
+  width: 100%;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.delete-confirm-btn {
+  background: linear-gradient(135deg, var(--red), #ff4757) !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+  transition: all 0.25s var(--easing);
+}
+
+.delete-confirm-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+  filter: brightness(1.05);
+}
+
+.delete-confirm-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 560px) {
+  .delete-confirm-modal {
+    width: 94vw;
+    padding: 24px 20px 20px;
+    gap: 16px;
+  }
+
+  .delete-confirm-icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .delete-confirm-icon i {
+    font-size: 32px;
+  }
+
+  .delete-confirm-title {
+    font-size: 20px;
+  }
+
+  .delete-confirm-message {
+    font-size: 15px;
+  }
+
+  .delete-confirm-footer {
+    flex-direction: column;
+  }
+
+  .delete-confirm-footer .btn {
+    width: 100%;
+  }
+}
+
+p, span {
+  font-family: 'Add Font' !important;
 }

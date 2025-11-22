@@ -163,11 +163,6 @@ body::after {
   }
 }
 
-body::marker {
-}
-body .grain-fix {
-}
-
 @media (prefers-reduced-motion: reduce) {
   body::before,
   body::after {

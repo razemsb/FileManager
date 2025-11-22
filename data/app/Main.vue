@@ -193,7 +193,7 @@ createApp({
     const showFolderCreator = ref(false);
     const testFolderCount = ref(50);
     const testFolderPrefix = ref('test_folder');
-    const ProjectStatus = ref('Production');
+    const ProjectStatus = ref('Development');
     // Development / Production
     const categories = ref([]);
     const isCategoryModalOpen = ref(false);
@@ -207,6 +207,12 @@ createApp({
     const isCreateFolderModalOpen = ref(false);
     const newFolderName = ref('');
     const folderNameInput = ref(null);
+    
+    const deleteConfirmAlert = ref({
+      isOpen: false,
+      folder: null,
+      resolve: null,
+    });
 
     const settings = ref({
       perPageMode: 'manual',
@@ -1292,9 +1298,39 @@ createApp({
       }
     }
 
+    function showDeleteConfirm(folder) {
+      return new Promise((resolve) => {
+        deleteConfirmAlert.value = {
+          isOpen: true,
+          folder: folder,
+          resolve: resolve,
+        };
+      });
+    }
+
+    function closeDeleteConfirm() {
+      deleteConfirmAlert.value.isOpen = false;
+      if (deleteConfirmAlert.value.resolve) {
+        deleteConfirmAlert.value.resolve(false);
+      }
+      deleteConfirmAlert.value.folder = null;
+      deleteConfirmAlert.value.resolve = null;
+    }
+
+    function confirmDelete() {
+      if (deleteConfirmAlert.value.resolve) {
+        deleteConfirmAlert.value.resolve(true);
+      }
+      closeDeleteConfirm();
+    }
+
     async function ctxDelete(folder) {
       if (!folder) return hideContextMenu();
-      if (!confirm(`Удалить папку «${folder.name}»?`)) return hideContextMenu();
+      hideContextMenu();
+      
+      const confirmed = await showDeleteConfirm(folder);
+      if (!confirmed) return;
+      
       try {
         isLoading.value = true;
         const resp = await axios.post('data/api/api.php', {
@@ -1309,7 +1345,6 @@ createApp({
         if (idx !== -1) folders.value.splice(idx, 1);
       } finally {
         isLoading.value = false;
-        hideContextMenu();
       }
     }
 
@@ -1614,6 +1649,9 @@ createApp({
       openCreateFolderModal,
       closeCreateFolderModal,
       createFolder,
+      deleteConfirmAlert,
+      closeDeleteConfirm,
+      confirmDelete,
     };
   },
 }).mount('#app');
