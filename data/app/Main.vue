@@ -193,7 +193,7 @@ createApp({
     const showFolderCreator = ref(false);
     const testFolderCount = ref(50);
     const testFolderPrefix = ref('test_folder');
-    const ProjectStatus = ref('Development');
+    const ProjectStatus = ref('Production');
     // Development / Production
     const categories = ref([]);
     const isCategoryModalOpen = ref(false);
