@@ -1339,6 +1339,7 @@ createApp({
         });
         if (!resp.data?.success) throw new Error(resp.data?.error || 'Удаление не удалось');
         await loadFolders();
+        notifier.warning({ message: `Папка "${folder.name}" удалена` });
       } catch (e) {
         console.error('delete error', e);
         const idx = folders.value.findIndex((f) => f.name === folder.name);
