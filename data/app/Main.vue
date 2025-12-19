@@ -193,7 +193,7 @@ createApp({
     const showFolderCreator = ref(false);
     const testFolderCount = ref(50);
     const testFolderPrefix = ref('test_folder');
-    const ProjectStatus = ref('Development');
+    const ProjectStatus = ref('Production');
     // Development / Production
     const categories = ref([]);
     const isCategoryModalOpen = ref(false);
@@ -238,6 +238,29 @@ createApp({
         { id: 'GithubDark', label: 'Github Dark' },
         { id: 'Anarchy', label: 'Anarchy' },
       ],
+    });
+
+    const cssFile = computed(() => {
+      return ProjectStatus.value === 'Development' 
+        ? 'data/css/style.css' 
+        : 'data/css/style.min.css';
+    });
+    
+    onMounted(() => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = cssFile.value;
+      link.id = 'main-css';
+      document.head.appendChild(link);
+    });
+    
+    watch(() => ProjectStatus.value, (newStatus) => {
+      const existingLink = document.getElementById('main-css');
+      if (existingLink) {
+        existingLink.href = newStatus === 'Development' 
+          ? 'data/css/style.css' 
+          : 'data/css/style.min.css';
+      }
     });
 
     function toggleSidebar() {
@@ -1100,31 +1123,26 @@ createApp({
         el.style.top = newTop + 'px';
       }
 
-      // Определяем позицию tooltip для кнопки удалить
       const deleteBtn = el.querySelector('[data-action="delete"]');
       if (deleteBtn) {
-        // Ждем пока меню полностью отобразится
         setTimeout(() => {
           try {
+
             const deleteBtnRect = deleteBtn.getBoundingClientRect();
             const screenWidth = window.innerWidth;
-            const tooltipWidth = 320; // Примерная ширина tooltip с текстом
+            const tooltipWidth = 320; 
             const spaceOnRight = screenWidth - deleteBtnRect.right;
             const spaceOnLeft = deleteBtnRect.left;
             
-            // Если справа достаточно места (больше tooltipWidth + отступ) или справа больше места чем слева - показываем справа
-            // Иначе показываем слева
-            const minSpace = tooltipWidth + 20; // Минимальное пространство с отступом
+            const minSpace = tooltipWidth + 20;
             const placement = (spaceOnRight >= minSpace || (spaceOnRight > spaceOnLeft && spaceOnRight >= 200)) ? 'right' : 'left';
             deleteBtn.setAttribute('data-bs-placement', placement);
             
-            // Удаляем старый tooltip если есть
             const existingTooltip = bootstrap.Tooltip.getInstance(deleteBtn);
             if (existingTooltip) {
               existingTooltip.dispose();
             }
             
-            // Инициализируем tooltip с правильным placement
             new bootstrap.Tooltip(deleteBtn, {
               placement: placement,
               trigger: 'hover',
@@ -1134,7 +1152,7 @@ createApp({
           } catch (e) {
             console.warn('Failed to initialize delete button tooltip:', e);
           }
-        }, 50); // Небольшая задержка для полного рендеринга меню
+        }, 50); 
       }
 
       setTimeout(() => {
@@ -1180,7 +1198,6 @@ createApp({
       menuEl.setAttribute('aria-hidden', 'true');
       ctxFolder.value = null;
 
-      // Очищаем tooltip кнопки удалить
       try {
         const deleteBtn = menuEl.querySelector('[data-action="delete"]');
         if (deleteBtn) {

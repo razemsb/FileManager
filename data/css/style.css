@@ -1021,7 +1021,7 @@ input {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 1.5rem;
 }
 
 .page-numbers {
@@ -2234,4 +2234,12 @@ input {
 
 p, span {
   font-family: 'Add Font' !important;
+}
+
+.popup-title {
+  font-family: 'Main';
+}
+
+.popup-message {
+  font-family: 'Add Font';
 }
