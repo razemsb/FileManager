@@ -28,7 +28,7 @@
 | **📊 Управление**                 | Просмотр всех папок, фильтрация, закрепление, история   |
 | **🎨 Интерфейс**                   | Адаптивный дизайн, 7 тем, кастомизация, tooltips                      |
 | **⚡ Производительность** | Быстрый поиск, мгновенные фильтры, оптимизированный API |
-| **🔧 Технологии**                 | Vue.js, Bootstrap, PHP, современный JavaScript                                            |
+| **🔧 Технологии**                 | Vue.js, Bootstrap, PHP (Rest API), современный JavaScript                                            |
 
 ## 🚀 Возможности
 
@@ -103,7 +103,7 @@ FileManager/
 │   │   └── categories.json         # Данные категорий
 │   │
 │   ├── 📁 api/
-│   │   └── api.php                 # Основной API endpoints
+│   │   └── api.php                 # Rest API
 │   │
 │   ├── 📁 app/
 │   │   └── Main.vue                # Главный компонент приложения
@@ -111,22 +111,22 @@ FileManager/
 │   ├── 📁 css/
 │   │   ├── style.css               # Основные стили
 │   │   ├── style.min.css           # Минимизированные стили
-│   │   └── 📁 themes/             # Папка с темами оформления
+│   │   └── 📁 themes/              # Папка с темами оформления
 │   │
 │   ├── 📁 vendors/                 # Внешние зависимости
 │   │   ├── vue/                    # Vue.js framework
-│   │   ├── bootstrap/            # Bootstrap CSS
-│   │   └── axios/                # HTTP client
+│   │   ├── bootstrap/              # Bootstrap CSS
+│   │   └── axios/                  # HTTP client
 │   │
-│   └── 📁 img/                   # Изображения и иконки
-│       ├── 📁 favicon/           # Фавиконки   
-│       ├── 📁 other/             # Доп иконки
-│       ├── 📁 screenshots/       # Скриншоты
-│       └── 📁 themes/            # Картинки для тем   
-│
-├── 📄 index.html                 # Главная страница
-├── 📄 LICENSE                    # Лицензия MIT
-└── 📄 README.md                  # Документация
+│   └── 📁 img/                     # Изображения и иконки
+│       ├── 📁 favicon/             # Фавикон  
+│       ├── 📁 other/               # Доп иконки
+│       ├── 📁 screenshots/         # Скриншоты
+│       └── 📁 themes/              # Картинки для тем   
+│  
+├── 📄 index.html                   # Главная страница
+├── 📄 LICENSE                      # Лицензия MIT
+└── 📄 README.md                    # Документация
 ```
 
 ## ⚙️ Настройка

@@ -1,0 +1,7 @@
+RewriteEngine On
+RewriteBase /data/api/
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+RewriteRule ^(.*)$ api.php [L,QSA]

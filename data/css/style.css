@@ -2243,3 +2243,50 @@ p, span {
 .popup-message {
   font-family: 'Add Font';
 }
+
+.snow-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.snowflake {
+  position: absolute;
+  top: -2rem; 
+  color: white;
+  user-select: none;
+  animation-name: fall, sway;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear, ease-in-out;
+}
+
+@keyframes fall {
+  0% {
+    top: -10%;
+  }
+  100% {
+    top: 110%;
+  }
+}
+
+@keyframes sway {
+  0%, 100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  50% {
+    transform: translateX(20px) rotate(20deg);
+  }
+}
+
+.snow-btn-success {
+  border: 0.15rem solid #0b7a3b !important;
+}
+
+.snow-btn-danger {
+  border: 0.15rem solid #7a0b0b !important;
+}

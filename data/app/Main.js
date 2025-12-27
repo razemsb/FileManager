@@ -95,15 +95,14 @@ class PopupNotifier {
               <div class="popup-message">${message}</div>
               ${showTime ? `<div class="popup-time">${currentTime}</div>` : ''}
           </div>
-          ${
-            showClose
-              ? `
+          ${showClose
+        ? `
               <button class="popup-close" aria-label="Закрыть уведомление">
                   <i class="fa-solid fa-xmark"></i>
               </button>
           `
-              : ''
-          }
+        : ''
+      }
       `;
 
     container.appendChild(popup);
@@ -144,7 +143,7 @@ class PopupNotifier {
         if (timeoutId) clearTimeout(timeoutId);
         closePopup();
       },
-      update: (newOptions) => {},
+      update: (newOptions) => { },
     };
   }
 
@@ -207,16 +206,62 @@ createApp({
     const isCreateFolderModalOpen = ref(false);
     const newFolderName = ref('');
     const folderNameInput = ref(null);
-    
+    const currentFolder = ref('');
+
+    const snowflakeCount = ref(15); // колличество снежинок
+    const fallSpeed = ref(7.5);     // скорость (чем меньще тем)
+    const snowflakes = ref([]);
+
+    const snowflakeTypes = ['❄', '❅', '❆'];
+
+    const initSnow = () => {
+      if (!settings.value.snowEnabled) {
+        snowflakes.value = [];
+        return;
+      }
+
+      const temp = [];
+
+      for (let i = 0; i < snowflakeCount.value; i++) {
+        temp.push({
+          id: i,
+          type: snowflakeTypes[Math.floor(Math.random() * snowflakeTypes.length)],
+          left: Math.random() * 100 + '%',
+          delay: Math.random() * 8 + 's',
+          duration: (Math.random() * 4 + fallSpeed.value) + 's',
+          opacity: Math.random() * 0.6 + 0.2,
+          size: Math.random() * 1.2 + 0.6 + 'rem'
+        });
+      }
+      snowflakes.value = temp;
+    };
+
+    const savedSnowStatus = localStorage.getItem('snow_enabled');
+    const settings = ref({
+      perPageMode: 'auto',
+      perPageValue: 20,
+      snowEnabled: savedSnowStatus !== null ? savedSnowStatus === 'true' : true,
+    });
+
+    const toggleSnow = () => {
+      settings.value.snowEnabled = !settings.value.snowEnabled;
+
+      localStorage.setItem('snow_enabled', settings.value.snowEnabled);
+
+      initSnow();
+
+      const statusText = settings.value.snowEnabled ? 'включен' : 'выключен';
+      notifier.info({ message: `Новогодний вайб ${statusText}` });
+    };
+
+    onMounted(() => {
+      initSnow();
+    });
+
     const deleteConfirmAlert = ref({
       isOpen: false,
       folder: null,
       resolve: null,
-    });
-
-    const settings = ref({
-      perPageMode: 'manual',
-      perPageValue: 16,
     });
 
     const errorModal = ref({
@@ -241,11 +286,11 @@ createApp({
     });
 
     const cssFile = computed(() => {
-      return ProjectStatus.value === 'Development' 
-        ? 'data/css/style.css' 
+      return ProjectStatus.value === 'Development'
+        ? 'data/css/style.css'
         : 'data/css/style.min.css';
     });
-    
+
     onMounted(() => {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
@@ -253,12 +298,12 @@ createApp({
       link.id = 'main-css';
       document.head.appendChild(link);
     });
-    
+
     watch(() => ProjectStatus.value, (newStatus) => {
       const existingLink = document.getElementById('main-css');
       if (existingLink) {
-        existingLink.href = newStatus === 'Development' 
-          ? 'data/css/style.css' 
+        existingLink.href = newStatus === 'Development'
+          ? 'data/css/style.css'
           : 'data/css/style.min.css';
       }
     });
@@ -323,7 +368,7 @@ createApp({
         tooltipInstances.value = Array.from(tooltipElements).map(
           (el) => new bootstrap.Tooltip(el, { placement: 'bottom', trigger: 'hover' })
         );
-      } catch (err) {}
+      } catch (err) { }
     };
 
     function selectCategory(catId) {
@@ -345,9 +390,9 @@ createApp({
       let result = folders.value.slice();
 
       if (activeFilter.value === 'pinned') {
-        result = result.filter((f) => f.isPinned);
+        result = result.filter((f) => f.is_pinned);
       } else if (activeFilter.value === 'recent') {
-        result = result.filter((f) => f.isRecent);
+        result = result.filter((f) => f.is_recent);
       } else if (activeFilter.value === 'categories' && selectedCategoryId.value) {
         const cat = categories.value.find((c) => c.id === selectedCategoryId.value);
         if (cat && Array.isArray(cat.folders)) {
@@ -356,6 +401,7 @@ createApp({
           result = [];
         }
       }
+
 
       if (searchQuery.value) {
         const q = searchQuery.value.toLowerCase();
@@ -369,7 +415,7 @@ createApp({
       tooltipInstances.value.forEach((t) => {
         try {
           t.dispose();
-        } catch (e) {}
+        } catch (e) { }
       });
       tooltipInstances.value = [];
     };
@@ -381,20 +427,23 @@ createApp({
       });
     };
 
-    async function loadCategories() {
+    const loadCategories = async () => {
       try {
-        const resp = await axios.get('data/api/api.php?action=getCategories');
-        if (resp.data?.success) {
-          categories.value = resp.data.data || [];
+        const response = await axios.get('data/api/categories');
+
+        const fetchedData = response.data.data;
+
+        if (Array.isArray(fetchedData)) {
+          categories.value = fetchedData;
         } else {
+          console.error('Ожидался массив, пришло:', fetchedData);
           categories.value = [];
-          console.warn('categories load failed', resp.data);
         }
-      } catch (e) {
-        categories.value = [];
-        console.error('loadCategories error', e);
+      } catch (err) {
+        console.error('categories load failed', err.response?.data || err);
+        notifier.error({ message: 'Ошибка загрузки категорий' });
       }
-    }
+    };
 
     function openCreateFolderModal() {
       isCreateFolderModalOpen.value = true;
@@ -417,19 +466,17 @@ createApp({
         notifier.info({ message: 'Введите название папки' });
         return;
       }
+
       try {
         isLoading.value = true;
-        const resp = await axios.post('data/api/api.php', {
-          action: 'createFolder',
-          folderName: name,
+        const resp = await axios.post('data/api/folders', {
+          name: name
         });
-        if (resp.data?.success) {
-          notifier.success({ message: 'Папка успешно создана' });
-          closeCreateFolderModal();
-          await loadFolders();
-        } else {
-          notifier.error({ message: resp.data.error || 'Ошибка создания папки' });
-        }
+
+        notifier.success({ message: 'Папка успешно создана' });
+        closeCreateFolderModal();
+        await loadFolders();
+
       } catch (e) {
         console.error(e);
         const errorMsg = e.response?.data?.error || e.message || 'Ошибка при создании папки';
@@ -453,69 +500,46 @@ createApp({
 
     async function createCategory() {
       const name = (newCategoryName.value || '').trim();
-      if (!name) {
-        notifier.info({ message: 'Введи имя категории' });
-        return;
-      }
+      if (!name) return;
       try {
-        const resp = await axios.post('data/api/api.php', {
-          action: 'createCategory',
-          name: name,
-        });
-        if (resp.data?.success) {
-          notifier.success({ message: 'Категория создана' });
-          await loadCategories();
-          newCategoryName.value = '';
-        } else {
-          notifier.error({ message: resp.data.error || 'Ошибка создания' });
-        }
+        const resp = await axios.post('data/api/categories', { name });
+        await loadCategories();
+        newCategoryName.value = '';
+        notifier.success({ message: 'Категория создана' });
       } catch (e) {
-        console.error(e);
-        notifier.error({ message: 'Ошибка при создании категории' });
+        notifier.error({ message: e.response?.data?.error || 'Ошибка' });
       }
     }
 
     async function addFolderToCategory(categoryId, folderName) {
-      if (!categoryId || !folderName) return;
       try {
-        const resp = await axios.post('data/api/api.php', {
-          action: 'addFolder',
-          categoryId,
-          folderName,
-        });
-        if (resp.data?.success) {
-          notifier.success({ message: 'Папка добавлена в категорию' });
-          await loadCategories();
-          closeCategoryModal();
-          hideContextMenu();
-        } else {
-          notifier.error({ message: resp.data.error || 'Ошибка добавления' });
-        }
+        await axios.post(`data/api/categories/${categoryId}/folders`, { folderName });
+        notifier.success({ message: 'Папка добавлена' });
+        await loadCategories();
+        closeCategoryModal();
       } catch (e) {
-        console.error(e);
-        notifier.error({ message: 'Ошибка при добавлении в категорию' });
+        notifier.error({ message: 'Ошибка добавления' });
       }
     }
 
     async function removeFolderFromCategory(categoryId, folderName) {
       if (!categoryId || !folderName) return;
       try {
-        const resp = await axios.post('data/api/api.php', {
-          action: 'removeFolder',
-          categoryId,
-          folderName,
-        });
-        if (resp.data?.success) {
-          notifier.success({ message: 'Папка убрана из категории' });
-          await loadCategories();
-          closeCategoryModal();
-          hideContextMenu();
-        } else {
-          notifier.error({ message: resp.data.error || 'Ошибка удаления из категории' });
-        }
+        isLoading.value = true;
+        await axios.delete(`data/api/categories/${categoryId}/folders/${encodeURIComponent(folderName)}`);
+
+        notifier.success({ message: 'Папка убрана из категории' });
+
+        await loadCategories();
+
+        closeCategoryModal();
+        hideContextMenu();
       } catch (e) {
         console.error(e);
-        notifier.error({ message: 'Ошибка при удалении из категории' });
+        const errorMsg = e.response?.data?.error || 'Ошибка при удалении из категории';
+        notifier.error({ message: errorMsg });
+      } finally {
+        isLoading.value = false;
       }
     }
 
@@ -534,21 +558,28 @@ createApp({
     }
 
     async function deleteCategory(categoryId) {
-      if (!confirm('Удалить категорию?')) return;
+      if (!categoryId) return;
+      if (!confirm('Вы уверены, что хотите удалить эту категорию?')) return;
+
       try {
-        const resp = await axios.post('data/api/api.php', {
-          action: 'deleteCategory',
-          categoryId,
-        });
-        if (resp.data?.success) {
+        isLoading.value = true;
+        const resp = await axios.delete(`data/api/categories/${categoryId}`);
+
+        if (resp.status === 200 || resp.status === 204) {
           notifier.success({ message: 'Категория удалена' });
           await loadCategories();
-        } else {
-          notifier.error({ message: resp.data.error || 'Ошибка удаления' });
+
+          if (selectedCategoryId.value === categoryId) {
+            selectedCategoryId.value = null;
+            activeFilter.value = 'all';
+          }
         }
       } catch (e) {
-        console.error(e);
-        notifier.error({ message: 'Ошибка при удалении категории' });
+        console.error('Ошибка удаления категории:', e);
+        const errorMsg = e.response?.data?.error || 'Ошибка при удалении';
+        notifier.error({ message: errorMsg });
+      } finally {
+        isLoading.value = false;
       }
     }
 
@@ -580,47 +611,46 @@ createApp({
     const loadFolders = async () => {
       try {
         isLoading.value = true;
-        const response = await axios.get('data/api/api.php?action=getFolders');
-        if (response.data?.success) {
-          folders.value = response.data.data || [];
-          await nextTick();
-          initTooltips();
-        } else {
-          throw new Error(response.data?.error || 'Ошибка загрузки данных');
-        }
+        error.value = null;
+
+        const response = await axios.get('data/api/folders');
+
+        folders.value = response.data.data || [];
+
+        await nextTick();
+        initTooltips();
       } catch (err) {
-        error.value = err.message || String(err);
+
+        const apiError = err.response?.data?.error;
+        error.value = apiError || err.message || 'Ошибка загрузки данных';
+
         folders.value = [];
         notifier.error({
-          title: 'Ошибка загрузки папок.',
-          message: 'Ошибка см консоль.',
+          title: 'Ошибка загрузки папок',
+          message: error.value,
           autoClose: false,
           showClose: true,
         });
-        console.error(err);
+        console.error('API Error:', err);
       } finally {
         isLoading.value = false;
       }
     };
 
     const togglePin = async (folder) => {
-      if (!folder) return;
+      if (!folder?.name) return;
+
       try {
         isLoading.value = true;
-        const response = await axios.post('data/api/api.php', {
-          action: 'togglePin',
-          folder: folder.name,
-          pinned: folder.isPinned,
-        });
-        if (!response.data?.success)
-          throw new Error(response.data?.error || 'Ошибка при изменении статуса');
+        await axios.post(`data/api/folders/${encodeURIComponent(folder.name)}/pin`, {});
         await loadFolders();
+        notifier.success({ message: `Папка ${folder.name} закреплена` });
       } catch (err) {
+        const errorMsg = err.response?.data?.error || 'Ошибка при изменении статуса';
         notifier.error({
-          title: 'Ошибка закрепления.',
-          message: 'Ошибка см консоль.',
-          autoClose: false,
-          showClose: true,
+          title: 'Ошибка закрепления',
+          message: errorMsg,
+          autoClose: true,
         });
         console.error('togglePin error:', err);
       } finally {
@@ -628,133 +658,38 @@ createApp({
       }
     };
 
-    const openFolder = async (folder) => {
-      if (!folder) return;
+    async function openFolder(folder) {
       try {
-        await axios.post('data/api/api.php', { action: 'addRecent', folder: folder.name });
+        const folderName = folder.name;
+        await axios.post(`data/api/folders/${encodeURIComponent(folderName)}/open`, {});
+        window.location.href = folderName;
+      } catch (e) {
+        console.error('Ошибка при логировании открытия:', e);
         window.location.href = folder.name;
-      } catch (err) {
-        notifier.error({
-          title: 'Ошибка открытия папки.',
-          message: 'Ошибка см консоль.',
-          autoClose: false,
-          showClose: true,
-        });
-        console.error('openFolder error:', err);
       }
-    };
+    }
 
     const downloadFolder = async (folder) => {
       if (!folder) return;
       try {
         isLoading.value = true;
-        const response = await fetch(
-          `data/api/api.php?action=download&folder=${encodeURIComponent(folder.name)}`
-        );
+        const url = `data/api/folders/download?name=${encodeURIComponent(folder.name)}`;
+        const response = await fetch(url);
 
-        const contentType = response.headers.get('content-type') || '';
-
-        if (!response.ok) {
-          let errorMessage = `Ошибка сервера: ${response.status}`;
-
-          try {
-            if (contentType.includes('application/json')) {
-              const errorData = await response.json();
-              errorMessage = errorData.error || JSON.stringify(errorData);
-            } else {
-              const errorText = await response.text();
-              errorMessage = errorText;
-            }
-
-            if (
-              errorMessage.toLowerCase().includes('ziparchive') ||
-              errorMessage.toLowerCase().includes('zip extension') ||
-              errorMessage.includes('ZipArchive error')
-            ) {
-              throw new Error('ZIP_ARCHIVE_ERROR');
-            }
-          } catch (e) {
-            notifier.error({
-              title: 'Ошибка скачивания.',
-              message: 'Ошибка см консоль.',
-              autoClose: false,
-              showClose: true,
-            });
-            console.error('Не удалось прочитать ошибку:', e);
-          }
-
-          throw new Error(errorMessage);
-        }
-
-        if (contentType.includes('application/json')) {
-          const responseData = await response.json();
-
-          if (
-            responseData.error &&
-            (responseData.error.toLowerCase().includes('ziparchive') ||
-              responseData.error.toLowerCase().includes('zip extension') ||
-              responseData.error.toLowerCase().includes('exception') ||
-              responseData.error.toLowerCase().includes('error'))
-          ) {
-            throw new Error('ZIP_ARCHIVE_ERROR');
-          }
-
-          const blob = new Blob([JSON.stringify(responseData)], { type: 'application/json' });
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${folder.name}.json`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
-          return;
-        }
+        if (!response.ok) throw new Error('Ошибка сервера при скачивании');
 
         const blob = await response.blob();
-
-        if (blob.size < 100) {
-          const text = await blob.text();
-          if (
-            text.toLowerCase().includes('ziparchive') ||
-            text.toLowerCase().includes('error') ||
-            text.toLowerCase().includes('exception')
-          ) {
-            throw new Error('ZIP_ARCHIVE_ERROR');
-          }
-        }
-
-        const url = window.URL.createObjectURL(blob);
+        const downloadUrl = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
+        a.href = downloadUrl;
         a.download = `${folder.name}.zip`;
         document.body.appendChild(a);
         a.click();
-        window.URL.revokeObjectURL(url);
+        window.URL.revokeObjectURL(downloadUrl);
         document.body.removeChild(a);
       } catch (err) {
         console.error('Ошибка при скачивании:', err);
-
-        if (err.message === 'ZIP_ARCHIVE_ERROR') {
-          showErrorModal(
-            'Ошибка создания архива',
-            'Системная ошибка: отсутствует поддержка ZIP на сервере.\n\n' +
-              'Для работы функции архивирования необходимо:\n' +
-              '1. Установить PHP расширение ZipArchive\n' +
-              '2. Включить extension=zip в php.ini\n\n' +
-              'Обратитесь к системному администратору.'
-          );
-        } else if (err.message.includes('Ошибка сервера: 500')) {
-          showErrorModal(
-            'Внутренняя ошибка сервера',
-            'Произошла внутренняя ошибка сервера. Возможно, отсутствует необходимое расширение PHP.'
-          );
-        } else {
-          showErrorModal(
-            'Ошибка загрузки',
-            err.message || 'Неизвестная ошибка при скачивании папки.'
-          );
-        }
+        notifier.error({ message: 'Не удалось скачать архив. Проверьте ZipArchive на сервере.' });
       } finally {
         isLoading.value = false;
       }
@@ -826,8 +761,14 @@ createApp({
     });
 
     const totalCount = computed(() => (folders.value || []).length);
-    const pinnedCount = computed(() => (folders.value || []).filter((f) => f.isPinned).length);
-    const recentCount = computed(() => (folders.value || []).filter((f) => f.isRecent).length);
+
+    const pinnedCount = computed(() =>
+      folders.value.filter(f => f.is_pinned === true).length
+    );
+
+    const recentCount = computed(() =>
+      folders.value.filter(f => f.is_recent === true).length
+    );
 
     const resolvedItemsPerPage = computed(() =>
       settings.value.perPageMode === 'auto'
@@ -854,7 +795,7 @@ createApp({
       localStorage.setItem('efm_theme', themeId);
       try {
         document.documentElement.setAttribute('data-efm-theme', themeId);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     const filterFolders = debounce(() => {
@@ -935,7 +876,7 @@ createApp({
 
           const ddH = dropdown.offsetHeight || 240;
           if (rect.bottom + ddH > window.innerHeight) parentBtn.classList.add('align-bottom');
-        } catch (e) {}
+        } catch (e) { }
 
         const clickHandler = (ev) => {
           const target = ev.target.closest('.ctx-category-item');
@@ -964,10 +905,10 @@ createApp({
         function removeDropdown() {
           try {
             dropdown.removeEventListener('click', clickHandler);
-          } catch (e) {}
+          } catch (e) { }
           try {
             if (dropdown && dropdown.parentElement) dropdown.remove();
-          } catch (e) {}
+          } catch (e) { }
           parentBtn.classList.remove('has-dropdown', 'flip', 'align-bottom');
         }
 
@@ -983,6 +924,7 @@ createApp({
         ev.preventDefault();
         const action = btn.getAttribute('data-action');
         const folder = ctxFolder.value;
+        console.log(folder);
         if (!folder) {
           hideContextMenu();
           return;
@@ -1095,10 +1037,11 @@ createApp({
       }
 
       const pinBtn = el.querySelector('[data-action="pin"]');
-      if (pinBtn) {
+      if (pinBtn && folder) {
         const icon = pinBtn.querySelector('i');
         const label = pinBtn.querySelector('.ctx-label');
-        if (folder && folder.isPinned) {
+
+        if (folder.is_pinned) {
           if (icon) icon.className = 'bi bi-pin-fill';
           if (label) label.textContent = 'Открепить';
         } else {
@@ -1130,19 +1073,19 @@ createApp({
 
             const deleteBtnRect = deleteBtn.getBoundingClientRect();
             const screenWidth = window.innerWidth;
-            const tooltipWidth = 320; 
+            const tooltipWidth = 320;
             const spaceOnRight = screenWidth - deleteBtnRect.right;
             const spaceOnLeft = deleteBtnRect.left;
-            
+
             const minSpace = tooltipWidth + 20;
             const placement = (spaceOnRight >= minSpace || (spaceOnRight > spaceOnLeft && spaceOnRight >= 200)) ? 'right' : 'left';
             deleteBtn.setAttribute('data-bs-placement', placement);
-            
+
             const existingTooltip = bootstrap.Tooltip.getInstance(deleteBtn);
             if (existingTooltip) {
               existingTooltip.dispose();
             }
-            
+
             new bootstrap.Tooltip(deleteBtn, {
               placement: placement,
               trigger: 'hover',
@@ -1152,7 +1095,7 @@ createApp({
           } catch (e) {
             console.warn('Failed to initialize delete button tooltip:', e);
           }
-        }, 50); 
+        }, 50);
       }
 
       setTimeout(() => {
@@ -1206,26 +1149,26 @@ createApp({
             tooltip.dispose();
           }
         }
-      } catch (e) {}
+      } catch (e) { }
 
       try {
         if (outsideListener)
           document.removeEventListener('pointerdown', outsideListener, { capture: true });
-      } catch (e) {}
+      } catch (e) { }
       outsideListener = null;
 
       try {
         if (scrollListener) window.removeEventListener('scroll', scrollListener, { capture: true });
-      } catch (e) {}
+      } catch (e) { }
       scrollListener = null;
 
       try {
         if (keyListener) window.removeEventListener('keydown', keyListener);
-      } catch (e) {}
+      } catch (e) { }
       keyListener = null;
       try {
         removeDropdown();
-      } catch(e) {}
+      } catch (e) { }
 
       setTimeout(() => {
         if (menuEl && !menuEl.classList.contains('visible')) {
@@ -1286,16 +1229,14 @@ createApp({
       if (!newName || !newName.trim()) return hideContextMenu();
       try {
         isLoading.value = true;
-        const resp = await axios.post('data/api/api.php', {
-          action: 'renameFolder',
-          folder: folder.name,
-          newName: newName.trim(),
+        const resp = await axios.post(`data/api/folders/${encodeURIComponent(folder.name)}/rename`, {
+          newName: newName.trim()
         });
-        if (!resp.data?.success) throw new Error(resp.data?.error || 'Ошибка при переименовании');
         await loadFolders();
+        notifier.success({ message: 'Папка переименована' });
       } catch (e) {
         console.error('rename error', e);
-        alert('Не удалось переименовать — см. консоль');
+        notifier.error({ message: 'Ошибка переименования' });
       } finally {
         isLoading.value = false;
         hideContextMenu();
@@ -1344,23 +1285,19 @@ createApp({
     async function ctxDelete(folder) {
       if (!folder) return hideContextMenu();
       hideContextMenu();
-      
+
       const confirmed = await showDeleteConfirm(folder);
       if (!confirmed) return;
-      
+
       try {
         isLoading.value = true;
-        const resp = await axios.post('data/api/api.php', {
-          action: 'deleteFolder',
-          folder: folder.name,
-        });
-        if (!resp.data?.success) throw new Error(resp.data?.error || 'Удаление не удалось');
+        await axios.delete(`data/api/folders/${encodeURIComponent(folder.name)}`);
+
         await loadFolders();
         notifier.warning({ message: `Папка "${folder.name}" удалена` });
       } catch (e) {
         console.error('delete error', e);
-        const idx = folders.value.findIndex((f) => f.name === folder.name);
-        if (idx !== -1) folders.value.splice(idx, 1);
+        notifier.error({ message: 'Не удалось удалить папку' });
       } finally {
         isLoading.value = false;
       }
@@ -1386,19 +1323,15 @@ createApp({
     const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
     const formatDate = (timestamp) => {
-      if (timestamp === undefined || timestamp === null) return '-';
-      try {
-        const ts = String(timestamp).length > 12 ? timestamp : timestamp * 1000;
-        return new Date(ts).toLocaleDateString('ru-RU', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        });
-      } catch (e) {
-        return '-';
-      }
+      if (!timestamp) return '—';
+      const date = new Date(timestamp * 1000);
+      return date.toLocaleString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     };
 
     const formatFolderName = (name) => {
@@ -1477,11 +1410,11 @@ createApp({
           settings.value.perPageValue = 100;
         }
       }
-      
+
       itemsPerPage.value = resolvedItemsPerPage.value;
       currentPage.value = 1;
       localStorage.setItem('efm_settings', JSON.stringify(settings.value));
-      
+
       if (selectedThemeSetting.value && selectedThemeSetting.value !== theme.value) {
         applyTheme(selectedThemeSetting.value);
       }
@@ -1511,7 +1444,7 @@ createApp({
             settings.value.perPageValue = parsed.perPageValue;
           }
         }
-      } catch (_) {}
+      } catch (_) { }
 
       try {
         const saved = localStorage.getItem('efm_theme');
@@ -1523,7 +1456,7 @@ createApp({
         } else {
           applyTheme(systemPrefersDark ? 'china' : 'japan');
         }
-      } catch (e) {}
+      } catch (e) { }
 
       itemsPerPage.value = resolvedItemsPerPage.value;
       await loadFolders();
@@ -1544,23 +1477,23 @@ createApp({
 
     onBeforeUnmount(() => {
       window.removeEventListener('resize', onResizeHandler);
-      window.removeEventListener('resize', () => {});
+      window.removeEventListener('resize', () => { });
       window.removeEventListener('keydown', onEsc);
       destroyTooltips();
 
       try {
         if (menuEl) menuEl.remove();
-      } catch (e) {}
+      } catch (e) { }
       try {
         if (outsideListener)
           document.removeEventListener('pointerdown', outsideListener, { capture: true });
-      } catch (e) {}
+      } catch (e) { }
       try {
         if (scrollListener) window.removeEventListener('scroll', scrollListener, { capture: true });
-      } catch (e) {}
+      } catch (e) { }
       try {
         if (keyListener) window.removeEventListener('keydown', keyListener);
-      } catch (e) {}
+      } catch (e) { }
     });
 
     watch(
@@ -1670,7 +1603,11 @@ createApp({
       deleteConfirmAlert,
       closeDeleteConfirm,
       confirmDelete,
+      snowflakes,
+      snowflakeCount,
+      fallSpeed,
+      toggleSnow
     };
   },
 }).mount('#app');
-          
+
