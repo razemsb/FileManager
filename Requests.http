@@ -1,0 +1,109 @@
+### получить все папки
+GET http://localhost/data/api/folders
+Accept: application/json
+
+### создать папку
+POST http://localhost/data/api/folders
+Content-Type: application/json
+
+{
+  "name": "MyNewFolder"
+}
+
+### добавить в recent
+POST http://localhost/data/api/folders/MyNewFolder/open
+Accept: application/json
+
+### закрепить/открепить
+POST http://localhost/data/api/folders/MyNewFolder/pin
+Accept: application/json
+
+### удалить
+DELETE http://localhost/data/api/folders/MyNewFolder
+Accept: application/json
+
+### скачать
+GET http://localhost/data/api/folders/download?name=MyNewFolder
+
+### все категории
+GET http://localhost/data/api/categories
+Accept: application/json
+
+### создать категорию
+POST http://localhost/data/api/categories
+Accept: application/json
+
+{
+    "name": "SVO"
+}
+
+### удалить категорию
+DELETE http://localhost/data/api/categories/1
+Accept: application/json
+
+### добавить папку в категорию
+POST http://localhost/data/api/categories/1/folders
+Accept: application/json
+
+{
+    "folderName": "MyNewFolder"
+}
+
+### удалить папку из категории
+DELETE http://localhost/data/api/categories/1/folders/MyNewFolder
+Accept: application/json
+
+# ### получить все папки
+# GET http://localhost/FileManager/data/api/folders
+# Accept: application/json
+
+# ### создать папку
+# POST http://localhost/FileManager/data/api/folders
+# Content-Type: application/json
+
+# {
+#   "name": "MyNewFolder"
+# }
+
+# ### добавить в recent
+# POST http://localhost/FileManager/data/api/folders/MyNewFolder/open
+# Accept: application/json
+
+# ### закрепить/открепить
+# POST http://localhost/FileManager/data/api/folders/MyNewFolder/pin
+# Accept: application/json
+
+# ### удалить
+# DELETE http://localhost/FileManager/data/api/folders/MyNewFolder
+# Accept: application/json
+
+# ### скачать
+# GET http://localhost/FileManager/data/api/folders/download?name=MyNewFolder
+
+# ### все категории
+# GET http://localhost/FileManager/data/api/categories
+# Accept: application/json
+
+# ### создать категорию
+# POST http://localhost/FileManager/data/api/categories
+# Accept: application/json
+
+# {
+#     "name": "SVO"
+# }
+
+# ### удалить категорию
+# DELETE http://localhost/FileManager/data/api/categories/1
+# Accept: application/json
+
+# ### добавить папку в категорию
+# POST http://localhost/FileManager/data/api/categories/1/folders
+# Accept: application/json
+
+# {
+#     "folderName": "MyNewFolder"
+# }
+
+# ### удалить папку из категории
+# DELETE http://localhost/FileManager/data/api/categories/1/folders/MyNewFolder
+# Accept: application/json

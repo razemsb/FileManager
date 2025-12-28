@@ -20,6 +20,29 @@ class FolderService
         }
     }
 
+    public function createMultipleFolders($prefix, $count)
+    {
+        $created = [];
+        $basePath = __DIR__ . '/../../';
+
+        for ($i = 1; $i <= $count; $i++) {
+            $folderName = $prefix . '_' . $i;
+            $fullPath = $basePath . $folderName;
+
+            if (!is_dir($fullPath)) {
+                if (mkdir($fullPath, 0777, true)) {
+                    $created[] = $folderName;
+                }
+            }
+        }
+
+        return [
+            'success' => true,
+            'created' => $created,
+            'message' => "Создано папок: " . count($created)
+        ];
+    }
+
     public function addToRecent($name)
     {
         $meta = $this->loadJson($this->foldersFile, ['pinned' => [], 'recent' => []]);
@@ -342,12 +365,20 @@ class ApiHandler
         try {
             if ($resource === 'folders') {
                 if ($method === 'POST') {
+                    $input = json_decode(file_get_contents('php://input'), true);
+
                     if ($action === 'open') {
                         $this->service->addToRecent($id);
                         $this->send(['success' => true]);
                     }
                     if ($action === 'pin') {
                         $this->send($this->service->togglePin($id));
+                    }
+
+                    if (isset($input['action']) && $input['action'] === 'createFolders') {
+                        $prefix = $input['prefix'] ?? 'test_folder';
+                        $count = (int)($input['count'] ?? 5);
+                        $this->send($this->service->createMultipleFolders($prefix, $count));
                     }
                 }
                 $this->handleFolders($method, $id);
@@ -437,8 +468,29 @@ class ApiHandler
 
             case 'PATCH':
                 if (!$id) throw new Exception("Category ID required", 400);
+
                 $input = json_decode(file_get_contents('php://input'), true);
-                $this->send($this->categoryService->updateCategory($id, $input));
+
+                $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+                $segments = explode('/', trim($requestUri, '/'));
+                $action = end($segments);
+
+                if ($action === 'rename') {
+                    $newName = $input['newName'] ?? '';
+                    $catIdFromBag = $input['categoryId'] ?? $id; 
+
+                    if (empty($newName)) {
+                        throw new Exception("New name is required", 400);
+                    }
+
+                    $updatedCategory = $this->categoryService->updateCategory($catIdFromBag, ['name' => $newName]);
+
+                    $this->send([
+                        'success' => true,
+                        'id' => $updatedCategory['id'],
+                        'name' => $updatedCategory['name']
+                    ]);
+                }
                 break;
 
             case 'DELETE':
@@ -459,7 +511,20 @@ class ApiHandler
     private function send($data, $code = 200)
     {
         http_response_code($code);
-        if ($data !== null) echo json_encode(['data' => $data]);
+        $response = [];
+
+        if ($code >= 400) {
+            $response = [
+                'error' => [
+                    'message' => $data,
+                    'status' => $code
+                ]
+            ];
+        } else {
+            $response = ['data' => $data];
+        }
+
+        echo json_encode($response, JSON_UNESCAPED_UNICODE);
         exit;
     }
 }

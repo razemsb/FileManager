@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="data/vendors/bootstrap/css/bootstrap.min.css" />
     <script src="data/vendors/vue/vue.global.js"></script>
     <script src="data/vendors/axios/axios.js"></script>
-    <script src="data/vendors/popups/script.js" async></script>
+    <script src="data/vendors/popups/script.js" defer></script>
     <script src="data/app/Main.js" defer></script>
     <script src="data/vendors/bootstrap/js/bootstrap.js" defer></script>
     <script src="data/vendors/popperjs/popper.js"></script>
@@ -45,20 +45,26 @@
           :key="snow.id"
           class="snowflake"
           :style="{
-      left: snow.left,
-      animationDelay: snow.delay,
-      animationDuration: snow.duration,
-      opacity: snow.opacity,
-      fontSize: snow.size
-    }"
+            left: snow.left,
+            animationDelay: snow.delay,
+            animationDuration: snow.duration,
+            opacity: snow.opacity,
+            fontSize: snow.size
+          }"
         >
           {{ snow.type }}
         </div>
       </div>
       <header class="app-header">
         <div class="header-left">
-          <button class="sidebar-toggle" @click="toggleSidebar" title="Меню">
-            <i class="bi bi-list"></i>
+          <button
+            class="sidebar-toggle"
+            @click="toggleSidebar"
+            data-bs-toggle="tooltip"
+            data-bs-placement="bottom"
+            :title="sidebarCollapsed ? 'Развернуть меню' : 'Свернуть меню'"
+          >
+            <i class="bi" :class="sidebarCollapsed ? 'bi-chevron-right' : 'bi-list'"></i>
           </button>
 
           <a href="#" class="app-brand" title="Enigma File Manager">
@@ -105,39 +111,64 @@
         </div>
       </header>
       <div class="app-container">
-        <aside class="app-sidebar" :class="{ 'collapsed': sidebarCollapsed }">
+        <aside class="app-sidebar" :class="{ 'collapsed': settings.sidebarCollapsed }">
           <div class="sidebar-bg"></div>
           <nav class="sidebar-nav">
             <div class="sidebar-section">
-              <h3 class="sidebar-title">МЕНЮ</h3>
+              <div class="sidebar-header-toggle" @click="toggleSidebar">
+                <h3 class="sidebar-title" v-show="!settings.sidebarCollapsed">МЕНЮ</h3>
+                <i
+                  class="bi"
+                  :class="settings.sidebarCollapsed ? 'bi-chevron-left' : 'bi-chevron-left'"
+                  :title="settings.sidebarCollapsed ? 'Развернуть меню' : 'Свернуть меню'"
+                >
+                </i>
+              </div>
               <button
                 class="sidebar-btn"
                 :class="{ active: activeFilter === 'all' }"
                 @click="setFilter('all')"
+                data-bs-toggle="tooltip"
+                data-bs-placement="right"
+                :title="settings.sidebarCollapsed ? `Все папки, ${totalCount} папок` : ''"
               >
                 <i class="bi bi-collection"></i>
                 <span class="btn-text">Все папки</span>
                 <span class="badge">{{ totalCount }}</span>
               </button>
+
               <button
                 class="sidebar-btn"
                 :class="{ active: activeFilter === 'pinned' }"
                 @click="setFilter('pinned')"
+                data-bs-toggle="tooltip"
+                data-bs-placement="right"
+                :title="settings.sidebarCollapsed ? `Закрепленные, ${pinnedCount} папок` : ''"
               >
                 <i class="bi bi-pin"></i>
                 <span class="btn-text">Закрепленные</span>
                 <span class="badge">{{ pinnedCount }}</span>
               </button>
+
               <button
                 class="sidebar-btn"
                 :class="{ active: activeFilter === 'recent' }"
                 @click="setFilter('recent')"
+                data-bs-toggle="tooltip"
+                data-bs-placement="right"
+                :title="settings.sidebarCollapsed ? `Недавние, ${recentCount} папок` : ''"
               >
                 <i class="bi bi-clock"></i>
                 <span class="btn-text">Недавние</span>
                 <span class="badge">{{ recentCount }}</span>
               </button>
-              <button class="sidebar-btn" @click="openCreateFolderModal">
+              <button
+                class="sidebar-btn"
+                @click="openCreateFolderModal"
+                data-bs-toggle="tooltip"
+                data-bs-placement="right"
+                :title="settings.sidebarCollapsed ? 'Создать папку' : ''"
+              >
                 <i class="bi bi-folder-plus"></i>
                 <span class="btn-text">Создать папку</span>
               </button>
@@ -177,9 +208,13 @@
         <main class="app-main">
           <div class="folder-grid">
             <div
-              v-for="folder in paginatedFolders"
+              v-for="(folder, index) in paginatedFolders"
               class="folder-card"
-              :class="{ 'pinned': folder.isPinned, 'recent': folder.isRecent }"
+              :class="{
+                'pinned': folder.is_pinned, 
+                'recent': folder.is_recent,
+                [getRandomOrnamentPattern(index)]: true
+              }"
               :key="folder.id"
               @contextmenu.prevent="onRightClickFolder($event, folder)"
               :data-folder-name="folder.name"
@@ -200,8 +235,8 @@
                 <span
                   class="modified-date"
                   data-bs-toggle="tooltip"
-                  :title="folder.modified ? formatDate(folder.modified) : '-'"
-                  :data-bs-original-title="folder.modified ? formatDate(folder.modified) : '-'"
+                  :title="folder.modified_at ? formatDate(folder.modified_at) : '-'"
+                  :data-bs-original-title="folder.modified_at ? formatDate(folder.modified_at) : '-'"
                 >
                   <i class="bi bi-calendar"></i> {{ folder.modified_at ?
                   formatDate(folder.modified_at) : '-' }}
@@ -209,28 +244,31 @@
               </div>
             </div>
           </div>
-          <div v-if="filteredFolders.length === 0" class="empty-state">
+          <div
+            v-if="filteredFolders.length === 0"
+            class="empty-state"
+            :data-state="emptyStateContext.type"
+          >
+            <div class="empty-decoration ring-1"></div>
+            <div class="empty-decoration ring-2"></div>
+
             <div class="empty-state-content">
-              <div class="empty-state-icon">
-                <i class="bi bi-folder-x"></i>
+              <div class="empty-icon-wrapper">
+                <i :class="emptyStateContext.icon"></i>
+                <div class="empty-status-badge">
+                  <i :class="emptyStateContext.subIcon"></i>
+                </div>
               </div>
+
               <div class="empty-state-text">
-                <h3 class="empty-state-title">Папки не найдены</h3>
-                <p class="empty-state-description">
-                  <span v-if="searchQuery">По запросу "{{ searchQuery }}" ничего не найдено</span>
-                  <span v-else-if="activeFilter === 'pinned'"
-                    >У вас пока нет закрепленных папок</span
-                  >
-                  <span v-else-if="activeFilter === 'recent'">Вы еще не открывали папки</span>
-                  <span v-else-if="activeFilter === 'categories' && selectedCategoryId"
-                    >В этой категории нет папок</span
-                  >
-                  <span v-else>В этой директории пока нет папок. Создайте первую папку!</span>
-                </p>
-                <div class="empty-state-actions" v-if="!searchQuery && activeFilter === 'all'">
+                <h3 class="empty-state-title">{{ emptyStateContext.title }}</h3>
+                <p class="empty-state-description">{{ emptyStateContext.description }}</p>
+
+                <div class="empty-state-actions" v-if="emptyStateContext.showAction">
                   <button class="btn btn-primary empty-state-btn" @click="openCreateFolderModal">
-                    <i class="bi bi-folder-plus"></i>
-                    <span class="ms-2">Создать папку</span>
+                    <div class="btn-shine"></div>
+                    <i class="bi bi-folder-plus me-1"></i>
+                    <span>Создать папку</span>
                   </button>
                 </div>
               </div>
@@ -570,6 +608,14 @@
                   Новогодний вайб {{ settings.snowEnabled ? 'OFF' : 'ON' }}
                 </button>
 
+                <button
+                  v-show="ProjectStatus === 'Development'"
+                  @click="generateRandomFolders"
+                  class="btn btn-primary ms-1"
+                >
+                  <i class="fa-solid fa-folder-plus"></i> Создать тестовые папки
+                </button>
+
                 <button v-if="!showDbButton" @click="showDbButton = true" class="btn btn-primary">
                   <i class="fa-solid fa-eye"></i> Показать кнопку БД
                 </button>
@@ -579,7 +625,10 @@
             <section v-show="activeTab==='about'">
               <fieldset class="set">
                 <legend><i class="fa-solid fa-dragon"></i> О приложении</legend>
-                <p class="muted">EFM — файловый менеджер. Версия 1.2</p>
+                <p class="muted">
+                  EFM — файловый менеджер. Версия 2.0
+                  <span class="badge soft">{{ProjectStatus}} Edition</span>
+                </p>
                 <div class="badges">
                   <span class="badge soft">Vue 3</span>
                   <span class="badge soft">Axios</span>

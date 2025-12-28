@@ -1,189 +1,13 @@
-class PopupNotifier {
-  constructor(options = {}) {
-    this.settings = {
-      theme: 'light',
-      colors: {
-        success: '#22c55e',
-        error: '#ef4444',
-        info: '#3b82f6',
-        warning: '#facc15',
-      },
-      position: 'bottom-right',
-      duration: 3000,
-      maxNotifications: 5,
-      showTime: true,
-      showClose: true,
-      autoClose: true,
-      ...options,
-    };
-
-    this.icons = {
-      success: '<i class="fa-solid fa-circle-check"></i>',
-      error: '<i class="fa-solid fa-circle-xmark"></i>',
-      info: '<i class="fa-solid fa-circle-info"></i>',
-      warning: '<i class="fa-solid fa-triangle-exclamation"></i>',
-    };
-
-    this.initTheme();
-    this.initContainers();
-  }
-
-  initTheme() {
-    document.body.classList.add(`popupx-theme-${this.settings.theme}`);
-
-    const root = document.documentElement;
-    root.style.setProperty('--popup-success', this.settings.colors.success);
-    root.style.setProperty('--popup-error', this.settings.colors.error);
-    root.style.setProperty('--popup-info', this.settings.colors.info);
-    root.style.setProperty('--popup-warning', this.settings.colors.warning);
-  }
-
-  initContainers() {
-    const positions = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
-    positions.forEach((pos) => {
-      const container = document.createElement('div');
-      container.id = `popup-container-${pos}`;
-      container.className = `popup-container ${pos}`;
-      document.body.appendChild(container);
-    });
-  }
-
-  setTheme(theme) {
-    this.settings.theme = theme;
-    document.body.classList.remove('popupx-theme-light', 'popupx-theme-dark');
-    document.body.classList.add(`popupx-theme-${theme}`);
-  }
-
-  setColors(colors) {
-    this.settings.colors = { ...this.settings.colors, ...colors };
-    this.initTheme();
-  }
-
-  show({
-    type = 'info',
-    message = '',
-    title = '',
-    duration = this.settings.duration,
-    position = this.settings.position,
-    showTime = this.settings.showTime,
-    showClose = this.settings.showClose,
-    autoClose = this.settings.autoClose,
-    color = null,
-  } = {}) {
-    const container = document.getElementById(`popup-container-${position}`);
-    if (!container) return;
-
-    if (container.children.length >= this.settings.maxNotifications) {
-      container.removeChild(container.children[0]);
-    }
-
-    const currentTime = this.getCurrentTime();
-    const popupId = `popup-${Date.now()}`;
-    const customColor = color || this.settings.colors[type];
-
-    const popup = document.createElement('div');
-    popup.id = popupId;
-    popup.className = `popup popup-${type}`;
-    popup.style.setProperty('--popup-color', customColor);
-    popup.setAttribute('role', 'alert');
-    popup.setAttribute('aria-live', 'assertive');
-
-    popup.innerHTML = `
-          <div class="popup-icon">${this.icons[type] || this.icons.info}</div>
-          <div class="popup-content">
-              ${title ? `<div class="popup-title">${title}</div>` : ''}
-              <div class="popup-message">${message}</div>
-              ${showTime ? `<div class="popup-time">${currentTime}</div>` : ''}
-          </div>
-          ${showClose
-        ? `
-              <button class="popup-close" aria-label="Закрыть уведомление">
-                  <i class="fa-solid fa-xmark"></i>
-              </button>
-          `
-        : ''
-      }
-      `;
-
-    container.appendChild(popup);
-    setTimeout(() => popup.classList.add('show'), 10);
-
-    const closePopup = () => {
-      popup.classList.remove('show');
-      popup.classList.add('hide');
-      popup.addEventListener('transitionend', () => popup.remove());
-    };
-
-    let timeoutId;
-
-    if (autoClose) {
-      timeoutId = setTimeout(closePopup, duration);
-    }
-
-    const closeBtn = popup.querySelector('.popup-close');
-    if (closeBtn) {
-      closeBtn.addEventListener('click', () => {
-        if (timeoutId) clearTimeout(timeoutId);
-        closePopup();
-      });
-    }
-
-    popup.addEventListener('mouseenter', () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    });
-
-    popup.addEventListener('mouseleave', () => {
-      if (autoClose) {
-        timeoutId = setTimeout(closePopup, duration);
-      }
-    });
-
-    return {
-      close: () => {
-        if (timeoutId) clearTimeout(timeoutId);
-        closePopup();
-      },
-      update: (newOptions) => { },
-    };
-  }
-
-  getCurrentTime() {
-    const now = new Date();
-    return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-
-  success(options) {
-    return this.show({ ...options, type: 'success' });
-  }
-
-  error(options) {
-    return this.show({ ...options, type: 'error' });
-  }
-
-  info(options) {
-    return this.show({ ...options, type: 'info' });
-  }
-
-  warning(options) {
-    return this.show({ ...options, type: 'warning' });
-  }
-}
-
-const notifier = new PopupNotifier({
-  theme: 'dark'
-});
-
 const { createApp, ref, computed, onMounted, nextTick, watch, onBeforeUnmount } = Vue;
-
 createApp({
   setup() {
+    const notifier = new window.PopupNotifier({ theme: 'dark' });
     const folders = ref([]);
     const searchQuery = ref('');
     const isLoading = ref(false);
     const activeFilter = ref('all');
     const currentPage = ref(1);
     const itemsPerPage = ref(12);
-    const sidebarCollapsed = ref(false);
     const error = ref(null);
     const tooltipInstances = ref([]);
     const isSettingsOpen = ref(false);
@@ -193,7 +17,86 @@ createApp({
     const testFolderCount = ref(50);
     const testFolderPrefix = ref('test_folder');
     const ProjectStatus = ref('Production');
+    const ornamentPatterns = ref([
+      'toy-1',
+      'toy-2',
+      'toy-3'
+    ]);
     // Development / Production
+    const savedRaw = localStorage.getItem('efm_settings');
+    const savedParsed = savedRaw ? JSON.parse(savedRaw) : {};
+    const savedSettings = JSON.parse(localStorage.getItem('efm_settings') || '{}');
+
+    const settings = ref({
+      perPageMode: savedSettings.perPageMode || 'auto',
+      perPageValue: savedSettings.perPageValue || 20,
+      snowEnabled: savedSettings.snowEnabled !== undefined ? savedSettings.snowEnabled : true,
+      sidebarCollapsed: savedSettings.sidebarCollapsed !== undefined ? savedSettings.sidebarCollapsed : false,
+    });
+
+    const saveSettings = () => {
+      localStorage.setItem('efm_settings', JSON.stringify(settings.value));
+    };
+
+    const toggleSidebar = () => {
+      settings.value.sidebarCollapsed = !settings.value.sidebarCollapsed;
+      saveSettings();
+      setTimeout(() => {
+        if (typeof initTooltips === 'function') initTooltips();
+      }, 350);
+    };
+
+    const emptyStateContext = computed(() => {
+      if (searchQuery.value) {
+        return {
+          type: 'search',
+          icon: 'bi bi-search',
+          subIcon: 'bi bi-question-lg',
+          title: 'Ничего не найдено',
+          description: `По запросу "${searchQuery.value}" совпадений нет.`,
+          showAction: false
+        };
+      }
+      if (activeFilter.value === 'pinned') {
+        return {
+          type: 'pinned',
+          icon: 'bi bi-pin-angle',
+          subIcon: 'bi bi-slash-circle',
+          title: 'Нет закрепленных папок',
+          description: 'Нажмите на иконку булавки у папки, чтобы закрепить её здесь.',
+          showAction: false
+        };
+      }
+      if (activeFilter.value === 'recent') {
+        return {
+          type: 'recent',
+          icon: 'bi bi-clock-history',
+          subIcon: 'bi bi-hourglass',
+          title: 'История пуста',
+          description: 'Вы еще не открывали ни одной папки.',
+          showAction: false
+        };
+      }
+      if (activeFilter.value === 'categories' && selectedCategoryId.value) {
+        return {
+          type: 'category',
+          icon: 'bi bi-tags',
+          subIcon: 'bi bi-folder-x',
+          title: 'Категория пуста',
+          description: 'В этой категории пока нет папок.',
+          showAction: false
+        };
+      }
+      return {
+        type: 'default',
+        icon: 'bi bi-folder2-open',
+        subIcon: 'bi bi-plus-lg',
+        title: 'Папок пока нет',
+        description: 'Создайте первую папку, чтобы начать работу!',
+        showAction: true
+      };
+    });
+
     const categories = ref([]);
     const isCategoryModalOpen = ref(false);
     const categoryModalTargetFolder = ref(null);
@@ -207,9 +110,8 @@ createApp({
     const newFolderName = ref('');
     const folderNameInput = ref(null);
     const currentFolder = ref('');
-
-    const snowflakeCount = ref(15); // колличество снежинок
-    const fallSpeed = ref(7.5);     // скорость (чем меньще тем)
+    const snowflakeCount = ref(20); // колличество снежинок
+    const fallSpeed = ref(7);     // скорость (чем меньше тем быстрее)
     const snowflakes = ref([]);
 
     const snowflakeTypes = ['❄', '❅', '❆'];
@@ -236,13 +138,14 @@ createApp({
       snowflakes.value = temp;
     };
 
-    const savedSnowStatus = localStorage.getItem('snow_enabled');
-    const settings = ref({
-      perPageMode: 'auto',
-      perPageValue: 20,
-      snowEnabled: savedSnowStatus !== null ? savedSnowStatus === 'true' : true,
-    });
+    function getRandomOrnamentPattern(index) {
+      if (theme.value !== 'NewYear') return '';
 
+      const patternIndex = (index * 13 + 7) % ornamentPatterns.value.length;
+      return ornamentPatterns.value[patternIndex];
+    }
+
+    const savedSnowStatus = localStorage.getItem('snow_enabled');
     const toggleSnow = () => {
       settings.value.snowEnabled = !settings.value.snowEnabled;
 
@@ -279,9 +182,8 @@ createApp({
       ],
       custom: [
         { id: 'NeoTokyo', label: 'Neo Tokyo' },
-        { id: 'Aurora', label: 'Aurora' },
-        { id: 'GithubDark', label: 'Github Dark' },
         { id: 'Anarchy', label: 'Anarchy' },
+        { id: 'NewYear', label: '🎅New Year' },
       ],
     });
 
@@ -307,10 +209,6 @@ createApp({
           : 'data/css/style.min.css';
       }
     });
-
-    function toggleSidebar() {
-      sidebarCollapsed.value = !sidebarCollapsed.value;
-    }
 
     const flatThemes = computed(() => [
       ...themes.value.light,
@@ -514,6 +412,7 @@ createApp({
     async function addFolderToCategory(categoryId, folderName) {
       try {
         await axios.post(`data/api/categories/${categoryId}/folders`, { folderName });
+        hideContextMenu();
         notifier.success({ message: 'Папка добавлена' });
         await loadCategories();
         closeCategoryModal();
@@ -591,49 +490,39 @@ createApp({
 
     async function renameCategory(categoryId, newName) {
       try {
-        const resp = await axios.post('data/api/api.php', {
-          action: 'renameCategory',
+        const resp = await axios.patch(`data/api/categories/${categoryId}/rename`, {
           categoryId,
-          newName,
+          newName
         });
-        if (resp.data?.success) {
+
+        if (resp.data?.data?.success || resp.data?.data?.id) {
           notifier.success({ message: 'Переименовано' });
           await loadCategories();
         } else {
-          notifier.error({ message: resp.data.error || 'Ошибка' });
+          notifier.error({ message: resp.data?.error?.message || 'Ошибка' });
         }
       } catch (e) {
         console.error(e);
-        notifier.error({ message: 'Ошибка при переименовании' });
+        const errorMsg = e.response?.data?.error?.message || 'Ошибка при переименовании';
+        notifier.error({ message: errorMsg });
       }
     }
 
     const loadFolders = async () => {
       try {
-        isLoading.value = true;
-        error.value = null;
-
         const response = await axios.get('data/api/folders');
+        const rawFolders = response.data.data || [];
 
-        folders.value = response.data.data || [];
+        folders.value = rawFolders.map(folder => ({
+          ...folder,
+          isPinned: !!folder.isPinned,
+          isRecent: !!folder.isRecent,
+          id: folder.id || folder.name
+        }));
 
-        await nextTick();
-        initTooltips();
+        console.log('Normalized folders:', folders.value);
       } catch (err) {
-
-        const apiError = err.response?.data?.error;
-        error.value = apiError || err.message || 'Ошибка загрузки данных';
-
-        folders.value = [];
-        notifier.error({
-          title: 'Ошибка загрузки папок',
-          message: error.value,
-          autoClose: false,
-          showClose: true,
-        });
-        console.error('API Error:', err);
-      } finally {
-        isLoading.value = false;
+        console.error('Ошибка загрузки папок', err);
       }
     };
 
@@ -658,16 +547,19 @@ createApp({
       }
     };
 
-    async function openFolder(folder) {
+    const openFolder = async (folder) => {
       try {
         const folderName = folder.name;
         await axios.post(`data/api/folders/${encodeURIComponent(folderName)}/open`, {});
-        window.location.href = folderName;
+        await loadFolders();
+        setTimeout(() => {
+          window.location.href = folderName;
+        }, 50);
       } catch (e) {
-        console.error('Ошибка при логировании открытия:', e);
-        window.location.href = folder.name;
+        console.error('Ошибка при открытии папки:', e);
+        notifier.error({ message: 'Не удалось открыть папку' });
       }
-    }
+    };
 
     const downloadFolder = async (folder) => {
       if (!folder) return;
@@ -796,6 +688,8 @@ createApp({
       try {
         document.documentElement.setAttribute('data-efm-theme', themeId);
       } catch (e) { }
+
+      if (typeof initTooltips === 'function') initTooltips()
     }
 
     const filterFolders = debounce(() => {
@@ -1140,42 +1034,24 @@ createApp({
       menuEl.classList.remove('visible');
       menuEl.setAttribute('aria-hidden', 'true');
       ctxFolder.value = null;
-
       try {
         const deleteBtn = menuEl.querySelector('[data-action="delete"]');
         if (deleteBtn) {
           const tooltip = bootstrap.Tooltip.getInstance(deleteBtn);
-          if (tooltip) {
-            tooltip.dispose();
-          }
+          if (tooltip) tooltip.dispose();
         }
       } catch (e) { }
-
-      try {
-        if (outsideListener)
-          document.removeEventListener('pointerdown', outsideListener, { capture: true });
-      } catch (e) { }
+      if (outsideListener) document.removeEventListener('pointerdown', outsideListener, { capture: true });
+      if (scrollListener) window.removeEventListener('scroll', scrollListener, { capture: true });
+      if (keyListener) window.removeEventListener('keydown', keyListener);
       outsideListener = null;
-
-      try {
-        if (scrollListener) window.removeEventListener('scroll', scrollListener, { capture: true });
-      } catch (e) { }
       scrollListener = null;
-
-      try {
-        if (keyListener) window.removeEventListener('keydown', keyListener);
-      } catch (e) { }
       keyListener = null;
-      try {
-        removeDropdown();
-      } catch (e) { }
-
-      setTimeout(() => {
-        if (menuEl && !menuEl.classList.contains('visible')) {
-          menuEl.style.left = '';
-          menuEl.style.top = '';
-        }
-      }, 200);
+      try { removeDropdown(); } catch (e) { }
+      if (menuEl.parentNode) {
+        menuEl.remove();
+        menuEl = null;
+      }
     }
 
     async function ctxTogglePin(folder) {
@@ -1185,31 +1061,29 @@ createApp({
 
     const generateRandomFolders = async () => {
       try {
+        isLoading.value = true;
         const randomPrefix = 'folder_' + Math.random().toString(36).substring(2, 8);
 
-        const response = await fetch('data/api/api.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'createFolders',
-            count: 5,
-            prefix: randomPrefix,
-          }),
+        const response = await axios.post('data/api/folders', {
+          action: 'createFolders',
+          count: 5,
+          prefix: randomPrefix,
         });
 
-        const result = await response.json();
-        if (result.success) {
-          notifier.success({
-            message: 'Папки успешно созданы!',
-          });
+        const result = response.data.data;
 
-          setTimeout(() => window.location.reload(), 750);
+        if (result.success) {
+          notifier.success({ message: '5 тестовых папок созданы!' });
+
+          await loadFolders();
         } else {
-          alert('Ошибка: ' + result.error);
+          notifier.error({ message: 'Ошибка: ' + result.error });
         }
       } catch (error) {
         console.error('Ошибка:', error);
-        alert('Ошибка при создании папок');
+        notifier.error({ message: 'Ошибка при генерации папок' });
+      } finally {
+        isLoading.value = false;
       }
     };
 
@@ -1462,14 +1336,6 @@ createApp({
       await loadFolders();
       await loadCategories();
       initTooltips();
-
-      window.addEventListener('resize', onResizeHandler);
-      const checkScreenSize = () => {
-        sidebarCollapsed.value = window.innerWidth < 992;
-      };
-      checkScreenSize();
-      window.addEventListener('resize', checkScreenSize);
-
       window.addEventListener('keydown', onEsc);
 
       createContextMenuDom();
@@ -1515,7 +1381,6 @@ createApp({
       activeFilter,
       currentPage,
       itemsPerPage,
-      sidebarCollapsed,
       error,
       filteredFolders,
       totalPages,
@@ -1573,7 +1438,6 @@ createApp({
       showDbButton,
       generateRandomFolders,
       ProjectStatus,
-      toggleSidebar,
       categories,
       isCategoryModalOpen,
       categoryModalTargetFolder,
@@ -1606,7 +1470,13 @@ createApp({
       snowflakes,
       snowflakeCount,
       fallSpeed,
-      toggleSnow
+      toggleSnow,
+      toggleSidebar,
+      settings,
+      toggleSidebar,
+      ornamentPatterns,
+      getRandomOrnamentPattern,
+      emptyStateContext
     };
   },
 }).mount('#app');

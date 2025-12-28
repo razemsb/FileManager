@@ -221,7 +221,10 @@ body::after {
   overflow-y: auto;
   box-shadow: var(--shadow-1);
 }
+
 .app-main {
+  height: 100%;
+  margin: auto;
   flex: 1;
   padding: 24px;
   margin-left: 280px;
@@ -298,7 +301,6 @@ body::after {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
   gap: 18px;
-  margin-bottom: 24px;
 }
 .folder-card {
   display: flex;
